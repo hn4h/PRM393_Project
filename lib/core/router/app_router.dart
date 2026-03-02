@@ -4,10 +4,10 @@ import 'package:prm_project/core/models/booking.dart';
 import 'package:prm_project/features/auth/screens/login_screen.dart';
 import 'package:prm_project/features/discover/screens/service_discover_screen.dart';
 import 'package:prm_project/features/home/screens/home_screen.dart';
-import 'package:prm_project/features/home/widgets/header.dart';
 import 'package:prm_project/features/profile/screens/profile_screen.dart';
 import 'package:prm_project/features/settings/screens/settings_screen.dart';
-import 'package:prm_project/features/service_detail/screens/service_detail_screen.dart';
+import 'package:prm_project/features/worker/screens/worker_detail.dart';
+import 'package:prm_project/features/service/screens/service_detail_screen.dart';
 import 'package:prm_project/features/booking/screens/booking_confirmed_screen.dart';
 import 'package:prm_project/features/booking/screens/booking_flow_screen.dart';
 import 'package:prm_project/features/booking/screens/booking_detail_view_screen.dart';
@@ -53,6 +53,11 @@ class AppRouter {
         path: '/service-detail',
         name: 'service-detail',
         builder: (context, state) => const ServiceDetailScreen(),
+      ),
+      GoRoute(
+        path: '/worker-detail',
+        name: 'worker-detail',
+        builder: (context, state) => const WorkerDetailScreen(),
       ),
       GoRoute(
         path: '/booking-flow',
