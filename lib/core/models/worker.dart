@@ -10,7 +10,7 @@ class Worker {
   final bool isVerified; 
   final List<String> galleryImages;
   final List<String> serviceIds; 
-
+  
   Worker({
     required this.id,
     required this.name,
