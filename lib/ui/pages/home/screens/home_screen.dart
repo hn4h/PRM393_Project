@@ -1,0 +1,193 @@
+import 'package:flutter/material.dart';
+import 'package:prm_project/models/service.dart';
+import 'package:prm_project/models/worker.dart';
+import 'package:prm_project/ui/pages/home/widgets/header.dart';
+import 'package:prm_project/ui/pages/home/widgets/popular-service-card.dart';
+import 'package:prm_project/ui/pages/home/widgets/search-bar.dart';
+import 'package:prm_project/ui/pages/home/widgets/section-header.dart';
+import 'package:prm_project/ui/pages/home/widgets/service_title.dart';
+import 'package:prm_project/ui/pages/home/widgets/worker_card.dart';
+
+class HomeScreen extends StatefulWidget {
+  HomeScreen({Key? key}) : super(key: key);
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
+  String _selectedFilter = 'All';
+  final List<String> _filters = ['All', 'Plumbing', 'Electrical', 'Cleaning'];
+
+  // Menu Category (Gọn gàng ngay trong HomeScreen hoặc tách file cũng được)
+  Widget _buildCategoryMenu() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        _buildCategoryItem(Icons.ac_unit, "AC Repair"),
+        _buildCategoryItem(Icons.kitchen, "Appliance"),
+        _buildCategoryItem(Icons.face_retouching_natural, "Beauty"),
+        _buildCategoryItem(Icons.arrow_forward, "More", isMore: true),
+      ],
+    );
+  }
+
+  Widget _buildCategoryItem(
+    IconData icon,
+    String label, {
+    bool isMore = false,
+  }) {
+    return Column(
+      children: [
+        Icon(
+          icon,
+          color: isMore ? Colors.blue : Colors.blue.shade400,
+          size: 36,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Lọc data theo _selectedFilter
+    final filteredServices = _selectedFilter == 'All'
+        ? demoServices
+        : demoServices.where((s) => s.categoryId == _selectedFilter).toList();
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const HomeHeader(),
+                const SizedBox(height: 24),
+                const Text(
+                  "What service do you need?",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                const CustomSearchBar(),
+                const SizedBox(height: 24),
+                _buildCategoryMenu(),
+                const SizedBox(height: 32),
+
+                SectionHeader(title: "Popular Services", onTap: () {}),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 270,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: demoServices.length,
+                    itemBuilder: (context, index) =>
+                        PopularServiceCard(service: demoServices[index]),
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                SectionHeader(title: "Top Rated Workers", onTap: () {}),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 290,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: demoWorkers.length,
+                    itemBuilder: (context, index) =>
+                        WorkerCard(worker: demoWorkers[index]),
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                SectionHeader(title: "Other Services", onTap: () {}),
+                const SizedBox(height: 16),
+
+                // Filter Chips
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: _filters.map((filter) {
+                      bool isSelected = _selectedFilter == filter;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: ChoiceChip(
+                          label: Text(filter),
+                          selected: isSelected,
+                          onSelected: (_) =>
+                              setState(() => _selectedFilter = filter),
+                          backgroundColor: Colors.white,
+                          selectedColor: Colors.blue.shade50,
+                          labelStyle: TextStyle(
+                            color: isSelected ? Colors.blue : Colors.black87,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(
+                              color: isSelected
+                                  ? Colors.blue
+                                  : Colors.grey.shade300,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Other Services List đã được lọc
+                ListView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: filteredServices.length,
+                  itemBuilder: (context, index) =>
+                      OtherServiceTile(service: filteredServices[index]),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) => setState(() => _selectedIndex = index),
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+        showSelectedLabels: true,
+        showUnselectedLabels: false,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today_outlined),
+            label: 'Calendar',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat_bubble_outline),
+            label: 'Chat',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: 'Profile',
+          ),
+        ],
+      ),
+    );
+  }
+}
