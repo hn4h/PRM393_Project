@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:prm_project/models/service.dart';
-import 'package:prm_project/models/worker.dart';
-import 'package:prm_project/ui/pages/home/widgets/header.dart';
-import 'package:prm_project/ui/pages/home/widgets/popular-service-card.dart';
-import 'package:prm_project/ui/pages/home/widgets/search-bar.dart';
-import 'package:prm_project/ui/pages/home/widgets/section-header.dart';
-import 'package:prm_project/ui/pages/home/widgets/service_title.dart';
-import 'package:prm_project/ui/pages/home/widgets/worker_card.dart';
+import 'package:prm_project/core/models/service.dart';
+import 'package:prm_project/core/models/worker.dart';
+import 'package:prm_project/features/home/widgets/header.dart';
+import 'package:prm_project/features/home/widgets/popular-service-card.dart';
+import 'package:prm_project/features/home/widgets/search-bar.dart';
+import 'package:prm_project/features/home/widgets/section-header.dart';
+import 'package:prm_project/features/home/widgets/service_title.dart';
+import 'package:prm_project/features/home/widgets/worker_card.dart';
+import 'package:prm_project/features/discover/screens/service_discover_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({Key? key}) : super(key: key);
@@ -20,7 +21,6 @@ class _HomeScreenState extends State<HomeScreen> {
   String _selectedFilter = 'All';
   final List<String> _filters = ['All', 'Plumbing', 'Electrical', 'Cleaning'];
 
-  // Menu Category (Gọn gàng ngay trong HomeScreen hoặc tách file cũng được)
   Widget _buildCategoryMenu() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -82,7 +82,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 _buildCategoryMenu(),
                 const SizedBox(height: 32),
 
-                SectionHeader(title: "Popular Services", onTap: () {}),
+                SectionHeader(
+                  title: "Popular Services",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => DiscoverScreen()),
+                    );
+                  },
+                ),
                 const SizedBox(height: 16),
                 SizedBox(
                   height: 270,
@@ -108,7 +116,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                SectionHeader(title: "Other Services", onTap: () {}),
+                SectionHeader(
+                  title: "Other Services",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => DiscoverScreen()),
+                    );
+                  },
+                ),
                 const SizedBox(height: 16),
 
                 // Filter Chips

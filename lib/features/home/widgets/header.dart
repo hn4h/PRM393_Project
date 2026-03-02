@@ -21,13 +21,13 @@ class HomeHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  "Mohammad",
+                  "Ngo Minh Cuong",
                   style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
                 Row(
                   children: const [
                     Text(
-                      "10th street, Kabul",
+                      "Hoa Lac, Ha Noi",
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,

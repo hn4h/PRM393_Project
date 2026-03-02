@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:prm_project/models/service.dart';
+import 'package:prm_project/core/models/service.dart';
 
 class PopularServiceCard extends StatelessWidget {
   final Service service;
