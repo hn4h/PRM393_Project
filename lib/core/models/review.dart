@@ -1,6 +1,8 @@
 class Review {
   final String id;
   final String serviceId;
+  final String workerId;
+  final String bookingId;
   final String userId;
   final String userName;
   final String userImage;
@@ -11,6 +13,8 @@ class Review {
   Review({
     required this.id,
     required this.serviceId,
+    required this.workerId,
+    required this.bookingId,
     required this.userId,
     required this.userName,
     required this.userImage,
@@ -23,6 +27,8 @@ class Review {
     return Review(
       id: json['id'] as String,
       serviceId: json['serviceId'] as String,
+      workerId: json['workerId'] as String,
+      bookingId: json['bookingId'] as String,
       userId: json['userId'] as String,
       userName: json['userName'] as String,
       userImage: json['userImage'] as String,
@@ -36,6 +42,8 @@ class Review {
     return {
       'id': id,
       'serviceId': serviceId,
+      'workerId': workerId,
+      'bookingId': bookingId,
       'userId': userId,
       'userName': userName,
       'userImage': userImage,
@@ -49,58 +57,42 @@ class Review {
 // Example reviews for demo
 List<Review> demoReviews = [
   Review(
-    id: '1',
+    id: 'r1',
     serviceId: '1',
+    workerId: 'w1',
+    bookingId: 'b1',
     userId: 'user1',
     userName: 'Sarah Johnson',
-    userImage: 'assets/images/user1.jpg',
+    userImage: 'https://picsum.photos/id/1005/100/100',
     rating: 5.0,
     comment:
-        'Excellent service! They did a thorough job cleaning our apartment and were very professional. Will definitely book again.',
+        'Excellent service! James did a thorough job cleaning our apartment and was very professional.',
     createdAt: DateTime.now().subtract(const Duration(days: 2)),
   ),
   Review(
-    id: '2',
+    id: 'r2',
     serviceId: '1',
+    workerId: 'w1',
+    bookingId: 'b2',
     userId: 'user2',
     userName: 'Michael Brown',
-    userImage: 'assets/images/user2.jpg',
+    userImage: 'https://picsum.photos/id/1006/100/100',
     rating: 4.5,
     comment:
-        'Great cleaning service. They arrived on time and did a fantastic job. Just missed a few spots under the furniture.',
+        'Great cleaning service. Arrived on time and completed everything properly.',
     createdAt: DateTime.now().subtract(const Duration(days: 5)),
   ),
   Review(
-    id: '3',
-    serviceId: '1',
+    id: 'r3',
+    serviceId: '3',
+    workerId: 'w2',
+    bookingId: 'b3',
     userId: 'user3',
     userName: 'Emily Davis',
-    userImage: 'assets/images/user3.jpg',
-    rating: 5.0,
+    userImage: 'https://picsum.photos/id/1008/100/100',
+    rating: 4.8,
     comment:
-        'I\'m very impressed with the cleaning service. My home hasn\'t been this clean in years! The staff was friendly and efficient.',
+        'Michael fixed the pipe leak quickly and explained everything clearly.',
     createdAt: DateTime.now().subtract(const Duration(days: 10)),
-  ),
-  Review(
-    id: '4',
-    serviceId: '2',
-    userId: 'user4',
-    userName: 'James Wilson',
-    userImage: 'assets/images/user4.jpg',
-    rating: 5.0,
-    comment:
-        'The deep cleaning service was worth every penny. They cleaned areas I didn\'t even think about. My house feels brand new!',
-    createdAt: DateTime.now().subtract(const Duration(days: 7)),
-  ),
-  Review(
-    id: '5',
-    serviceId: '3',
-    userId: 'user5',
-    userName: 'Alex Thompson',
-    userImage: 'assets/images/user5.jpg',
-    rating: 4.7,
-    comment:
-        'Quick response to my emergency leak. Fixed the problem efficiently and gave me advice on preventing future issues.',
-    createdAt: DateTime.now().subtract(const Duration(days: 3)),
   ),
 ];
