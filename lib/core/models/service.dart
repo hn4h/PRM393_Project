@@ -12,6 +12,9 @@ class Service {
   final List<String> features;
   final bool isFeatured;
   final bool isPopular;
+  final int durationMinutes; 
+  final List<String> serviceTags; 
+  final List<String> workerIds; 
 
   Service({
     required this.id,
@@ -27,6 +30,9 @@ class Service {
     required this.features,
     this.isFeatured = false,
     this.isPopular = false,
+    this.durationMinutes = 0,
+    this.serviceTags = const [],
+    this.workerIds = const [],
   });
 
   factory Service.fromJson(Map<String, dynamic> json) {
@@ -48,6 +54,16 @@ class Service {
           .toList(),
       isFeatured: json['isFeatured'] as bool? ?? false,
       isPopular: json['isPopular'] as bool? ?? false,
+      durationMinutes: json['durationMinutes'] as int? ?? 0,
+      serviceTags: (json['serviceTags'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      workerIds: (json['workerIds'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+
     );
   }
 
@@ -66,6 +82,9 @@ class Service {
       'features': features,
       'isFeatured': isFeatured,
       'isPopular': isPopular,
+      'durationMinutes': durationMinutes,
+      'serviceTags': serviceTags,
+      'workerIds': workerIds,
     };
   }
 }
@@ -98,6 +117,9 @@ List<Service> demoServices = [
     ],
     isFeatured: true,
     isPopular: true,
+    durationMinutes: 120,
+    serviceTags: const ["Cleaning", "Repair"],
+    workerIds: const ["w1", "w2"],
   ),
   Service(
     id: '2',
@@ -124,6 +146,9 @@ List<Service> demoServices = [
       'Light fixtures and ceiling fans',
     ],
     isFeatured: true,
+    durationMinutes: 180,
+    serviceTags: const ["Cleaning"],
+    workerIds: const ["w1"],
   ),
   Service(
     id: '3',
@@ -150,6 +175,9 @@ List<Service> demoServices = [
       '30-day guarantee',
     ],
     isPopular: true,
+    durationMinutes: 120,
+    serviceTags: const ["Repair"],
+    workerIds: const ["w2"],
   ),
   Service(
     id: '4',
@@ -176,6 +204,9 @@ List<Service> demoServices = [
       'Final inspection and testing',
     ],
     isFeatured: true,
+    durationMinutes: 240,
+    serviceTags: const ["Installation", "Repair"],
+    workerIds: const ["w2"],
   ),
   Service(
     id: '5',
@@ -202,6 +233,9 @@ List<Service> demoServices = [
       '1-year warranty on work',
     ],
     isPopular: true,
+    durationMinutes: 180,
+    serviceTags: const ["Repair", "Installation"],
+    workerIds: const ["w2"],
   ),
   Service(
     id: '6',
@@ -229,5 +263,8 @@ List<Service> demoServices = [
     ],
     isFeatured: true,
     isPopular: true,
+    durationMinutes: 240,
+    serviceTags: const ["Painting"],
+    workerIds: const ["w1"],
   ),
 ];
