@@ -40,8 +40,12 @@ class Service {
       rating: (json['rating'] as num).toDouble(),
       reviewCount: json['reviewCount'] as int,
       bookingCount: json['bookingCount'] as int,
-      images: (json['images'] as List<dynamic>).map((e) => e as String).toList(),
-      features: (json['features'] as List<dynamic>).map((e) => e as String).toList(),
+      images: (json['images'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
+      features: (json['features'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
       isFeatured: json['isFeatured'] as bool? ?? false,
       isPopular: json['isPopular'] as bool? ?? false,
     );
@@ -71,17 +75,18 @@ List<Service> demoServices = [
   Service(
     id: '1',
     name: 'Standard Home Cleaning',
-    description: 'Professional cleaning service to make your home spotless and fresh. Our team uses eco-friendly products and advanced cleaning techniques.',
+    description:
+        'Professional cleaning service to make your home spotless and fresh. Our team uses eco-friendly products and advanced cleaning techniques.',
     price: 120,
     categoryId: '1',
-    image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+    image: 'https://picsum.photos/id/10/500/300',
     rating: 4.8,
     reviewCount: 245,
     bookingCount: 1250,
     images: [
-      'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      'https://images.unsplash.com/photo-1563453392212-326f5e854473?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      'https://images.unsplash.com/photo-1595091029053-d296ad9bf661?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+      'https://picsum.photos/id/11/500/300',
+      'https://picsum.photos/id/12/500/300',
+      'https://picsum.photos/id/13/500/300',
     ],
     features: [
       'Dusting all accessible surfaces',
@@ -97,17 +102,18 @@ List<Service> demoServices = [
   Service(
     id: '2',
     name: 'Deep Cleaning Service',
-    description: 'A thorough cleaning service for homes that need extra attention. Includes cleaning inside appliances, behind furniture, and detailed scrubbing.',
+    description:
+        'A thorough cleaning service for homes that need extra attention. Includes cleaning inside appliances, behind furniture, and detailed scrubbing.',
     price: 220,
     categoryId: '1',
-    image: 'https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+    image: 'https://picsum.photos/id/20/500/300',
     rating: 4.9,
     reviewCount: 189,
     bookingCount: 876,
     images: [
-      'https://images.unsplash.com/photo-1615875409064-e1354e8e6896?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      'https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      'https://images.unsplash.com/photo-1587316290720-10dfa4e1b7bd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+      'https://picsum.photos/id/21/500/300',
+      'https://picsum.photos/id/22/500/300',
+      'https://picsum.photos/id/23/500/300',
     ],
     features: [
       'All standard cleaning tasks',
@@ -122,17 +128,18 @@ List<Service> demoServices = [
   Service(
     id: '3',
     name: 'Pipe Leak Repair',
-    description: 'Fast and reliable repair for any pipe leaks in your home. Our certified plumbers fix all types of pipe leaks to prevent water damage.',
+    description:
+        'Fast and reliable repair for any pipe leaks in your home. Our certified plumbers fix all types of pipe leaks to prevent water damage.',
     price: 90,
     categoryId: '2',
-    image: 'https://images.unsplash.com/photo-1601997719352-e7e6041d30e7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+    image: 'https://picsum.photos/id/30/500/300',
     rating: 4.7,
     reviewCount: 156,
     bookingCount: 735,
     images: [
-      'https://images.unsplash.com/photo-1542013936693-884638332954?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      'https://images.unsplash.com/photo-1620626576482-c9b6f7405e3b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      'https://images.unsplash.com/photo-1499744937866-d7e566a20a61?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+      'https://picsum.photos/id/31/500/300',
+      'https://picsum.photos/id/32/500/300',
+      'https://picsum.photos/id/33/500/300',
     ],
     features: [
       'Leak detection',
@@ -147,17 +154,18 @@ List<Service> demoServices = [
   Service(
     id: '4',
     name: 'Bathroom Installation',
-    description: 'Complete bathroom installation service including fixtures, plumbing, and finishing. Transform your bathroom with our expert plumbers.',
+    description:
+        'Complete bathroom installation service including fixtures, plumbing, and finishing. Transform your bathroom with our expert plumbers.',
     price: 580,
     categoryId: '2',
-    image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+    image: 'https://picsum.photos/id/40/500/300',
     rating: 4.9,
     reviewCount: 122,
     bookingCount: 450,
     images: [
-      'https://images.unsplash.com/photo-1576698483491-8c43f0862543?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      'https://images.unsplash.com/photo-1507652313519-d4e9174996dd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      'https://images.unsplash.com/photo-1595515106969-1ce29566ff1e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+      'https://picsum.photos/id/41/500/300',
+      'https://picsum.photos/id/42/500/300',
+      'https://picsum.photos/id/43/500/300',
     ],
     features: [
       'Fixture installation',
@@ -172,17 +180,18 @@ List<Service> demoServices = [
   Service(
     id: '5',
     name: 'Electrical Wiring',
-    description: 'Professional electrical wiring service for new installations or rewiring existing systems. All work meets safety codes and regulations.',
+    description:
+        'Professional electrical wiring service for new installations or rewiring existing systems. All work meets safety codes and regulations.',
     price: 150,
     categoryId: '3',
-    image: 'https://images.unsplash.com/photo-1558630929-ca9a77fb84f3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+    image: 'https://picsum.photos/id/50/500/300',
     rating: 4.8,
     reviewCount: 178,
     bookingCount: 689,
     images: [
-      'https://images.unsplash.com/photo-1585645568877-e5fe4cea5679?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      'https://images.unsplash.com/photo-1621905251918-48416bd8575a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      'https://images.unsplash.com/photo-1555963966-b7ae5404b6ed?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+      'https://picsum.photos/id/51/500/300',
+      'https://picsum.photos/id/52/500/300',
+      'https://picsum.photos/id/53/500/300',
     ],
     features: [
       'Circuit installation',
@@ -197,17 +206,18 @@ List<Service> demoServices = [
   Service(
     id: '6',
     name: 'Room Painting',
-    description: 'Transform your space with our professional painting services. We use high-quality paints and techniques for a perfect finish.',
+    description:
+        'Transform your space with our professional painting services. We use high-quality paints and techniques for a perfect finish.',
     price: 320,
     categoryId: '4',
-    image: 'https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+    image: 'https://picsum.photos/id/60/500/300',
     rating: 4.7,
     reviewCount: 205,
     bookingCount: 920,
     images: [
-      'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      'https://images.unsplash.com/photo-1558402529-d2638a7023e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      'https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+      'https://picsum.photos/id/61/500/300',
+      'https://picsum.photos/id/62/500/300',
+      'https://picsum.photos/id/63/500/300',
     ],
     features: [
       'Surface preparation',

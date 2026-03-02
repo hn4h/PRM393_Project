@@ -55,7 +55,8 @@ List<Review> demoReviews = [
     userName: 'Sarah Johnson',
     userImage: 'assets/images/user1.jpg',
     rating: 5.0,
-    comment: 'Excellent service! They did a thorough job cleaning our apartment and were very professional. Will definitely book again.',
+    comment:
+        'Excellent service! They did a thorough job cleaning our apartment and were very professional. Will definitely book again.',
     createdAt: DateTime.now().subtract(const Duration(days: 2)),
   ),
   Review(
@@ -65,7 +66,8 @@ List<Review> demoReviews = [
     userName: 'Michael Brown',
     userImage: 'assets/images/user2.jpg',
     rating: 4.5,
-    comment: 'Great cleaning service. They arrived on time and did a fantastic job. Just missed a few spots under the furniture.',
+    comment:
+        'Great cleaning service. They arrived on time and did a fantastic job. Just missed a few spots under the furniture.',
     createdAt: DateTime.now().subtract(const Duration(days: 5)),
   ),
   Review(
@@ -75,7 +77,8 @@ List<Review> demoReviews = [
     userName: 'Emily Davis',
     userImage: 'assets/images/user3.jpg',
     rating: 5.0,
-    comment: 'I\'m very impressed with the cleaning service. My home hasn\'t been this clean in years! The staff was friendly and efficient.',
+    comment:
+        'I\'m very impressed with the cleaning service. My home hasn\'t been this clean in years! The staff was friendly and efficient.',
     createdAt: DateTime.now().subtract(const Duration(days: 10)),
   ),
   Review(
@@ -85,7 +88,8 @@ List<Review> demoReviews = [
     userName: 'James Wilson',
     userImage: 'assets/images/user4.jpg',
     rating: 5.0,
-    comment: 'The deep cleaning service was worth every penny. They cleaned areas I didn\'t even think about. My house feels brand new!',
+    comment:
+        'The deep cleaning service was worth every penny. They cleaned areas I didn\'t even think about. My house feels brand new!',
     createdAt: DateTime.now().subtract(const Duration(days: 7)),
   ),
   Review(
@@ -95,7 +99,8 @@ List<Review> demoReviews = [
     userName: 'Alex Thompson',
     userImage: 'assets/images/user5.jpg',
     rating: 4.7,
-    comment: 'Quick response to my emergency leak. Fixed the problem efficiently and gave me advice on preventing future issues.',
+    comment:
+        'Quick response to my emergency leak. Fixed the problem efficiently and gave me advice on preventing future issues.',
     createdAt: DateTime.now().subtract(const Duration(days: 3)),
   ),
 ];
