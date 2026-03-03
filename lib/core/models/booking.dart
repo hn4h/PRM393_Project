@@ -48,6 +48,26 @@ class Booking {
         return "Cancelled";
     }
   }
+
+  Booking copyWith({
+    String? id,
+    Worker? worker,
+    List<Service>? services,
+    BookingStatus? status,
+    DateTime? scheduledAt,
+    String? duration,
+    double? totalPrice,
+  }) {
+    return Booking(
+      id: id ?? this.id,
+      worker: worker ?? this.worker,
+      services: services ?? this.services,
+      status: status ?? this.status,
+      scheduledAt: scheduledAt ?? this.scheduledAt,
+      duration: duration ?? this.duration,
+      totalPrice: totalPrice ?? this.totalPrice,
+    );
+  }
 }
 
 //data mau

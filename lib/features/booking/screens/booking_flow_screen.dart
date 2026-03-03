@@ -1,41 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/step_worker_info.dart';
 import '../widgets/step_schedule.dart';
 import '../widgets/step_summary.dart';
 import '../widgets/step_personal_info.dart';
 import '../widgets/step_payment.dart';
 import '../widgets/step_notes.dart';
+import '../viewmodel/booking_flow_viewmodel.dart';
 
-class BookingFlowScreen extends StatefulWidget {
+class BookingFlowScreen extends ConsumerWidget {
   const BookingFlowScreen({super.key});
 
   @override
-  State<BookingFlowScreen> createState() => _BookingFlowScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final flowState = ref.watch(bookingFlowViewModelProvider);
+    final notifier = ref.read(bookingFlowViewModelProvider.notifier);
 
-class _BookingFlowScreenState extends State<BookingFlowScreen> {
-  int currentStep = 0;
+    final int currentStep = flowState.currentStep;
 
-  void nextStep() {
-    if (currentStep < 4) {
-      setState(() => currentStep++);
-    } else {
-      // buoc cuoi payment, bam checkout se sang man hinh confirm
-      context.pushReplacementNamed('booking-confirmed');
-    }
-  }
-
-  void previousStep() {
-    if (currentStep > 0) {
-      setState(() => currentStep--);
-    } else {
-      context.pop(); // back ve service detail
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -43,32 +26,51 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: previousStep,
+          onPressed: () {
+            if (currentStep == 0) {
+              context.pop();
+            } else {
+              notifier.previousStep();
+            }
+          },
         ),
-        title: const Text("Booking", style: TextStyle(color: Colors.black)),
+        title: Text(
+          "Step ${currentStep + 1} of 5",
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       body: Column(
         children: [
+          LinearProgressIndicator(
+            value: (currentStep + 1) / 5,
+            backgroundColor: Colors.grey[200],
+            color: const Color(0xFF008DDA),
+            minHeight: 2,
+          ),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
                   const StepWorkerInfo(),
-                  const SizedBox(height: 20),
-                  _buildCurrentStepWidget(),
+                  const SizedBox(height: 10),
+                  _buildStep(currentStep),
                 ],
               ),
             ),
           ),
-          _buildBottomButton(),
+          _buildBottomButton(context, currentStep, notifier),
         ],
       ),
     );
   }
 
-  Widget _buildCurrentStepWidget() {
-    switch (currentStep) {
+  Widget _buildStep(int step) {
+    switch (step) {
       case 0:
         return const StepSchedule();
       case 1:
@@ -84,24 +86,51 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
     }
   }
 
-  Widget _buildBottomButton() {
+  Widget _buildBottomButton(
+    BuildContext context,
+    int step,
+    BookingFlowViewModel notifier,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
-      child: ElevatedButton(
-        onPressed: nextStep,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.black,
-          minimumSize: const Size(double.infinity, 54),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
           ),
-        ),
-        child: Text(
-          currentStep == 4 ? "Checkout" : "Continue",
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
+        ],
+      ),
+      child: SafeArea(
+        child: ElevatedButton(
+          onPressed: () async {
+            if (step < 4) {
+              notifier.nextStep();
+            } else {
+              await notifier.checkout();
+
+              if (context.mounted) {
+                context.pushReplacementNamed('booking-confirmed');
+              }
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF008DDA),
+            minimumSize: const Size(double.infinity, 54),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            elevation: 0,
+          ),
+          child: Text(
+            step == 4 ? "Complete Checkout" : "Continue",
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),

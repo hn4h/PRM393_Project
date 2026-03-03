@@ -21,7 +21,6 @@ class _BookingFilterBarState extends State<BookingFilterBar> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Thanh tìm kiếm
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: TextField(

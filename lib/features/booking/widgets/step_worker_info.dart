@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/* thong tin tho */
+/* ttin tho */
 class StepWorkerInfo extends StatelessWidget {
   const StepWorkerInfo({super.key});
 
@@ -9,6 +9,7 @@ class StepWorkerInfo extends StatelessWidget {
     return Column(
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const CircleAvatar(
               radius: 35,
@@ -25,13 +26,14 @@ class StepWorkerInfo extends StatelessWidget {
                     "Do Duc Anh",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
+                  const SizedBox(height: 4),
                   const Text(
-                    "He is a highly experienced home cleaner with over ...",
+                    "He is a highly experienced home cleaner with over 5 years in the industry...",
                     style: TextStyle(color: Colors.grey, fontSize: 13),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
                   Row(
                     children: const [
                       Icon(Icons.star, color: Colors.orange, size: 16),
@@ -43,8 +45,13 @@ class StepWorkerInfo extends StatelessWidget {
                         ),
                       ),
                       SizedBox(width: 16),
+                      Icon(
+                        Icons.monetization_on_outlined,
+                        color: Color(0xFF008DDA),
+                        size: 16,
+                      ),
                       Text(
-                        "\$40 / hour",
+                        " \$40 / hour",
                         style: TextStyle(
                           color: Color(0xFF008DDA),
                           fontWeight: FontWeight.bold,
@@ -58,7 +65,8 @@ class StepWorkerInfo extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        const Divider(thickness: 3, color: Colors.black),
+        Divider(thickness: 1, color: Colors.grey.shade200),
+        const SizedBox(height: 10),
       ],
     );
   }

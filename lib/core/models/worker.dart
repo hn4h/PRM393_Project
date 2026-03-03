@@ -5,12 +5,12 @@ class Worker {
   final String description;
   final double rating;
   final String image;
-   final int experienceYears; 
-  final int clients; 
-  final bool isVerified; 
+  final int experienceYears;
+  final int clients;
+  final bool isVerified;
   final List<String> galleryImages;
-  final List<String> serviceIds; 
-  
+  final List<String> serviceIds;
+
   Worker({
     required this.id,
     required this.name,
@@ -29,10 +29,10 @@ class Worker {
 final List<Worker> demoWorkers = [
   Worker(
     id: "w1",
-    name: "James Anderson",
+    name: "Duc Anh",
     jobTitle: "Cleaning",
     description:
-        "James Anderson is a highly experienced home cleaner with over 10 years in the industry.",
+        "Duc Anh is a highly experienced home cleaner with over 10 years in the industry.",
     rating: 4.9,
     image: "https://picsum.photos/id/1027/500/500",
     experienceYears: 10,
@@ -43,14 +43,14 @@ final List<Worker> demoWorkers = [
       "https://picsum.photos/id/201/500/300",
       "https://picsum.photos/id/202/500/300",
     ],
-    serviceIds: ["1", "2", "6"], 
+    serviceIds: ["1", "2", "6"],
   ),
   Worker(
     id: "w2",
-    name: "Michael C",
+    name: "Tu Anh",
     jobTitle: "Plumbing",
     description:
-        "Michael is a professional plumber with 8+ years of experience in pipe repair and installation.",
+        "Tu Anh is a professional plumber with 8+ years of experience in pipe repair and installation.",
     rating: 4.8,
     image: "https://picsum.photos/id/1012/500/500",
     experienceYears: 8,

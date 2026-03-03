@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../viewmodel/booking_flow_viewmodel.dart';
 
-class StepSchedule extends StatelessWidget {
+class StepSchedule extends ConsumerWidget {
   const StepSchedule({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final flowState = ref.watch(bookingFlowViewModelProvider);
+    final booking = flowState.booking;
+    final notifier = ref.read(bookingFlowViewModelProvider.notifier);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildCalendarHeader(),
         const SizedBox(height: 16),
-        _buildCalendarGrid(),
+        _buildCalendarGrid(booking, notifier),
         const SizedBox(height: 24),
         const Text(
           "Select a Time",
@@ -20,16 +26,36 @@ class StepSchedule extends StatelessWidget {
         Wrap(
           spacing: 10,
           runSpacing: 10,
-          children: [
-            _buildTimeChip("10:00 AM", isSelected: true),
-            _buildTimeChip("11:00 AM"),
-            _buildTimeChip("12:00 PM"),
-            _buildTimeChip("1:00 PM"),
-            _buildTimeChip("2:00 PM"),
-            _buildTimeChip("3:00 PM"),
-            _buildTimeChip("4:00 PM"),
-            _buildTimeChip("5:00 PM"),
-          ],
+          children:
+              [
+                "10:00 AM",
+                "11:00 AM",
+                "12:00 PM",
+                "01:00 PM",
+                "02:00 PM",
+                "03:00 PM",
+                "04:00 PM",
+                "05:00 PM",
+              ].map((timeStr) {
+                // Kiểm tra chip này có đang được chọn dựa trên giờ trong state không
+                final isSelected = _isTimeSelected(
+                  booking.scheduledAt,
+                  timeStr,
+                );
+
+                return GestureDetector(
+                  onTap: () {
+                    final newDateTime = _updateTime(
+                      booking.scheduledAt,
+                      timeStr,
+                    );
+                    notifier.updateBooking(
+                      booking.copyWith(scheduledAt: newDateTime),
+                    );
+                  },
+                  child: _buildTimeChip(timeStr, isSelected: isSelected),
+                );
+              }).toList(),
         ),
       ],
     );
@@ -39,18 +65,18 @@ class StepSchedule extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: const [
-        Text("S"),
-        Text("M"),
-        Text("T"),
-        Text("W"),
-        Text("T"),
-        Text("F"),
-        Text("S"),
+        Text("S", style: TextStyle(color: Colors.grey)),
+        Text("M", style: TextStyle(color: Colors.grey)),
+        Text("T", style: TextStyle(color: Colors.grey)),
+        Text("W", style: TextStyle(color: Colors.grey)),
+        Text("T", style: TextStyle(color: Colors.grey)),
+        Text("F", style: TextStyle(color: Colors.grey)),
+        Text("S", style: TextStyle(color: Colors.grey)),
       ],
     );
   }
 
-  Widget _buildCalendarGrid() {
+  Widget _buildCalendarGrid(dynamic booking, BookingFlowViewModel notifier) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -60,24 +86,43 @@ class StepSchedule extends StatelessWidget {
       itemCount: 31,
       itemBuilder: (context, index) {
         int day = index + 1;
-        bool isSelected = day == 13;
-        bool isToday = day == 2;
-        return Center(
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFF008DDA) : Colors.transparent,
-              shape: BoxShape.circle,
-              border: isToday
-                  ? Border.all(color: const Color(0xFF008DDA))
-                  : null,
-            ),
-            child: Text(
-              "$day",
-              style: TextStyle(
+        //so sanh ngay trong state voi ngay hien thi
+        bool isSelected = booking.scheduledAt.day == day;
+        bool isToday =
+            DateTime.now().day == day &&
+            DateTime.now().month == booking.scheduledAt.month;
+
+        return GestureDetector(
+          onTap: () {
+            final newDate = DateTime(
+              booking.scheduledAt.year,
+              booking.scheduledAt.month,
+              day,
+              booking.scheduledAt.hour,
+              booking.scheduledAt.minute,
+            );
+            notifier.updateBooking(booking.copyWith(scheduledAt: newDate));
+          },
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
                 color: isSelected
-                    ? Colors.white
-                    : (isToday ? const Color(0xFF008DDA) : Colors.black),
+                    ? const Color(0xFF008DDA)
+                    : Colors.transparent,
+                shape: BoxShape.circle,
+                border: isToday
+                    ? Border.all(color: const Color(0xFF008DDA))
+                    : null,
+              ),
+              child: Text(
+                "$day",
+                style: TextStyle(
+                  color: isSelected
+                      ? Colors.white
+                      : (isToday ? const Color(0xFF008DDA) : Colors.black),
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
               ),
             ),
           ),
@@ -102,9 +147,27 @@ class StepSchedule extends StatelessWidget {
         time,
         style: TextStyle(
           color: isSelected ? const Color(0xFF008DDA) : Colors.black,
-          fontWeight: FontWeight.w500,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
         ),
       ),
     );
+  }
+
+  bool _isTimeSelected(DateTime current, String timeStr) {
+    final hour = int.parse(timeStr.split(":")[0]);
+    final isPM = timeStr.contains("PM");
+    final convertedHour = (isPM && hour != 12)
+        ? hour + 12
+        : (isPM ? hour : (hour == 12 ? 0 : hour));
+    return current.hour == convertedHour;
+  }
+
+  DateTime _updateTime(DateTime current, String timeStr) {
+    final hour = int.parse(timeStr.split(":")[0]);
+    final isPM = timeStr.contains("PM");
+    final convertedHour = (isPM && hour != 12)
+        ? hour + 12
+        : (isPM ? hour : (hour == 12 ? 0 : hour));
+    return DateTime(current.year, current.month, current.day, convertedHour, 0);
   }
 }

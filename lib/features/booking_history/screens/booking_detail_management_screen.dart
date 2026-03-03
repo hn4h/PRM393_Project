@@ -92,9 +92,7 @@ class BookingDetailManagementScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  booking.worker.description
-                      .split('.')
-                      .first, // Lấy câu đầu của mô tả
+                  booking.worker.description.split('.').first,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(color: Colors.grey, fontSize: 13),

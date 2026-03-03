@@ -1,17 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import '../viewmodel/booking_flow_viewmodel.dart';
 
-class BookingConfirmedScreen extends StatelessWidget {
+class BookingConfirmedScreen extends ConsumerWidget {
   const BookingConfirmedScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final flowState = ref.watch(bookingFlowViewModelProvider);
+    final booking = flowState.booking;
+
+    final formattedDateTime = DateFormat(
+      'EEEE, hh:mm a',
+    ).format(booking.scheduledAt);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => context.pushReplacementNamed('service-detail'),
+          onPressed: () => context.goNamed('home'),
         ),
         elevation: 0,
         backgroundColor: Colors.white,
@@ -22,9 +32,9 @@ class BookingConfirmedScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(
-              Icons.calendar_month_outlined,
+              Icons.check_circle_outline,
               size: 100,
-              color: Colors.black,
+              color: Colors.green,
             ),
             const SizedBox(height: 24),
             Row(
@@ -42,13 +52,15 @@ class BookingConfirmedScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            const Text(
-              "Your booking is confirmed with Duc Anh.\nPlease find the details below.",
+            Text(
+              "Your booking is confirmed with ${booking.worker.name}.\nPlease find the details below.",
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey),
+              style: const TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 32),
-            _buildInfoCard(),
+
+            _buildInfoCard(booking, formattedDateTime),
+
             const SizedBox(height: 40),
             ElevatedButton(
               onPressed: () {
@@ -60,10 +72,14 @@ class BookingConfirmedScreen extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
+                elevation: 0,
               ),
               child: const Text(
-                "View Booking",
-                style: TextStyle(color: Colors.white),
+                "View My Bookings",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -72,20 +88,38 @@ class BookingConfirmedScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCard() {
+  Widget _buildInfoCard(dynamic booking, String dateTime) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFFF8F9FA),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade100),
       ),
       child: Column(
         children: [
-          _buildRow(Icons.person, "Professional", "Duc Anh", isBlue: true),
+          _buildRow(
+            Icons.person,
+            "Professional",
+            booking.worker.name,
+            isBlue: true,
+          ),
           const Divider(),
-          _buildRow(Icons.calendar_today, "Date Time", "Tomorrow, 09:00 AM"),
+          _buildRow(Icons.calendar_today, "Date Time", dateTime),
           const Divider(),
-          _buildRow(Icons.cleaning_services, "Services", "Home Cleaning"),
+          _buildRow(
+            Icons.cleaning_services,
+            "Services",
+            booking.services.isNotEmpty
+                ? booking.services[0].name
+                : "General Cleaning",
+          ),
+          const Divider(),
+          _buildRow(
+            Icons.monetization_on,
+            "Total Paid",
+            "\$${(booking.totalPrice + 3.5).toStringAsFixed(2)}",
+          ),
         ],
       ),
     );

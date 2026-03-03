@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import '../viewmodel/booking_flow_viewmodel.dart';
 
-class BookingDetailViewScreen extends StatelessWidget {
+class BookingDetailViewScreen extends ConsumerWidget {
   const BookingDetailViewScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final flowState = ref.watch(bookingFlowViewModelProvider);
+    final booking = flowState.booking;
+
+    final dateStr = DateFormat('EEEE, d MMMM yyyy').format(booking.scheduledAt);
+    final timeStr = DateFormat('hh:mm a').format(booking.scheduledAt);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -29,19 +38,36 @@ class BookingDetailViewScreen extends StatelessWidget {
               children: [
                 _buildStatusBanner(),
                 const SizedBox(height: 24),
+
                 _buildSectionTitle("Service Information"),
                 _buildInfoCard([
-                  _buildDetailRow("Service", "Plumbing - Home Repair"),
-                  _buildDetailRow("Package", "Premium Package"),
-                  _buildDetailRow("Provider", "Duc Anh", isLink: true),
+                  _buildDetailRow(
+                    "Service",
+                    booking.services.isNotEmpty
+                        ? booking.services[0].name
+                        : "Home Cleaning",
+                  ),
+                  _buildDetailRow(
+                    "Package",
+                    booking.duration.contains("Hour")
+                        ? booking.duration
+                        : "Standard Package",
+                  ),
+                  _buildDetailRow(
+                    "Provider",
+                    booking.worker.name,
+                    isLink: true,
+                  ),
                 ]),
+
                 const SizedBox(height: 24),
                 _buildSectionTitle("Schedule"),
                 _buildInfoCard([
-                  _buildDetailRow("Date", "Wednesday, 20 May 2026"),
-                  _buildDetailRow("Time", "10:00 AM"),
-                  _buildDetailRow("Duration", "2 Hours"),
+                  _buildDetailRow("Date", dateStr),
+                  _buildDetailRow("Time", timeStr),
+                  _buildDetailRow("Duration", booking.duration),
                 ]),
+
                 const SizedBox(height: 24),
                 _buildSectionTitle("Address & Contact"),
                 _buildInfoCard([
@@ -53,15 +79,19 @@ class BookingDetailViewScreen extends StatelessWidget {
                     isMultiLine: true,
                   ),
                 ]),
+
                 const SizedBox(height: 24),
                 _buildSectionTitle("Payment Summary"),
                 _buildInfoCard([
-                  _buildDetailRow("Subtotal", "\$142.00"),
+                  _buildDetailRow(
+                    "Subtotal",
+                    "\$${booking.totalPrice.toStringAsFixed(2)}",
+                  ),
                   _buildDetailRow("Service Fee", "\$3.50"),
                   const Divider(),
                   _buildDetailRow(
                     "Total Amount",
-                    "\$145.50",
+                    "\$${(booking.totalPrice + 3.5).toStringAsFixed(2)}",
                     isBold: true,
                     color: const Color(0xFF008DDA),
                   ),
@@ -140,7 +170,7 @@ class BookingDetailViewScreen extends StatelessWidget {
             ? CrossAxisAlignment.start
             : CrossAxisAlignment.center,
         children: [
-          Text(label, style: const TextStyle(color: Colors.grey)),
+          Text(label, style: const TextStyle(color: Colors.grey, fontSize: 13)),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
@@ -150,6 +180,7 @@ class BookingDetailViewScreen extends StatelessWidget {
                 fontWeight: isBold || isLink
                     ? FontWeight.bold
                     : FontWeight.normal,
+                fontSize: 14,
                 color: isLink
                     ? const Color(0xFF008DDA)
                     : (color ?? Colors.black),
@@ -174,21 +205,23 @@ class BookingDetailViewScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: ElevatedButton(
-        onPressed: () => context.goNamed('home'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.black,
-          minimumSize: const Size(double.infinity, 54),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+      child: SafeArea(
+        child: ElevatedButton(
+          onPressed: () => context.goNamed('home'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.black,
+            minimumSize: const Size(double.infinity, 54),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
-        ),
-        child: const Text(
-          "Return to Home",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
+          child: const Text(
+            "Return to Home",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),
