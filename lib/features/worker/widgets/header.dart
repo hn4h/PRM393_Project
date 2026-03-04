@@ -1,34 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:prm_project/core/models/worker.dart';
 
 class Header extends StatelessWidget {
-  const Header({super.key});
+  final Worker worker;
+
+  const Header({super.key, required this.worker});
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        children: const [
+        children: [
           CircleAvatar(
             radius: 44,
-            backgroundImage:
-                NetworkImage("https://picsum.photos/id/1027/500/500"),
+            backgroundImage: NetworkImage(worker.image),
+            backgroundColor: Colors.grey.shade200,
+            onBackgroundImageError: (_, __) {},
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "James Anderson",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                worker.name,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
               ),
-              SizedBox(width: 6),
-              Icon(Icons.verified, size: 18, color: Color(0xFF2F80ED)),
+              if (worker.isVerified) ...[
+                const SizedBox(width: 6),
+                const Icon(Icons.verified, size: 18, color: Color(0xFF2F80ED)),
+              ],
             ],
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
-            "Cleaning",
-            style: TextStyle(
+            worker.jobTitle,
+            style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
               color: Color(0xFF2F80ED),

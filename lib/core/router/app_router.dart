@@ -50,14 +50,19 @@ class AppRouter {
         builder: (context, state) => DiscoverScreen(),
       ),
       GoRoute(
-        path: '/service-detail',
+        path: '/service-detail/:id',
         name: 'service-detail',
-        builder: (context, state) => const ServiceDetailScreen(),
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return ServiceDetailScreen(serviceId: id);
+        },
       ),
       GoRoute(
-        path: '/worker-detail',
-        name: 'worker-detail',
-        builder: (context, state) => const WorkerDetailScreen(),
+        path: '/worker/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return WorkerDetailScreen(workerId: id);
+        },
       ),
       GoRoute(
         path: '/booking-flow',

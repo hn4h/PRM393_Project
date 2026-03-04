@@ -1,11 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:prm_project/core/models/service.dart';
 
-/* bang chi tiet dich vu */
+/* bảng chi tiết dịch vụ */
 class DetailsCard extends StatelessWidget {
-  const DetailsCard({super.key});
+  final Service service;
+
+  const DetailsCard({
+    super.key,
+    required this.service,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final tagsText = service.serviceTags.isNotEmpty
+        ? service.serviceTags.join(', ')
+        : service.name;
+
+    final durationText =
+        service.durationMinutes > 0 ? '${service.durationMinutes} minutes' : '-';
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -17,36 +30,45 @@ class DetailsCard extends StatelessWidget {
           _buildDetailRow(
             Icons.cleaning_services,
             "Service",
-            "Cleaning, Repair",
+            tagsText,
           ),
-          _buildDetailRow(Icons.timer_outlined, "Duration", "2 hours"),
-          _buildDetailRow(Icons.monetization_on_outlined, "Price", "\$40.00"),
-          _buildDetailRow(Icons.star_outline, "Rating", "4.6", isRating: true),
-          _buildDetailRow(Icons.people_outline, "Rating Count", "110"),
-          _buildDetailRow(Icons.list_alt, "Category", "Plumbing", isLast: true),
+          _buildDetailRow(Icons.timer_outlined, "Duration", durationText),
+          _buildDetailRow(
+            Icons.monetization_on_outlined,
+            "Price",
+            "\$${service.price.toStringAsFixed(2)}",
+          ),
+          _buildDetailRow(
+            Icons.star_outline,
+            "Rating",
+            service.rating.toStringAsFixed(1),
+            isRating: true,
+          ),
+          _buildDetailRow(
+            Icons.people_outline,
+            "Review Count",
+            service.reviewCount.toString(),
+          ),
+          _buildDetailRow(
+            Icons.local_fire_department_outlined,
+            "Booking Count",
+            service.bookingCount.toString(),
+            isLast: true,
+          ),
         ],
       ),
     );
   }
 
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text(
-            "Service Details",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          GestureDetector(
-            onTap: () {},
-            child: const Text(
-              "See All >",
-              style: TextStyle(color: Color(0xFF008DDA), fontSize: 14),
-            ),
-          ),
-        ],
+    return const Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          "Service Details",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
       ),
     );
   }

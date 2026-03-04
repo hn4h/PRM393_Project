@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:prm_project/core/models/worker.dart';
 
 class Stats extends StatelessWidget {
-  const Stats({super.key});
+  final Worker worker;
+
+  const Stats({super.key, required this.worker});
 
   Widget _item(IconData icon, String value, String label) {
     return Expanded(
@@ -13,7 +16,7 @@ class Stats extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(icon, size: 18, color: Color(0xFF2F80ED)),
+            Icon(icon, size: 18, color: const Color(0xFF2F80ED)),
             const SizedBox(height: 6),
             Text(value, style: const TextStyle(fontWeight: FontWeight.w800)),
             const SizedBox(height: 2),
@@ -26,13 +29,17 @@ class Stats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final expText = '${worker.experienceYears} yrs';
+    final clientsText = worker.clients.toString();
+    final ratingText = worker.rating.toStringAsFixed(1);
+
     return Row(
       children: [
-        _item(Icons.timer_outlined, '6 yrs', 'Experience'),
+        _item(Icons.timer_outlined, expText, 'Experience'),
         const SizedBox(width: 10),
-        _item(Icons.people_outline, '1000', 'Clients'),
+        _item(Icons.people_outline, clientsText, 'Clients'),
         const SizedBox(width: 10),
-        _item(Icons.star_border, '4.9', 'Rating'),
+        _item(Icons.star_border, ratingText, 'Rating'),
       ],
     );
   }

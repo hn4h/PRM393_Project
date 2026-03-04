@@ -1,30 +1,28 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'booking_flow_viewmodel.dart';
+part of 'service_repository.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$bookingFlowViewModelHash() =>
-    r'c36ed32eae436ef863c50a667069b789d1d13304';
+String _$serviceRepositoryHash() => r'6bd2f310dfb6aaf47fdba24e2da1c16655abdc14';
 
-/// See also [BookingFlowViewModel].
-@ProviderFor(BookingFlowViewModel)
-final bookingFlowViewModelProvider =
-    AutoDisposeNotifierProvider<
-      BookingFlowViewModel,
-      BookingFlowState
-    >.internal(
-      BookingFlowViewModel.new,
-      name: r'bookingFlowViewModelProvider',
+/// See also [serviceRepository].
+@ProviderFor(serviceRepository)
+final serviceRepositoryProvider =
+    AutoDisposeProvider<ServiceRepository>.internal(
+      serviceRepository,
+      name: r'serviceRepositoryProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$bookingFlowViewModelHash,
+          : _$serviceRepositoryHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$BookingFlowViewModel = AutoDisposeNotifier<BookingFlowState>;
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ServiceRepositoryRef = AutoDisposeProviderRef<ServiceRepository>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

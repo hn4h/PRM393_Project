@@ -10,6 +10,9 @@ class Worker {
   final bool isVerified;
   final List<String> galleryImages;
   final List<String> serviceIds;
+  final String workingDays; // "Mon - Fri"
+  final String workingTime; // "9:00 AM - 5:00 PM"
+  final String location; // "Hanoi, Vietnam"
 
   Worker({
     required this.id,
@@ -23,6 +26,9 @@ class Worker {
     this.isVerified = false,
     this.galleryImages = const [],
     this.serviceIds = const [],
+    this.workingDays = "Mon - Fri",
+    this.workingTime = "9:00 AM - 5:00 PM",
+    this.location = "",
   });
 }
 
@@ -44,6 +50,9 @@ final List<Worker> demoWorkers = [
       "https://picsum.photos/id/202/500/300",
     ],
     serviceIds: ["1", "2", "6"],
+    workingDays: "Mon - Fri",
+    workingTime: "9:00 AM - 5:00 PM",
+    location: "Hanoi, Vietnam",
   ),
   Worker(
     id: "w2",
@@ -62,5 +71,8 @@ final List<Worker> demoWorkers = [
       "https://picsum.photos/id/212/500/300",
     ],
     serviceIds: ["3", "4", "5"],
+    workingDays: "Mon - Fri",
+    workingTime: "9:00 AM - 5:00 PM",
+    location: "Hanoi, Vietnam",
   ),
 ];

@@ -38,7 +38,7 @@ class BottomBar extends StatelessWidget {
               height: 48,
               child: ElevatedButton(
                 onPressed: () {
-                  context.pushNamed('service-detail');
+                  context.pushNamed('booking-flow');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2F80ED),

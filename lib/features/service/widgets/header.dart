@@ -1,21 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:prm_project/core/models/service.dart';
 
-/* anh nen tren cung + appbar */
 class Header extends StatelessWidget {
-  const Header({super.key});
+  final Service service;
+
+  const Header({super.key, required this.service});
 
   @override
   Widget build(BuildContext context) {
+    final cover =
+        service.images.isNotEmpty ? service.images.first : service.image;
+
     return Stack(
       children: [
-        // anh dich vu
         Image.network(
-          'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=1000',
+          cover,
           height: 320,
           width: double.infinity,
           fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Container(
+            height: 320,
+            width: double.infinity,
+            color: Colors.grey.shade200,
+            alignment: Alignment.center,
+            child: const Icon(Icons.broken_image, size: 40),
+          ),
         ),
-        // nut back
         Positioned(
           top: MediaQuery.of(context).padding.top + 10,
           left: 16,
@@ -24,7 +34,6 @@ class Header extends StatelessWidget {
             onTap: () => Navigator.pop(context),
           ),
         ),
-        // nut share
         Positioned(
           top: MediaQuery.of(context).padding.top + 10,
           right: 16,

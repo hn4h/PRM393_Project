@@ -20,18 +20,6 @@ class BottomBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Color(0xFFEAEAEA)),
-            ),
-            child: IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.chat_bubble_outline),
-            ),
-          ),
           const SizedBox(width: 12),
           Expanded(
             child: SizedBox(

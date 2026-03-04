@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:prm_project/core/models/service.dart';
 
 class InfoSection extends StatefulWidget {
-  const InfoSection({super.key});
+  final Service service;
+
+  const InfoSection({super.key, required this.service});
 
   @override
   State<InfoSection> createState() => _InfoSectionState();
@@ -10,42 +13,31 @@ class InfoSection extends StatefulWidget {
 class _InfoSectionState extends State<InfoSection> {
   bool expanded = false;
 
-  final String description =
-      "Reliable plumbing services for leaks and repairs. "
-      "This service is available in your area. Please check the availability "
-      "before booking. Our professional plumbers ensure high quality service "
-      "with guaranteed customer satisfaction and fast response time.";
-
   @override
   Widget build(BuildContext context) {
+    final description = widget.service.description;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "About Plumbing Service",
-          style: TextStyle(
+        Text(
+          "About ${widget.service.name}",
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
         ),
         const SizedBox(height: 10),
-
         Text(
           description,
           maxLines: expanded ? null : 3,
           overflow: expanded ? TextOverflow.visible : TextOverflow.ellipsis,
           style: const TextStyle(fontSize: 14, color: Colors.grey, height: 1.5),
         ),
-
         const SizedBox(height: 6),
-
         GestureDetector(
-          onTap: () {
-            setState(() {
-              expanded = !expanded;
-            });
-          },
+          onTap: () => setState(() => expanded = !expanded),
           child: Text(
             expanded ? "Show less" : "Show more",
             style: const TextStyle(
