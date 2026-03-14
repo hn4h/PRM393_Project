@@ -7,35 +7,42 @@ import 'package:prm_project/core/widgets/app_button.dart';
 import 'package:prm_project/core/widgets/app_text_field.dart';
 import 'package:prm_project/features/auth/viewmodels/auth_viewmodel.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class RegisterScreen extends ConsumerStatefulWidget {
+  const RegisterScreen({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
   bool _isLoading = false;
   bool _showPassword = false;
+  bool _showConfirmPassword = false;
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _login() async {
+  Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
 
-    final errorMessage = await ref.read(authViewModelProvider.notifier).login(
+    final errorMessage = await ref.read(authViewModelProvider.notifier).register(
           email: _emailController.text.trim(),
           password: _passwordController.text,
+          fullName: _nameController.text.trim(),
         );
 
     if (!mounted) return;
@@ -51,27 +58,55 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return;
     }
 
-    context.go('/home');
+    // Success → show confirmation dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: const Text('Confirm your email'),
+        content: Text(
+          'A confirmation link has been sent to ${_emailController.text.trim()}. '
+          'Please check your inbox and click the link to activate your account.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.go('/login');
+            },
+            child: const Text('Go to Login'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
+      appBar: AppBar(
+        backgroundColor: AppColors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          onPressed: () => context.pop(),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 40),
+                const SizedBox(height: 16),
 
-                // App Logo
+                // Logo
                 Container(
-                  width: 100,
-                  height: 100,
+                  width: 80,
+                  height: 80,
                   decoration: BoxDecoration(
                     color: AppColors.primary,
                     borderRadius: BorderRadius.circular(20),
@@ -80,31 +115,46 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: Icon(
                       Icons.home_repair_service,
                       color: AppColors.white,
-                      size: 60,
+                      size: 48,
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
 
-                // Title
                 const Text(
-                  'Welcome Back',
+                  'Create Account',
                   style: AppTextStyles.display1,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Login to your account to continue',
+                  'Join us and book home services easily',
                   style: AppTextStyles.body1.copyWith(
                     color: AppColors.textSecondary,
                   ),
                   textAlign: TextAlign.center,
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 32),
 
-                // Email field
+                // Full Name
+                AppTextField(
+                  controller: _nameController,
+                  label: 'Full Name',
+                  hint: 'Enter your full name',
+                  prefixIcon: const Icon(Icons.person_outline),
+                  textInputAction: TextInputAction.next,
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) return 'Name is required';
+                    if (v.trim().length < 2) return 'Name must be at least 2 characters';
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                // Email
                 AppTextField(
                   controller: _emailController,
                   label: 'Email',
@@ -120,16 +170,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   },
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
-                // Password field
+                // Password
                 AppTextField(
                   controller: _passwordController,
                   label: 'Password',
                   hint: 'Enter your password',
                   obscureText: !_showPassword,
                   prefixIcon: const Icon(Icons.lock_outline),
-                  textInputAction: TextInputAction.done,
+                  textInputAction: TextInputAction.next,
                   suffixIcon: GestureDetector(
                     onTap: () => setState(() => _showPassword = !_showPassword),
                     child: Icon(
@@ -140,90 +190,62 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   validator: (v) {
                     if (v == null || v.isEmpty) return 'Password is required';
+                    if (v.length < 8) return 'Password must be at least 8 characters';
                     return null;
                   },
                 ),
 
-                // Forgot password
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () => context.push('/forgot-password'),
-                    child: Text(
-                      'Forgot Password?',
-                      style: AppTextStyles.body2.copyWith(
-                        color: AppColors.primary,
-                      ),
+                const SizedBox(height: 16),
+
+                // Confirm Password
+                AppTextField(
+                  controller: _confirmPasswordController,
+                  label: 'Confirm Password',
+                  hint: 'Re-enter your password',
+                  obscureText: !_showConfirmPassword,
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  textInputAction: TextInputAction.done,
+                  suffixIcon: GestureDetector(
+                    onTap: () => setState(
+                        () => _showConfirmPassword = !_showConfirmPassword),
+                    child: Icon(
+                      _showConfirmPassword
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
                     ),
                   ),
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return 'Please confirm your password';
+                    if (v != _passwordController.text) return 'Passwords do not match';
+                    return null;
+                  },
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 28),
 
-                // Login button
+                // Register button
                 AppButton(
-                  text: 'Login',
-                  onPressed: _login,
+                  text: 'Create Account',
+                  onPressed: _register,
                   isLoading: _isLoading,
                 ),
 
                 const SizedBox(height: 24),
 
-                // Social login divider
-                const Row(
+                // Login link
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Expanded(child: Divider()),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'Or continue with',
-                        style: AppTextStyles.body2,
+                    Text(
+                      'Already have an account?',
+                      style: AppTextStyles.body1.copyWith(
+                        color: AppColors.textSecondary,
                       ),
                     ),
-                    Expanded(child: Divider()),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-
-                // Social buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildSocialButton(
-                      icon: Icons.g_mobiledata,
-                      color: Colors.red,
-                      onTap: () {},
-                    ),
-                    const SizedBox(width: 20),
-                    _buildSocialButton(
-                      icon: Icons.facebook,
-                      color: Colors.blue,
-                      onTap: () {},
-                    ),
-                    const SizedBox(width: 20),
-                    _buildSocialButton(
-                      icon: Icons.apple,
-                      color: Colors.black,
-                      onTap: () {},
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 40),
-
-                // Register link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "Don't have an account?",
-                      style: AppTextStyles.body1,
-                    ),
                     TextButton(
-                      onPressed: () => context.push('/register'),
+                      onPressed: () => context.pop(),
                       child: Text(
-                        'Register',
+                        'Login',
                         style: AppTextStyles.body1.copyWith(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,
@@ -232,34 +254,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ],
                 ),
+
+                const SizedBox(height: 24),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSocialButton({
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: 60,
-        height: 60,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Center(
-          child: Icon(
-            icon,
-            color: color,
-            size: 30,
           ),
         ),
       ),

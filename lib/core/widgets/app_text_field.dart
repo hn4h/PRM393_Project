@@ -20,6 +20,8 @@ class AppTextField extends StatelessWidget {
   final bool autofocus;
   final FocusNode? focusNode;
   final TextInputAction? textInputAction;
+  // Validator for use inside Form widgets
+  final String? Function(String?)? validator;
 
   const AppTextField({
     Key? key,
@@ -40,6 +42,7 @@ class AppTextField extends StatelessWidget {
     this.autofocus = false,
     this.focusNode,
     this.textInputAction,
+    this.validator,
   }) : super(key: key);
 
   @override
@@ -51,12 +54,12 @@ class AppTextField extends StatelessWidget {
           Text(label!, style: AppTextStyles.label),
           const SizedBox(height: 8),
         ],
-        TextField(
+        TextFormField(
           controller: controller,
           keyboardType: keyboardType,
           obscureText: obscureText,
           onChanged: onChanged,
-          onSubmitted: onSubmitted,
+          onFieldSubmitted: onSubmitted,
           maxLines: maxLines,
           maxLength: maxLength,
           readOnly: readOnly,
@@ -64,6 +67,7 @@ class AppTextField extends StatelessWidget {
           autofocus: autofocus,
           focusNode: focusNode,
           textInputAction: textInputAction,
+          validator: validator,
           style: AppTextStyles.body2,
           decoration: InputDecoration(
             hintText: hint,
@@ -91,6 +95,10 @@ class AppTextField extends StatelessWidget {
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(color: AppColors.error),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppColors.error, width: 2),
             ),
           ),
         ),

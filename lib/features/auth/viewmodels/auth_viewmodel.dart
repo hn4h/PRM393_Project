@@ -1,0 +1,187 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:prm_project/features/auth/models/auth_state_model.dart';
+import 'package:prm_project/features/auth/repositories/auth_repository.dart';
+
+class AuthViewModel extends AsyncNotifier<AuthStateModel> {
+  late AuthRepository _repo;
+
+  @override
+  Future<AuthStateModel> build() async {
+    _repo = ref.read(authRepositoryProvider);
+
+    // Listen to Supabase auth changes and update state reactively
+    ref.listen(authRepositoryProvider, (_, next) {});
+
+    final session = _repo.currentSession;
+    if (session == null) {
+      return const AuthStateModel(status: AuthStatus.unauthenticated);
+    }
+
+    final user = session.user;
+    if (!_isEmailConfirmed(user)) {
+      return AuthStateModel(
+        status: AuthStatus.emailNotConfirmed,
+        email: user.email,
+        userId: user.id,
+      );
+    }
+
+    final role = await _repo.getUserRole(user.id);
+    return AuthStateModel(
+      status: AuthStatus.authenticated,
+      userId: user.id,
+      email: user.email,
+      role: role,
+    );
+  }
+
+  // ── Register ──────────────────────────────────────────────────────────────
+
+  Future<String?> register({
+    required String email,
+    required String password,
+    required String fullName,
+  }) async {
+    state = const AsyncLoading();
+    try {
+      final res = await _repo.signUp(
+        email: email,
+        password: password,
+        fullName: fullName,
+      );
+      if (res.user != null) {
+        state = AsyncData(
+          AuthStateModel(
+            status: AuthStatus.emailNotConfirmed,
+            email: email,
+            userId: res.user!.id,
+          ),
+        );
+        return null; // success
+      }
+      return 'Registration failed. Please try again.';
+    } on AuthException catch (e) {
+      state = AsyncData(
+        AuthStateModel(
+          status: AuthStatus.unauthenticated,
+          errorMessage: e.message,
+        ),
+      );
+      return e.message;
+    } catch (e) {
+      state = AsyncData(
+        const AuthStateModel(
+          status: AuthStatus.unauthenticated,
+          errorMessage: 'An unexpected error occurred.',
+        ),
+      );
+      return 'An unexpected error occurred.';
+    }
+  }
+
+  // ── Login ─────────────────────────────────────────────────────────────────
+
+  Future<String?> login({
+    required String email,
+    required String password,
+  }) async {
+    state = const AsyncLoading();
+    try {
+      final res = await _repo.signIn(email: email, password: password);
+      final user = res.user;
+      if (user == null) {
+        state = const AsyncData(
+          AuthStateModel(
+            status: AuthStatus.unauthenticated,
+            errorMessage: 'Login failed.',
+          ),
+        );
+        return 'Login failed.';
+      }
+
+      if (!_isEmailConfirmed(user)) {
+        state = AsyncData(
+          AuthStateModel(
+            status: AuthStatus.emailNotConfirmed,
+            email: user.email,
+            userId: user.id,
+          ),
+        );
+        return 'Please confirm your email before logging in.';
+      }
+
+      final role = await _repo.getUserRole(user.id);
+      state = AsyncData(
+        AuthStateModel(
+          status: AuthStatus.authenticated,
+          userId: user.id,
+          email: user.email,
+          role: role,
+        ),
+      );
+      return null; // success
+    } on AuthException catch (e) {
+      state = AsyncData(
+        AuthStateModel(
+          status: AuthStatus.unauthenticated,
+          errorMessage: e.message,
+        ),
+      );
+      return e.message;
+    } catch (e) {
+      state = AsyncData(
+        const AuthStateModel(
+          status: AuthStatus.unauthenticated,
+          errorMessage: 'An unexpected error occurred.',
+        ),
+      );
+      return 'An unexpected error occurred.';
+    }
+  }
+
+  // ── Sign Out ──────────────────────────────────────────────────────────────
+
+  Future<void> signOut() async {
+    await _repo.signOut();
+    state = const AsyncData(
+      AuthStateModel(status: AuthStatus.unauthenticated),
+    );
+  }
+
+  // ── Forgot Password ───────────────────────────────────────────────────────
+
+  /// Returns null on success, error message on failure.
+  Future<String?> sendPasswordReset(String email) async {
+    try {
+      await _repo.resetPassword(email);
+      return null;
+    } on AuthException catch (e) {
+      return e.message;
+    } catch (_) {
+      return 'Failed to send reset email.';
+    }
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  bool _isEmailConfirmed(User user) {
+    final confirmedAt = user.emailConfirmedAt;
+    return confirmedAt != null && confirmedAt.isNotEmpty;
+  }
+}
+
+// ── Providers ─────────────────────────────────────────────────────────────────
+
+final supabaseClientProvider = Provider<dynamic>((ref) {
+  return Supabase.instance.client;
+});
+
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  return AuthRepository(Supabase.instance.client);
+});
+
+final authViewModelProvider =
+    AsyncNotifierProvider<AuthViewModel, AuthStateModel>(() {
+  return AuthViewModel();
+});

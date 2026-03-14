@@ -4,7 +4,8 @@ import 'package:prm_project/core/models/service.dart';
 import 'package:prm_project/core/models/worker.dart';
 import 'package:prm_project/features/service/widgets/workers_horizontal_list.dart';
 
-import '../../home/widgets/worker_card.dart';
+
+
 import '../viewmodel/service_detail_viewmodel.dart';
 import 'package:prm_project/features/service/widgets//bottom_bar.dart';
 import 'package:prm_project/features/service/widgets//details_card.dart';

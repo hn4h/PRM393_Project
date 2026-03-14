@@ -14,9 +14,8 @@ class _StepNotesState extends ConsumerState<StepNotes> {
 
   @override
   Widget build(BuildContext context) {
-    final flowState = ref.watch(bookingFlowViewModelProvider);
-    final booking = flowState.booking;
-    final notifier = ref.read(bookingFlowViewModelProvider.notifier);
+    // Watch bookingFlowViewModelProvider for future use when notes field is added
+    ref.watch(bookingFlowViewModelProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
