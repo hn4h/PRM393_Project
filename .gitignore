@@ -43,3 +43,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/.agent
+
+# Secrets — không commit lên git
+.env
+# .env.example được phép commit (template không chứa secrets)
