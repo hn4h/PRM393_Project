@@ -31,7 +31,7 @@ class ProfileScreen extends ConsumerWidget {
           // ── Profile header ────────────────────────────────────────────
           profileAsync.when(
             loading: () => _buildHeaderSkeleton(),
-            error: (_, __) => _buildHeaderFallback(),
+            error: (_, __) => _buildHeaderFallback(context),
             data: (profile) => _buildHeader(context, ref, profile),
           ),
 
@@ -116,7 +116,7 @@ class ProfileScreen extends ConsumerWidget {
         const SizedBox(height: 16),
         AppButton(
           text: 'Edit Profile',
-          onPressed: () {},
+          onPressed: () => context.push('/edit-profile'),
           isFullWidth: false,
           backgroundColor: AppColors.primary.withOpacity(0.1),
           textColor: AppColors.primary,
@@ -145,7 +145,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeaderFallback() {
+  Widget _buildHeaderFallback(BuildContext context) {
     return Column(
       children: [
         const CircleAvatar(radius: 50, child: Icon(Icons.person, size: 50)),
@@ -154,7 +154,7 @@ class ProfileScreen extends ConsumerWidget {
         const SizedBox(height: 16),
         AppButton(
           text: 'Edit Profile',
-          onPressed: () {},
+          onPressed: () => context.push('/edit-profile'),
           isFullWidth: false,
           backgroundColor: AppColors.primary.withOpacity(0.1),
           textColor: AppColors.primary,

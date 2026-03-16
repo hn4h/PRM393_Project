@@ -10,6 +10,9 @@ class UserProfile {
   final String? avatarUrl;
   final String? role;
   final String? phone;
+  final String? address;
+  final DateTime? dateOfBirth;
+  final String? gender;
 
   const UserProfile({
     required this.id,
@@ -18,6 +21,9 @@ class UserProfile {
     this.avatarUrl,
     this.role,
     this.phone,
+    this.address,
+    this.dateOfBirth,
+    this.gender,
   });
 
   factory UserProfile.fromMap(Map<String, dynamic> map, {String? email}) {
@@ -28,6 +34,32 @@ class UserProfile {
       avatarUrl: map['avatar_url'] as String?,
       role: map['role'] as String?,
       phone: map['phone'] as String?,
+      address: map['address'] as String?,
+      dateOfBirth: map['date_of_birth'] != null
+          ? DateTime.tryParse(map['date_of_birth'] as String)
+          : null,
+      gender: map['gender'] as String?,
+    );
+  }
+
+  UserProfile copyWith({
+    String? fullName,
+    String? avatarUrl,
+    String? phone,
+    String? address,
+    DateTime? dateOfBirth,
+    String? gender,
+  }) {
+    return UserProfile(
+      id: id,
+      fullName: fullName ?? this.fullName,
+      email: email,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      role: role,
+      phone: phone ?? this.phone,
+      address: address ?? this.address,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      gender: gender ?? this.gender,
     );
   }
 
@@ -49,7 +81,7 @@ final userProfileProvider = FutureProvider<UserProfile?>((ref) async {
 
   final data = await client
       .from(SupabaseTables.profiles)
-      .select('id, full_name, avatar_url, role, phone')
+      .select('id, full_name, avatar_url, role, phone, address, date_of_birth, gender')
       .eq('id', user.id)
       .maybeSingle();
 

@@ -13,6 +13,7 @@ import 'package:prm_project/features/booking/screens/booking_confirmed_screen.da
 import 'package:prm_project/features/booking/screens/booking_flow_screen.dart';
 import 'package:prm_project/features/booking/screens/booking_detail_view_screen.dart';
 import 'package:prm_project/features/booking_history/screens/booking_detail_management_screen.dart';
+import 'package:prm_project/features/profile/screens/edit_profile_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'root',
@@ -106,6 +107,13 @@ class AppRouter {
           final booking = state.extra as Booking;
           return BookingDetailManagementScreen(booking: booking);
         },
+      ),
+
+      // ── Profile ──────────────────────────────────────────────────────────
+      GoRoute(
+        path: '/edit-profile',
+        name: 'edit-profile',
+        builder: (_, __) => const EditProfileScreen(),
       ),
     ],
   );
