@@ -48,6 +48,27 @@ class AuthRepository {
     await _client.auth.resetPasswordForEmail(email);
   }
 
+  // ── Change Password ─────────────────────────────────────────────────────
+
+  /// Verifies the user's current password by re-authenticating.
+  /// Returns null on success, error message on failure.
+  Future<String?> verifyCurrentPassword(
+      String email, String password) async {
+    try {
+      await _client.auth
+          .signInWithPassword(email: email, password: password);
+      return null;
+    } on AuthException catch (e) {
+      return e.message;
+    }
+  }
+
+  /// Updates the signed-in user's password.
+  Future<void> updatePassword(String newPassword) async {
+    await _client.auth
+        .updateUser(UserAttributes(password: newPassword));
+  }
+
   // ── Current Session ───────────────────────────────────────────────────────
 
   Session? get currentSession => _client.auth.currentSession;

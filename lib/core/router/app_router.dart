@@ -14,6 +14,7 @@ import 'package:prm_project/features/booking/screens/booking_flow_screen.dart';
 import 'package:prm_project/features/booking/screens/booking_detail_view_screen.dart';
 import 'package:prm_project/features/booking_history/screens/booking_detail_management_screen.dart';
 import 'package:prm_project/features/profile/screens/edit_profile_screen.dart';
+import 'package:prm_project/features/settings/screens/change_password_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'root',
@@ -56,6 +57,13 @@ class AppRouter {
         path: '/settings',
         name: 'settings',
         builder: (_, __) => const SettingsScreen(),
+      ),
+
+      // ── Change Password ─────────────────────────────────────────────────
+      GoRoute(
+        path: '/change-password',
+        name: 'change-password',
+        builder: (_, __) => const ChangePasswordScreen(),
       ),
 
       // ── Service ─────────────────────────────────────────────────────────

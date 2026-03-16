@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:prm_project/core/theme/app_colors.dart';
 import 'package:prm_project/core/theme/app_text_styles.dart';
 import 'package:prm_project/core/widgets/app_button.dart';
@@ -40,9 +41,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSettingItem(
             icon: Icons.password_outlined,
             title: 'Change Password',
-            onTap: () {
-              // Navigate to change password screen
-            },
+            onTap: () => context.push('/change-password'),
           ),
           _buildSettingItem(
             icon: Icons.privacy_tip_outlined,
