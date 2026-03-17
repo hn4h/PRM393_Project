@@ -9,36 +9,38 @@ class HomeHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(userProfileProvider);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         profileAsync.when(
-          loading: () => _buildSkeleton(),
-          error: (_, __) => _buildFallback(),
-          data: (profile) => _buildUserInfo(profile),
+          loading: () => _buildSkeleton(context),
+          error: (_, __) => _buildFallback(context),
+          data: (profile) => _buildUserInfo(context, profile),
         ),
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.grey.shade100,
+            color: colorScheme.surfaceContainerHighest,
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.notifications_none, color: Colors.black87),
+          child: Icon(Icons.notifications_none, color: colorScheme.onSurface),
         ),
       ],
     );
   }
 
-  Widget _buildUserInfo(dynamic profile) {
+  Widget _buildUserInfo(BuildContext context, dynamic profile) {
     final name = profile?.displayName ?? 'User';
     final avatarUrl = profile?.avatarUrl;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Row(
       children: [
         CircleAvatar(
           radius: 24,
-          backgroundColor: Colors.grey.shade200,
+          backgroundColor: colorScheme.surfaceContainerHighest,
           child: avatarUrl != null && avatarUrl.isNotEmpty
               ? ClipOval(
                   child: ImageHelper.loadNetworkImage(
@@ -49,21 +51,22 @@ class HomeHeader extends ConsumerWidget {
                     errorWidget: const Icon(Icons.person, size: 24),
                   ),
                 )
-              : const Icon(Icons.person, size: 24, color: Colors.grey),
+              : Icon(Icons.person, size: 24, color: colorScheme.onSurfaceVariant),
         ),
         const SizedBox(width: 12),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Hello 👋',
-              style: TextStyle(fontSize: 13, color: Colors.grey),
+              style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
             ),
             Text(
               name,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface,
               ),
             ),
           ],
@@ -72,13 +75,14 @@ class HomeHeader extends ConsumerWidget {
     );
   }
 
-  Widget _buildSkeleton() {
+  Widget _buildSkeleton(BuildContext context) {
+    final surfaceColor = Theme.of(context).colorScheme.surfaceContainerHighest;
     return Row(
       children: [
         Container(
           width: 48, height: 48,
           decoration: BoxDecoration(
-            color: Colors.grey.shade200,
+            color: surfaceColor,
             shape: BoxShape.circle,
           ),
         ),
@@ -86,25 +90,26 @@ class HomeHeader extends ConsumerWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(width: 60, height: 12, color: Colors.grey.shade200),
+            Container(width: 60, height: 12, color: surfaceColor),
             const SizedBox(height: 4),
-            Container(width: 100, height: 14, color: Colors.grey.shade200),
+            Container(width: 100, height: 14, color: surfaceColor),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildFallback() {
+  Widget _buildFallback(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       children: [
         const CircleAvatar(radius: 24, child: Icon(Icons.person)),
         const SizedBox(width: 12),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text('Hello 👋', style: TextStyle(fontSize: 13, color: Colors.grey)),
-            Text('User', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          children: [
+            Text('Hello 👋', style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant)),
+            Text('User', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: colorScheme.onSurface)),
           ],
         ),
       ],

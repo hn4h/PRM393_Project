@@ -56,8 +56,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: AppColors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -97,7 +97,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Text(
                   'Login to your account to continue',
                   style: AppTextStyles.body1.copyWith(
-                    color: AppColors.textSecondary,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -204,7 +204,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(width: 20),
                     _buildSocialButton(
                       icon: Icons.apple,
-                      color: Colors.black,
+                      color: colorScheme.onSurface,
                       onTap: () {},
                     ),
                   ],
@@ -253,7 +253,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         height: 60,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: Theme.of(context).dividerColor),
         ),
         child: Center(
           child: Icon(

@@ -8,12 +8,14 @@ class OtherServiceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -28,10 +30,10 @@ class OtherServiceTile extends StatelessWidget {
               errorBuilder: (context, error, stackTrace) => Container(
                 height: 80,
                 width: 80,
-                color: Colors.grey.shade200,
-                child: const Icon(
+                color: colorScheme.surfaceContainerHighest,
+                child: Icon(
                   Icons.image_not_supported,
-                  color: Colors.grey,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -43,9 +45,10 @@ class OtherServiceTile extends StatelessWidget {
               children: [
                 Text(
                   service.name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -53,7 +56,7 @@ class OtherServiceTile extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   service.categoryId,
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                  style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -73,10 +76,10 @@ class OtherServiceTile extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const TextSpan(
+                            TextSpan(
                               text: " / hour",
                               style: TextStyle(
-                                color: Colors.grey,
+                                color: colorScheme.onSurfaceVariant,
                                 fontSize: 13,
                               ),
                             ),

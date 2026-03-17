@@ -19,6 +19,9 @@ class _BookingFilterBarState extends State<BookingFilterBar> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       children: [
         Padding(
@@ -26,14 +29,16 @@ class _BookingFilterBarState extends State<BookingFilterBar> {
           child: TextField(
             decoration: InputDecoration(
               hintText: "Search in services, workers, etc.",
-              hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
-              prefixIcon: const Icon(
+              hintStyle: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
+              prefixIcon: Icon(
                 Icons.search,
-                color: Colors.grey,
+                color: colorScheme.onSurfaceVariant,
                 size: 20,
               ),
               filled: true,
-              fillColor: const Color(0xFFF1F4F8),
+              fillColor: isDark
+                  ? colorScheme.surfaceContainerHighest
+                  : const Color(0xFFF1F4F8),
               contentPadding: const EdgeInsets.symmetric(vertical: 0),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -62,18 +67,18 @@ class _BookingFilterBarState extends State<BookingFilterBar> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? const Color(0xFF008DDA)
-                          : Colors.white,
+                          : colorScheme.surface,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isSelected
                             ? Colors.transparent
-                            : Colors.grey.shade200,
+                            : Theme.of(context).dividerColor,
                       ),
                     ),
                     child: Text(
                       categories[index],
                       style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.black87,
+                        color: isSelected ? Colors.white : colorScheme.onSurface,
                         fontWeight: isSelected
                             ? FontWeight.bold
                             : FontWeight.normal,

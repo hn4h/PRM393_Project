@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:prm_project/core/models/booking.dart';
 import 'package:prm_project/core/shell/main_shell.dart';
 import 'package:prm_project/features/auth/screens/login_screen.dart';
@@ -13,15 +16,40 @@ import 'package:prm_project/features/booking/screens/booking_confirmed_screen.da
 import 'package:prm_project/features/booking/screens/booking_flow_screen.dart';
 import 'package:prm_project/features/booking/screens/booking_detail_view_screen.dart';
 import 'package:prm_project/features/booking_history/screens/booking_detail_management_screen.dart';
+import 'package:prm_project/features/profile/screens/edit_profile_screen.dart';
+import 'package:prm_project/features/settings/screens/change_password_screen.dart';
+
+// ── Routes that don't require authentication ──────────────────────────────────
+const _publicRoutes = ['/login', '/register', '/forgot-password'];
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'root',
 );
 
 class AppRouter {
+  /// Refresh notifier that triggers GoRouter redirect when auth state changes.
+  static final _authRefresh = GoRouterRefreshStream(
+    Supabase.instance.client.auth.onAuthStateChange,
+  );
+
   static final GoRouter router = GoRouter(
     initialLocation: '/login',
     navigatorKey: _rootNavigatorKey,
+    refreshListenable: _authRefresh,
+    redirect: (context, state) {
+      final session = Supabase.instance.client.auth.currentSession;
+      final isLoggedIn = session != null;
+      final isOnPublicRoute = _publicRoutes.contains(state.matchedLocation);
+
+      // Authenticated user on a public page → go to shell
+      if (isLoggedIn && isOnPublicRoute) return '/shell';
+
+      // Unauthenticated user on a protected page → go to login
+      if (!isLoggedIn && !isOnPublicRoute) return '/login';
+
+      // No redirect needed
+      return null;
+    },
     routes: [
       // Root redirect → shell (sau khi đăng nhập)
       GoRoute(path: '/', redirect: (_, __) => '/shell'),
@@ -55,6 +83,13 @@ class AppRouter {
         path: '/settings',
         name: 'settings',
         builder: (_, __) => const SettingsScreen(),
+      ),
+
+      // ── Change Password ─────────────────────────────────────────────────
+      GoRoute(
+        path: '/change-password',
+        name: 'change-password',
+        builder: (_, __) => const ChangePasswordScreen(),
       ),
 
       // ── Service ─────────────────────────────────────────────────────────
@@ -107,6 +142,31 @@ class AppRouter {
           return BookingDetailManagementScreen(booking: booking);
         },
       ),
+
+      // ── Profile ──────────────────────────────────────────────────────────
+      GoRoute(
+        path: '/edit-profile',
+        name: 'edit-profile',
+        builder: (_, __) => const EditProfileScreen(),
+      ),
     ],
   );
+}
+
+// ── GoRouterRefreshStream ─────────────────────────────────────────────────────
+/// Converts a [Stream] into a [ChangeNotifier] so GoRouter re-evaluates its
+/// `redirect` callback whenever the stream emits a new value.
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    notifyListeners(); // trigger initial evaluation
+    _subscription = stream.asBroadcastStream().listen((_) => notifyListeners());
+  }
+
+  late final StreamSubscription<dynamic> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
 }
