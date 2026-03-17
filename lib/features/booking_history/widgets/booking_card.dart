@@ -9,18 +9,19 @@ class BookingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: Theme.of(context).dividerColor),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
+              color: Colors.black.withValues(alpha: 0.02),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -46,29 +47,31 @@ class BookingCard extends StatelessWidget {
                     children: [
                       Text(
                         booking.worker.name,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
+                          color: colorScheme.onSurface,
                         ),
                       ),
                       Text(
                         booking.services.isNotEmpty
                             ? booking.services.first.name
                             : "No Service",
-                        style: const TextStyle(
-                          color: Colors.grey,
+                        style: TextStyle(
+                          color: colorScheme.onSurfaceVariant,
                           fontSize: 13,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Row(
-                        children: const [
-                          Icon(Icons.star, color: Colors.orange, size: 14),
+                        children: [
+                          const Icon(Icons.star, color: Colors.orange, size: 14),
                           Text(
                             " 4.9 (142)",
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
                             ),
                           ),
                         ],
@@ -79,7 +82,7 @@ class BookingCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF008DDA).withOpacity(0.1),
+                    color: const Color(0xFF008DDA).withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -95,31 +98,33 @@ class BookingCard extends StatelessWidget {
               child: Divider(height: 1, thickness: 0.5),
             ),
             _buildInfoRow(
+              context,
               "Status",
               booking.statusText,
               valueColor: booking.statusColor,
             ),
-            _buildInfoRow("Date & Time", "5 May, 10:00 AM"),
-            _buildInfoRow("Duration", booking.duration),
+            _buildInfoRow(context, "Date & Time", "5 May, 10:00 AM"),
+            _buildInfoRow(context, "Duration", booking.duration),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoRow(String label, String value, {Color? valueColor}) {
+  Widget _buildInfoRow(BuildContext context, String label, String value, {Color? valueColor}) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+          Text(label, style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13)),
           Text(
             value,
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
-              color: valueColor ?? Colors.black,
+              color: valueColor ?? colorScheme.onSurface,
             ),
           ),
         ],

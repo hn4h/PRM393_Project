@@ -1,27 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:prm_project/core/l10n/app_localizations.dart';
 import 'package:prm_project/core/theme/app_colors.dart';
 import 'package:prm_project/core/theme/app_text_styles.dart';
 import 'package:prm_project/core/widgets/app_button.dart';
+import 'package:prm_project/core/providers/settings_provider.dart';
 
-class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+class SettingsScreen extends ConsumerStatefulWidget {
+  const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool notificationsEnabled = true;
   bool locationEnabled = true;
-  ThemeMode themeMode = ThemeMode.system;
-  String selectedLanguage = 'English';
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final currentThemeMode = ref.watch(themeModeProvider);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(l10n.settings),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -30,29 +34,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _buildSectionHeader('Account Settings'),
+          _buildSectionHeader(l10n.accountSettings),
           _buildSettingItem(
             icon: Icons.person_outline,
-            title: 'Personal Information',
+            title: l10n.personalInformation,
             onTap: () {
               // Navigate to personal info screen
             },
           ),
           _buildSettingItem(
             icon: Icons.password_outlined,
-            title: 'Change Password',
+            title: l10n.changePassword,
             onTap: () => context.push('/change-password'),
           ),
           _buildSettingItem(
             icon: Icons.privacy_tip_outlined,
-            title: 'Privacy Settings',
+            title: l10n.privacySettings,
             onTap: () {
               // Navigate to privacy settings screen
             },
           ),
           
           const SizedBox(height: 24),
-          _buildSectionHeader('App Settings'),
+          _buildSectionHeader(l10n.appSettings),
           
           // Notifications toggle
           SwitchListTile(
@@ -62,7 +66,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 notificationsEnabled = value;
               });
             },
-            title: const Text('Push Notifications', style: AppTextStyles.body1),
+            title: Text(l10n.pushNotifications, style: AppTextStyles.body1),
             secondary: const Icon(Icons.notifications_outlined, color: AppColors.primary),
             contentPadding: EdgeInsets.zero,
           ),
@@ -75,7 +79,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 locationEnabled = value;
               });
             },
-            title: const Text('Location Services', style: AppTextStyles.body1),
+            title: Text(l10n.locationServices, style: AppTextStyles.body1),
             secondary: const Icon(Icons.location_on_outlined, color: AppColors.primary),
             contentPadding: EdgeInsets.zero,
           ),
@@ -83,87 +87,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // Theme selection
           ListTile(
             leading: const Icon(Icons.brightness_4_outlined, color: AppColors.primary),
-            title: const Text('Theme Mode', style: AppTextStyles.body1),
+            title: Text(l10n.themeMode, style: AppTextStyles.body1),
             contentPadding: EdgeInsets.zero,
             trailing: DropdownButton<ThemeMode>(
-              value: themeMode,
+              value: currentThemeMode,
               underline: const SizedBox(),
               onChanged: (ThemeMode? newValue) {
                 if (newValue != null) {
-                  setState(() {
-                    themeMode = newValue;
-                  });
+                  ref.read(themeModeProvider.notifier).setThemeMode(newValue);
                 }
               },
-              items: const [
+              items: [
                 DropdownMenuItem(
                   value: ThemeMode.system,
-                  child: Text('System Default'),
+                  child: Text(l10n.systemDefault),
                 ),
                 DropdownMenuItem(
                   value: ThemeMode.light,
-                  child: Text('Light Mode'),
+                  child: Text(l10n.lightMode),
                 ),
                 DropdownMenuItem(
                   value: ThemeMode.dark,
-                  child: Text('Dark Mode'),
+                  child: Text(l10n.darkMode),
                 ),
               ],
             ),
           ),
-          
-          // Language selection
-          ListTile(
-            leading: const Icon(Icons.language_outlined, color: AppColors.primary),
-            title: const Text('Language', style: AppTextStyles.body1),
-            contentPadding: EdgeInsets.zero,
-            trailing: DropdownButton<String>(
-              value: selectedLanguage,
-              underline: const SizedBox(),
-              onChanged: (String? newValue) {
-                if (newValue != null) {
-                  setState(() {
-                    selectedLanguage = newValue;
-                  });
-                }
-              },
-              items: const [
-                DropdownMenuItem(
-                  value: 'English',
-                  child: Text('English'),
-                ),
-                DropdownMenuItem(
-                  value: 'Persian',
-                  child: Text('Persian'),
-                ),
-                DropdownMenuItem(
-                  value: 'Arabic',
-                  child: Text('Arabic'),
-                ),
-              ],
-            ),
-          ),
+
           
           const SizedBox(height: 24),
-          _buildSectionHeader('Other Settings'),
+          _buildSectionHeader(l10n.otherSettings),
           
           _buildSettingItem(
             icon: Icons.help_outline,
-            title: 'Help & Support',
+            title: l10n.helpAndSupport,
             onTap: () {
               // Navigate to help screen
             },
           ),
           _buildSettingItem(
             icon: Icons.info_outline,
-            title: 'About',
+            title: l10n.about,
             onTap: () {
               // Navigate to about screen
             },
           ),
           _buildSettingItem(
             icon: Icons.star_outline,
-            title: 'Rate the App',
+            title: l10n.rateTheApp,
             onTap: () {
               // Open rate dialog
             },
@@ -171,10 +142,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           
           const SizedBox(height: 32),
           AppButton(
-            text: 'Clear App Cache',
+            text: l10n.clearAppCache,
             onPressed: () {
-              // Show confirmation dialog for clearing cache
-              _showClearCacheDialog();
+              _showClearCacheDialog(l10n);
             },
             backgroundColor: AppColors.lightGrey,
             textColor: AppColors.textPrimary,
@@ -182,12 +152,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           
           const SizedBox(height: 16),
           AppButton(
-            text: 'Delete My Account',
+            text: l10n.deleteMyAccount,
             onPressed: () {
-              // Show confirmation dialog for account deletion
-              _showDeleteAccountDialog();
+              _showDeleteAccountDialog(l10n);
             },
-            backgroundColor: AppColors.error.withOpacity(0.1),
+            backgroundColor: AppColors.error.withValues(alpha: 0.1),
             textColor: AppColors.error,
           ),
           
@@ -225,28 +194,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
   
-  void _showClearCacheDialog() {
+  void _showClearCacheDialog(AppLocalizations l10n) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Clear Cache'),
-          content: const Text('Are you sure you want to clear the app cache? This will not affect your account data.'),
+          title: Text(l10n.clearCache),
+          content: Text(l10n.clearCacheConfirmation),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () {
-                // Clear cache logic here
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Cache cleared successfully')),
+                  SnackBar(content: Text(l10n.cacheClearedSuccessfully)),
                 );
               },
               child: Text(
-                'Clear',
+                l10n.clear,
                 style: TextStyle(color: AppColors.error),
               ),
             ),
@@ -256,28 +224,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
   
-  void _showDeleteAccountDialog() {
+  void _showDeleteAccountDialog(AppLocalizations l10n) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Delete Account'),
-          content: const Text(
-            'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.',
-          ),
+          title: Text(l10n.deleteAccount),
+          content: Text(l10n.deleteAccountConfirmation),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () {
-                // Delete account logic here
                 Navigator.of(context).pop();
                 // Navigate to login screen after account deletion
               },
               child: Text(
-                'Delete',
+                l10n.delete,
                 style: TextStyle(color: AppColors.error),
               ),
             ),

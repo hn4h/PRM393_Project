@@ -14,18 +14,17 @@ class BookingFlowScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final flowState = ref.watch(bookingFlowViewModelProvider);
     final notifier = ref.read(bookingFlowViewModelProvider.notifier);
 
     final int currentStep = flowState.currentStep;
 
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
           onPressed: () {
             if (currentStep == 0) {
               context.pop();
@@ -36,8 +35,8 @@ class BookingFlowScreen extends ConsumerWidget {
         ),
         title: Text(
           "Step ${currentStep + 1} of 5",
-          style: const TextStyle(
-            color: Colors.black,
+          style: TextStyle(
+            color: colorScheme.onSurface,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -47,7 +46,7 @@ class BookingFlowScreen extends ConsumerWidget {
         children: [
           LinearProgressIndicator(
             value: (currentStep + 1) / 5,
-            backgroundColor: Colors.grey[200],
+            backgroundColor: colorScheme.surfaceContainerHighest,
             color: const Color(0xFF008DDA),
             minHeight: 2,
           ),
@@ -91,13 +90,14 @@ class BookingFlowScreen extends ConsumerWidget {
     int step,
     BookingFlowViewModel notifier,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),
@@ -124,9 +124,9 @@ class BookingFlowScreen extends ConsumerWidget {
             ),
             elevation: 0,
           ),
-          child: Text(
-            step == 4 ? "Complete Checkout" : "Continue",
-            style: const TextStyle(
+          child: const Text(
+            "Continue",
+            style: TextStyle(
               color: Colors.white,
               fontSize: 16,
               fontWeight: FontWeight.bold,

@@ -11,6 +11,7 @@ class BookingHistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final List<Booking> mockBookings = [
       Booking(
         id: "1",
@@ -42,20 +43,18 @@ class BookingHistoryScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "My Booking",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(color: colorScheme.onSurface, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.calendar_month_outlined,
-              color: Colors.black,
+              color: colorScheme.onSurface,
             ),
             onPressed: () {
               // logic loc theo ngay (code sau)

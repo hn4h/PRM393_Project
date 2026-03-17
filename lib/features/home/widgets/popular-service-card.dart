@@ -8,12 +8,14 @@ class PopularServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: 280,
       margin: const EdgeInsets.only(right: 16),
       decoration: BoxDecoration(
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,11 +38,11 @@ class PopularServiceCard extends StatelessWidget {
                 right: 12,
                 child: Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.favorite_border, size: 20),
+                  child: Icon(Icons.favorite_border, size: 20, color: colorScheme.onSurface),
                 ),
               ),
               Positioned(
@@ -52,7 +54,7 @@ class PopularServiceCard extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: colorScheme.surface,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -61,7 +63,10 @@ class PopularServiceCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         service.rating.toString(),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
+                        ),
                       ),
                     ],
                   ),
@@ -76,9 +81,10 @@ class PopularServiceCard extends StatelessWidget {
               children: [
                 Text(
                   service.name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -96,9 +102,12 @@ class PopularServiceCard extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const TextSpan(
+                          TextSpan(
                             text: " / hour",
-                            style: TextStyle(color: Colors.grey, fontSize: 14),
+                            style: TextStyle(
+                              color: colorScheme.onSurfaceVariant,
+                              fontSize: 14,
+                            ),
                           ),
                         ],
                       ),

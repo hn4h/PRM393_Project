@@ -8,12 +8,14 @@ class WorkerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: 240,
       margin: const EdgeInsets.only(right: 16),
       decoration: BoxDecoration(
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -29,14 +31,14 @@ class WorkerCard extends StatelessWidget {
                 return Container(
                   height: 140,
                   width: double.infinity,
-                  color: Colors.grey.shade200,
-                  child: const Column(
+                  color: colorScheme.surfaceContainerHighest,
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.broken_image, color: Colors.grey, size: 32),
+                      Icon(Icons.broken_image, color: colorScheme.onSurfaceVariant, size: 32),
                       Text(
                         "Image unavailable",
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                        style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12),
                       ),
                     ],
                   ),
@@ -60,9 +62,10 @@ class WorkerCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           worker.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurface,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -76,7 +79,7 @@ class WorkerCard extends StatelessWidget {
                     worker.description,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                    style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -91,7 +94,7 @@ class WorkerCard extends StatelessWidget {
                           const SizedBox(width: 4),
                           Text(
                             "(${worker.rating})",
-                            style: const TextStyle(color: Colors.grey),
+                            style: TextStyle(color: colorScheme.onSurfaceVariant),
                           ),
                         ],
                       ),

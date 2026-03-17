@@ -14,12 +14,16 @@ class SectionHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
         ),
         GestureDetector(
           onTap: onTap,
-          child: Row(
-            children: const [
+          child: const Row(
+            children: [
               Text(
                 "See All",
                 style: TextStyle(

@@ -68,7 +68,9 @@ class AppTextField extends StatelessWidget {
           focusNode: focusNode,
           textInputAction: textInputAction,
           validator: validator,
-          style: AppTextStyles.body2,
+          style: AppTextStyles.body2.copyWith(
+            color: const Color(0xFF333333),
+          ),
           decoration: InputDecoration(
             hintText: hint,
             errorText: errorText,

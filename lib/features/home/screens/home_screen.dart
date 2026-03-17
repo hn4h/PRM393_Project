@@ -38,19 +38,23 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         Icon(icon, color: isMore ? Colors.blue : Colors.blue.shade400, size: 36),
         const SizedBox(height: 8),
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
+        Text(label, style: TextStyle(
+          fontWeight: FontWeight.w500,
+          fontSize: 14,
+          color: Theme.of(context).colorScheme.onSurface,
+        )),
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final filteredServices = _selectedFilter == 'All'
         ? demoServices
         : demoServices.where((s) => s.categoryId == _selectedFilter).toList();
 
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -60,9 +64,13 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 const HomeHeader(),
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   'What service do you need?',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 const CustomSearchBar(),
@@ -118,10 +126,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           selected: isSelected,
                           onSelected: (_) =>
                               setState(() => _selectedFilter = filter),
-                          backgroundColor: Colors.white,
+                          backgroundColor: colorScheme.surface,
                           selectedColor: Colors.blue.shade50,
                           labelStyle: TextStyle(
-                            color: isSelected ? Colors.blue : Colors.black87,
+                            color: isSelected ? Colors.blue : colorScheme.onSurface,
                             fontWeight: isSelected
                                 ? FontWeight.bold
                                 : FontWeight.normal,
@@ -131,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             side: BorderSide(
                               color: isSelected
                                   ? Colors.blue
-                                  : Colors.grey.shade300,
+                                  : Theme.of(context).dividerColor,
                             ),
                           ),
                         ),
