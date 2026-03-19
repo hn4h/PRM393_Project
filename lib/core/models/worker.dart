@@ -30,6 +30,35 @@ class Worker {
     this.workingTime = "9:00 AM - 5:00 PM",
     this.location = "",
   });
+
+  /// Parse from Supabase response (workers joined with profiles).
+  factory Worker.fromMap(Map<String, dynamic> map) {
+    // Support flat map or nested profile join
+    final profile = map['profile'] as Map<String, dynamic>? ?? map;
+
+    return Worker(
+      id: map['id'] as String? ?? map['user_id'] as String? ?? '',
+      name: profile['full_name'] as String? ?? 'Worker',
+      jobTitle: map['specialization'] as String? ?? '',
+      description: map['bio'] as String? ?? '',
+      rating: (map['rating'] as num?)?.toDouble() ?? 0.0,
+      image: profile['avatar_url'] as String? ?? '',
+      experienceYears: map['experience_years'] as int? ?? 0,
+      clients: map['total_clients'] as int? ?? 0,
+      isVerified: map['is_verified'] as bool? ?? false,
+      galleryImages: (map['gallery_images'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      serviceIds: (map['service_ids'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      workingDays: map['working_days'] as String? ?? 'Mon - Fri',
+      workingTime: map['working_time'] as String? ?? '9:00 AM - 5:00 PM',
+      location: profile['address'] as String? ?? '',
+    );
+  }
 }
 
 final List<Worker> demoWorkers = [

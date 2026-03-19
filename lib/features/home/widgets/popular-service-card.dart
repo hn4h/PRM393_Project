@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:prm_project/core/models/service.dart';
 
 class PopularServiceCard extends StatelessWidget {
@@ -113,7 +114,7 @@ class PopularServiceCard extends StatelessWidget {
                       ),
                     ),
                     OutlinedButton(
-                      onPressed: () {},
+                      onPressed: () => context.pushNamed('booking-flow'),
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.blue),
                         shape: RoundedRectangleBorder(

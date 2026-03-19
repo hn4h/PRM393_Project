@@ -23,33 +23,69 @@ class Review {
     required this.createdAt,
   });
 
+  /// Parse from Supabase response (snake_case keys).
+  factory Review.fromMap(Map<String, dynamic> map) {
+    // Support joined profile data for reviewer name/image
+    final profile = map['profile'] as Map<String, dynamic>?;
+
+    return Review(
+      id: map['id'] as String,
+      serviceId: map['service_id'] as String? ?? '',
+      workerId: map['worker_id'] as String? ?? '',
+      bookingId: map['booking_id'] as String? ?? '',
+      userId: map['user_id'] as String? ?? '',
+      userName: profile?['full_name'] as String? ??
+          map['user_name'] as String? ??
+          'User',
+      userImage: profile?['avatar_url'] as String? ??
+          map['user_image'] as String? ??
+          '',
+      rating: (map['rating'] as num?)?.toDouble() ?? 0.0,
+      comment: map['comment'] as String? ?? '',
+      createdAt: DateTime.parse(
+          map['created_at'] as String? ?? DateTime.now().toIso8601String()),
+    );
+  }
+
+  /// For legacy demo data compatibility.
   factory Review.fromJson(Map<String, dynamic> json) {
     return Review(
       id: json['id'] as String,
-      serviceId: json['serviceId'] as String,
-      workerId: json['workerId'] as String,
-      bookingId: json['bookingId'] as String,
-      userId: json['userId'] as String,
-      userName: json['userName'] as String,
-      userImage: json['userImage'] as String,
+      serviceId: json['serviceId'] as String? ?? json['service_id'] as String? ?? '',
+      workerId: json['workerId'] as String? ?? json['worker_id'] as String? ?? '',
+      bookingId: json['bookingId'] as String? ?? json['booking_id'] as String? ?? '',
+      userId: json['userId'] as String? ?? json['user_id'] as String? ?? '',
+      userName: json['userName'] as String? ?? json['user_name'] as String? ?? '',
+      userImage: json['userImage'] as String? ?? json['user_image'] as String? ?? '',
       rating: (json['rating'] as num).toDouble(),
-      comment: json['comment'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      comment: json['comment'] as String? ?? '',
+      createdAt: DateTime.parse(
+          json['createdAt'] as String? ?? json['created_at'] as String? ?? DateTime.now().toIso8601String()),
     );
   }
+
+  /// Map for INSERT into reviews table.
+  Map<String, dynamic> toInsertMap() => {
+        'service_id': serviceId,
+        'worker_id': workerId,
+        'booking_id': bookingId,
+        'user_id': userId,
+        'rating': rating,
+        'comment': comment,
+      };
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'serviceId': serviceId,
-      'workerId': workerId,
-      'bookingId': bookingId,
-      'userId': userId,
-      'userName': userName,
-      'userImage': userImage,
+      'service_id': serviceId,
+      'worker_id': workerId,
+      'booking_id': bookingId,
+      'user_id': userId,
+      'user_name': userName,
+      'user_image': userImage,
       'rating': rating,
       'comment': comment,
-      'createdAt': createdAt.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
     };
   }
 }

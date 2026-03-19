@@ -58,27 +58,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return;
     }
 
-    // Success → show confirmation dialog
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        title: const Text('Confirm your email'),
-        content: Text(
-          'A confirmation link has been sent to ${_emailController.text.trim()}. '
-          'Please check your inbox and click the link to activate your account.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.go('/login');
-            },
-            child: const Text('Go to Login'),
-          ),
-        ],
-      ),
-    );
+    // Success → navigate to complete profile
+    context.go('/complete-profile', extra: _emailController.text.trim());
   }
 
   @override

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:prm_project/core/models/service.dart';
 
 class OtherServiceTile extends StatelessWidget {
@@ -91,7 +92,7 @@ class OtherServiceTile extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     OutlinedButton(
-                      onPressed: () {},
+                      onPressed: () => context.pushNamed('booking-flow'),
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.blue),
                         shape: RoundedRectangleBorder(
