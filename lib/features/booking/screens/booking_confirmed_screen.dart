@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../core/models/booking.dart';
 import '../viewmodel/booking_flow_viewmodel.dart';
 
 class BookingConfirmedScreen extends ConsumerWidget {
@@ -12,9 +13,10 @@ class BookingConfirmedScreen extends ConsumerWidget {
     final flowState = ref.watch(bookingFlowViewModelProvider);
     final booking = flowState.booking;
 
+    final scheduled = booking.scheduledAt ?? DateTime.now();
     final formattedDateTime = DateFormat(
       'EEEE, hh:mm a',
-    ).format(booking.scheduledAt);
+    ).format(scheduled);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -53,7 +55,7 @@ class BookingConfirmedScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              "Your booking is confirmed with ${booking.worker.name}.\nPlease find the details below.",
+              "Your booking is confirmed with ${booking.workerName ?? 'your provider'}.\nPlease find the details below.",
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.grey),
             ),
@@ -88,7 +90,7 @@ class BookingConfirmedScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildInfoCard(dynamic booking, String dateTime) {
+  Widget _buildInfoCard(Booking booking, String dateTime) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -101,7 +103,7 @@ class BookingConfirmedScreen extends ConsumerWidget {
           _buildRow(
             Icons.person,
             "Professional",
-            booking.worker.name,
+            booking.workerName ?? 'Worker',
             isBlue: true,
           ),
           const Divider(),
@@ -110,9 +112,7 @@ class BookingConfirmedScreen extends ConsumerWidget {
           _buildRow(
             Icons.cleaning_services,
             "Services",
-            booking.services.isNotEmpty
-                ? booking.services[0].name
-                : "General Cleaning",
+            booking.serviceName ?? "General Cleaning",
           ),
           const Divider(),
           _buildRow(
