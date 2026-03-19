@@ -63,7 +63,31 @@
                 ?.map((e) => e as String)
                 .toList() ??
             const [],
+      );
+    }
 
+    /// Parse from Supabase response (snake_case columns).
+    factory Service.fromMap(Map<String, dynamic> map) {
+      return Service(
+        id: map['id'] as String,
+        name: map['name'] as String? ?? '',
+        description: map['description'] as String? ?? '',
+        price: (map['price'] as num?)?.toDouble() ?? 0,
+        categoryId: map['category'] as String? ?? '',
+        image: map['image_url'] as String? ?? '',
+        rating: (map['rating'] as num?)?.toDouble() ?? 0,
+        reviewCount: (map['review_count'] as int?) ?? 0,
+        bookingCount: (map['booking_count'] as int?) ?? 0,
+        images: const [],
+        features: const [],
+        isFeatured: map['is_featured'] as bool? ?? false,
+        isPopular: map['is_popular'] as bool? ?? false,
+        durationMinutes: map['duration_minutes'] as int? ?? 0,
+        serviceTags: (map['service_tags'] as List<dynamic>?)
+                ?.map((e) => e as String)
+                .toList() ??
+            const [],
+        workerIds: const [],
       );
     }
 

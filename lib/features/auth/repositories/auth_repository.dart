@@ -69,6 +69,34 @@ class AuthRepository {
         .updateUser(UserAttributes(password: newPassword));
   }
 
+  // ── OTP (Registration flow) ────────────────────────────────────────────────
+
+  /// Gửi lại OTP cho user chưa confirmed (signup flow).
+  Future<void> resendOtp(String email) async {
+    await _client.auth.resend(type: OtpType.signup, email: email);
+  }
+
+  /// Xác nhận OTP — nếu đúng, Supabase auto confirm email + trả session.
+  Future<AuthResponse> verifyOtp(String email, String otpCode) async {
+    return _client.auth.verifyOTP(
+      email: email,
+      token: otpCode,
+      type: OtpType.signup,
+    );
+  }
+
+  /// Cập nhật phone + address vào profiles table.
+  Future<void> updateProfileInfo(
+    String userId, {
+    required String phone,
+    required String address,
+  }) async {
+    await _client.from('profiles').update({
+      'phone': phone,
+      'address': address,
+    }).eq('id', userId);
+  }
+
   // ── Current Session ───────────────────────────────────────────────────────
 
   Session? get currentSession => _client.auth.currentSession;

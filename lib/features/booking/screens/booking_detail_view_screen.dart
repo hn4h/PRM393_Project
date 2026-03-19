@@ -12,8 +12,9 @@ class BookingDetailViewScreen extends ConsumerWidget {
     final flowState = ref.watch(bookingFlowViewModelProvider);
     final booking = flowState.booking;
 
-    final dateStr = DateFormat('EEEE, d MMMM yyyy').format(booking.scheduledAt);
-    final timeStr = DateFormat('hh:mm a').format(booking.scheduledAt);
+    final scheduled = booking.scheduledAt ?? DateTime.now();
+    final dateStr = DateFormat('EEEE, d MMMM yyyy').format(scheduled);
+    final timeStr = DateFormat('hh:mm a').format(scheduled);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -43,19 +44,15 @@ class BookingDetailViewScreen extends ConsumerWidget {
                 _buildInfoCard([
                   _buildDetailRow(
                     "Service",
-                    booking.services.isNotEmpty
-                        ? booking.services[0].name
-                        : "Home Cleaning",
+                    booking.serviceName ?? "Home Cleaning",
                   ),
                   _buildDetailRow(
                     "Package",
-                    booking.duration.contains("Hour")
-                        ? booking.duration
-                        : "Standard Package",
+                    "${booking.durationMinutes} min",
                   ),
                   _buildDetailRow(
                     "Provider",
-                    booking.worker.name,
+                    booking.workerName ?? 'Worker',
                     isLink: true,
                   ),
                 ]),
@@ -65,7 +62,7 @@ class BookingDetailViewScreen extends ConsumerWidget {
                 _buildInfoCard([
                   _buildDetailRow("Date", dateStr),
                   _buildDetailRow("Time", timeStr),
-                  _buildDetailRow("Duration", booking.duration),
+                  _buildDetailRow("Duration", "${booking.durationMinutes} min"),
                 ]),
 
                 const SizedBox(height: 24),

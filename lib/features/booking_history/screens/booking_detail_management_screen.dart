@@ -36,19 +36,14 @@ class BookingDetailManagementScreen extends StatelessWidget {
                   _buildWorkerHeader(),
                   const SizedBox(height: 24),
                   const Text(
-                    "Services",
+                    "Service",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
-                  ...booking.services
-                      .map(
-                        (service) => _buildServiceItem(
-                          service.name,
-                          "\$${service.price.toStringAsFixed(2)}",
-                        ),
-                      )
-                      .toList(),
-
+                  _buildServiceItem(
+                    booking.serviceName ?? 'Service',
+                    "\$${booking.totalPrice.toStringAsFixed(2)}",
+                  ),
                   const Divider(height: 40),
                   const Text(
                     "Details",
@@ -77,7 +72,12 @@ class BookingDetailManagementScreen extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 30,
-            backgroundImage: NetworkImage(booking.worker.image),
+            backgroundImage: booking.workerAvatar != null && booking.workerAvatar!.isNotEmpty
+                ? NetworkImage(booking.workerAvatar!)
+                : null,
+            child: booking.workerAvatar == null || booking.workerAvatar!.isEmpty
+                ? const Icon(Icons.person, size: 30)
+                : null,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -85,14 +85,14 @@ class BookingDetailManagementScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  booking.worker.name,
+                  booking.workerName ?? 'Worker',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
                 ),
                 Text(
-                  booking.worker.description.split('.').first,
+                  booking.serviceName ?? 'Service',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(color: Colors.grey, fontSize: 13),
@@ -137,6 +137,7 @@ class BookingDetailManagementScreen extends StatelessWidget {
   }
 
   Widget _buildDetailBox() {
+    final scheduled = booking.scheduledAt ?? DateTime.now();
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -152,11 +153,12 @@ class BookingDetailManagementScreen extends StatelessWidget {
           ),
           _buildRow(
             "Date",
-            DateFormat('EEE, d MMM yyyy').format(booking.scheduledAt),
+            DateFormat('EEE, d MMM yyyy').format(scheduled),
           ),
-          _buildRow("Time", DateFormat('hh:mm a').format(booking.scheduledAt)),
-          _buildRow("Duration", booking.duration),
-          _buildRow("Address", "Hanoi, Vietnam", isMultiLine: true),
+          _buildRow("Time", DateFormat('hh:mm a').format(scheduled)),
+          _buildRow("Duration", "${booking.durationMinutes} min"),
+          if (booking.address != null)
+            _buildRow("Address", booking.address!, isMultiLine: true),
           const Divider(height: 24),
           _buildRow(
             "Total price",
@@ -178,9 +180,8 @@ class BookingDetailManagementScreen extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
-        crossAxisAlignment: isMultiLine
-            ? CrossAxisAlignment.start
-            : CrossAxisAlignment.center,
+        crossAxisAlignment:
+            isMultiLine ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
           Text(label, style: const TextStyle(color: Colors.grey)),
           const SizedBox(width: 16),
@@ -191,8 +192,7 @@ class BookingDetailManagementScreen extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: isTotal ? 16 : 14,
-                color:
-                    valueColor ??
+                color: valueColor ??
                     (isTotal ? const Color(0xFF008DDA) : Colors.black),
               ),
             ),

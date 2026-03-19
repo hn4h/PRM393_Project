@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:prm_project/core/models/booking.dart';
 
 class BookingCard extends StatelessWidget {
@@ -10,6 +11,8 @@ class BookingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final scheduled = booking.scheduledAt;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -33,12 +36,15 @@ class BookingCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    booking.worker.image,
-                    width: 64,
-                    height: 64,
-                    fit: BoxFit.cover,
-                  ),
+                  child: booking.workerAvatar != null && booking.workerAvatar!.isNotEmpty
+                      ? Image.network(
+                          booking.workerAvatar!,
+                          width: 64,
+                          height: 64,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => _buildAvatarPlaceholder(colorScheme),
+                        )
+                      : _buildAvatarPlaceholder(colorScheme),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -46,7 +52,7 @@ class BookingCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        booking.worker.name,
+                        booking.workerName ?? 'Worker',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -54,27 +60,11 @@ class BookingCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        booking.services.isNotEmpty
-                            ? booking.services.first.name
-                            : "No Service",
+                        booking.serviceName ?? 'Service',
                         style: TextStyle(
                           color: colorScheme.onSurfaceVariant,
                           fontSize: 13,
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          const Icon(Icons.star, color: Colors.orange, size: 14),
-                          Text(
-                            " 4.9 (142)",
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.onSurface,
-                            ),
-                          ),
-                        ],
                       ),
                     ],
                   ),
@@ -103,22 +93,46 @@ class BookingCard extends StatelessWidget {
               booking.statusText,
               valueColor: booking.statusColor,
             ),
-            _buildInfoRow(context, "Date & Time", "5 May, 10:00 AM"),
-            _buildInfoRow(context, "Duration", booking.duration),
+            if (scheduled != null)
+              _buildInfoRow(
+                context,
+                "Date & Time",
+                DateFormat('d MMM, hh:mm a').format(scheduled),
+              ),
+            _buildInfoRow(
+              context,
+              "Duration",
+              "${booking.durationMinutes} min",
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoRow(BuildContext context, String label, String value, {Color? valueColor}) {
+  Widget _buildAvatarPlaceholder(ColorScheme colorScheme) {
+    return Container(
+      width: 64,
+      height: 64,
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(Icons.person, size: 32, color: colorScheme.onSurfaceVariant),
+    );
+  }
+
+  Widget _buildInfoRow(BuildContext context, String label, String value,
+      {Color? valueColor}) {
     final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13)),
+          Text(label,
+              style: TextStyle(
+                  color: colorScheme.onSurfaceVariant, fontSize: 13)),
           Text(
             value,
             style: TextStyle(

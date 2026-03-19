@@ -37,16 +37,16 @@ class StepSchedule extends ConsumerWidget {
                 "04:00 PM",
                 "05:00 PM",
               ].map((timeStr) {
-                // Kiểm tra chip này có đang được chọn dựa trên giờ trong state không
+                final scheduled = booking.scheduledAt ?? DateTime.now();
                 final isSelected = _isTimeSelected(
-                  booking.scheduledAt,
+                  scheduled,
                   timeStr,
                 );
 
                 return GestureDetector(
                   onTap: () {
                     final newDateTime = _updateTime(
-                      booking.scheduledAt,
+                      scheduled,
                       timeStr,
                     );
                     notifier.updateBooking(
@@ -86,20 +86,20 @@ class StepSchedule extends ConsumerWidget {
       itemCount: 31,
       itemBuilder: (context, index) {
         int day = index + 1;
-        //so sanh ngay trong state voi ngay hien thi
-        bool isSelected = booking.scheduledAt.day == day;
+        final scheduled = booking.scheduledAt ?? DateTime.now();
+        bool isSelected = scheduled.day == day;
         bool isToday =
             DateTime.now().day == day &&
-            DateTime.now().month == booking.scheduledAt.month;
+            DateTime.now().month == scheduled.month;
 
         return GestureDetector(
           onTap: () {
             final newDate = DateTime(
-              booking.scheduledAt.year,
-              booking.scheduledAt.month,
+              scheduled.year,
+              scheduled.month,
               day,
-              booking.scheduledAt.hour,
-              booking.scheduledAt.minute,
+              scheduled.hour,
+              scheduled.minute,
             );
             notifier.updateBooking(booking.copyWith(scheduledAt: newDate));
           },

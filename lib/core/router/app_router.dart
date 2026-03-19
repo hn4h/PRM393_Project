@@ -8,6 +8,8 @@ import 'package:prm_project/core/shell/main_shell.dart';
 import 'package:prm_project/features/auth/screens/login_screen.dart';
 import 'package:prm_project/features/auth/screens/register_screen.dart';
 import 'package:prm_project/features/auth/screens/forgot_password_screen.dart';
+import 'package:prm_project/features/auth/screens/complete_profile_screen.dart';
+import 'package:prm_project/features/auth/screens/otp_verify_screen.dart';
 import 'package:prm_project/features/discover/screens/service_discover_screen.dart';
 import 'package:prm_project/features/settings/screens/settings_screen.dart';
 import 'package:prm_project/features/worker/screens/worker_detail.dart';
@@ -20,7 +22,13 @@ import 'package:prm_project/features/profile/screens/edit_profile_screen.dart';
 import 'package:prm_project/features/settings/screens/change_password_screen.dart';
 
 // ── Routes that don't require authentication ──────────────────────────────────
-const _publicRoutes = ['/login', '/register', '/forgot-password'];
+const _publicRoutes = [
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/complete-profile',
+  '/otp-verify',
+];
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'root',
@@ -38,11 +46,27 @@ class AppRouter {
     refreshListenable: _authRefresh,
     redirect: (context, state) {
       final session = Supabase.instance.client.auth.currentSession;
+      final user = Supabase.instance.client.auth.currentUser;
       final isLoggedIn = session != null;
-      final isOnPublicRoute = _publicRoutes.contains(state.matchedLocation);
+      final loc = state.matchedLocation;
+      final isOnPublicRoute = _publicRoutes.contains(loc);
 
-      // Authenticated user on a public page → go to shell
-      if (isLoggedIn && isOnPublicRoute) return '/shell';
+      // ── Logged-in but email NOT confirmed → must complete registration ──
+      if (isLoggedIn && user != null) {
+        final confirmedAt = user.emailConfirmedAt;
+        final isConfirmed = confirmedAt != null && confirmedAt.isNotEmpty;
+
+        if (!isConfirmed) {
+          // Allow staying on complete-profile or otp-verify
+          if (loc == '/complete-profile' || loc == '/otp-verify') {
+            return null;
+          }
+          return '/complete-profile';
+        }
+
+        // Confirmed + on public route → go to shell
+        if (isOnPublicRoute) return '/shell';
+      }
 
       // Unauthenticated user on a protected page → go to login
       if (!isLoggedIn && !isOnPublicRoute) return '/login';
@@ -69,6 +93,30 @@ class AppRouter {
         path: '/forgot-password',
         name: 'forgot-password',
         builder: (_, __) => const ForgotPasswordScreen(),
+      ),
+
+      // ── Registration flow (complete profile → OTP) ─────────────────────
+      GoRoute(
+        path: '/complete-profile',
+        name: 'complete-profile',
+        builder: (_, state) {
+          final email = state.extra as String? ??
+              Supabase.instance.client.auth.currentUser?.email ??
+              '';
+          return CompleteProfileScreen(email: email);
+        },
+      ),
+      GoRoute(
+        path: '/otp-verify',
+        name: 'otp-verify',
+        builder: (_, state) {
+          final data = state.extra as Map<String, String>;
+          return OtpVerifyScreen(
+            email: data['email']!,
+            phone: data['phone']!,
+            address: data['address']!,
+          );
+        },
       ),
 
       // ── Main shell (Home + Bookings + Calendar + Chat + Profile tabs) ───

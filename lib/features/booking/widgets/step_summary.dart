@@ -11,8 +11,9 @@ class StepSummary extends ConsumerWidget {
     final flowState = ref.watch(bookingFlowViewModelProvider);
     final booking = flowState.booking;
 
-    final dateStr = DateFormat('EEE, d MMM yyyy').format(booking.scheduledAt);
-    final timeStr = DateFormat('hh:mm a').format(booking.scheduledAt);
+    final scheduled = booking.scheduledAt ?? DateTime.now();
+    final dateStr = DateFormat('EEE, d MMM yyyy').format(scheduled);
+    final timeStr = DateFormat('hh:mm a').format(scheduled);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,15 +42,12 @@ class StepSummary extends ConsumerWidget {
               _buildSummaryRow(
                 Icons.handyman_outlined,
                 "Package",
-                booking.duration,
+                "${booking.durationMinutes} min",
               ),
               _buildSummaryRow(
                 Icons.payment,
                 "Method",
-                booking.duration.contains("Pay") ||
-                        booking.duration.contains("Card")
-                    ? booking.duration
-                    : "Not selected",
+                booking.paymentMethod,
               ),
               const Divider(height: 32),
               _buildSummaryRow(
