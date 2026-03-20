@@ -75,7 +75,7 @@ class WorkerDetailScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                const BottomBar(),
+                BottomBar(workerId: worker.id),
               ],
             );
           },

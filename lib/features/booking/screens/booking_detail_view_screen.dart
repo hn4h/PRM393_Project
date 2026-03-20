@@ -11,10 +11,17 @@ class BookingDetailViewScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final flowState = ref.watch(bookingFlowViewModelProvider);
     final booking = flowState.booking;
+    final selectedWorker = flowState.selectedWorker;
+    final selectedService = flowState.selectedService;
 
     final scheduled = booking.scheduledAt ?? DateTime.now();
     final dateStr = DateFormat('EEEE, d MMMM yyyy').format(scheduled);
     final timeStr = DateFormat('hh:mm a').format(scheduled);
+
+    // Calculate prices
+    final servicePrice = booking.totalPrice;
+    final serviceFee = servicePrice * 0.05;
+    final totalAmount = servicePrice + serviceFee;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -37,22 +44,19 @@ class BookingDetailViewScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildStatusBanner(),
+                _buildStatusBanner(booking.status.label),
                 const SizedBox(height: 24),
 
                 _buildSectionTitle("Service Information"),
                 _buildInfoCard([
                   _buildDetailRow(
                     "Service",
-                    booking.serviceName ?? "Home Cleaning",
+                    selectedService?.name ?? booking.serviceName ?? "Service",
                   ),
-                  _buildDetailRow(
-                    "Package",
-                    "${booking.durationMinutes} min",
-                  ),
+                  _buildDetailRow("Duration", "${booking.durationMinutes} min"),
                   _buildDetailRow(
                     "Provider",
-                    booking.workerName ?? 'Worker',
+                    selectedWorker?.name ?? booking.workerName ?? 'Worker',
                     isLink: true,
                   ),
                 ]),
@@ -68,31 +72,54 @@ class BookingDetailViewScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
                 _buildSectionTitle("Address & Contact"),
                 _buildInfoCard([
-                  _buildDetailRow("Customer", "Anh Duc"),
-                  _buildDetailRow("Phone", "0123456422"),
+                  _buildDetailRow(
+                    "Customer",
+                    booking.contactName ?? "Customer",
+                  ),
+                  _buildDetailRow("Phone", booking.contactPhone ?? "N/A"),
                   _buildDetailRow(
                     "Address",
-                    "Hoa Lac, Ha Noi",
+                    booking.address ?? "N/A",
                     isMultiLine: true,
                   ),
                 ]),
+
+                if (booking.notes != null && booking.notes!.isNotEmpty) ...[
+                  const SizedBox(height: 24),
+                  _buildSectionTitle("Notes"),
+                  _buildInfoCard([
+                    Text(
+                      booking.notes!,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ]),
+                ],
 
                 const SizedBox(height: 24),
                 _buildSectionTitle("Payment Summary"),
                 _buildInfoCard([
                   _buildDetailRow(
-                    "Subtotal",
-                    "\$${booking.totalPrice.toStringAsFixed(2)}",
+                    "Service Price",
+                    "\$${servicePrice.toStringAsFixed(2)}",
                   ),
-                  _buildDetailRow("Service Fee", "\$3.50"),
+                  _buildDetailRow(
+                    "Service Fee (5%)",
+                    "\$${serviceFee.toStringAsFixed(2)}",
+                  ),
                   const Divider(),
                   _buildDetailRow(
                     "Total Amount",
-                    "\$${(booking.totalPrice + 3.5).toStringAsFixed(2)}",
+                    "\$${totalAmount.toStringAsFixed(2)}",
                     isBold: true,
                     color: const Color(0xFF008DDA),
                   ),
-                  _buildDetailRow("Method", "Credit Card (**** 1234)"),
+                  _buildDetailRow(
+                    "Payment Method",
+                    _formatPaymentMethod(booking.paymentMethod),
+                  ),
                 ]),
                 const SizedBox(height: 120),
               ],
@@ -107,7 +134,24 @@ class BookingDetailViewScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatusBanner() {
+  String _formatPaymentMethod(String method) {
+    switch (method.toLowerCase()) {
+      case 'credit card':
+        return 'Credit Card';
+      case 'paypal':
+        return 'PayPal';
+      case 'apple pay':
+        return 'Apple Pay';
+      case 'google pay':
+        return 'Google Pay';
+      case 'cash':
+        return 'Cash';
+      default:
+        return method;
+    }
+  }
+
+  Widget _buildStatusBanner(String status) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -115,12 +159,12 @@ class BookingDetailViewScreen extends ConsumerWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
-        children: const [
-          Icon(Icons.check_circle, color: Color(0xFF008DDA)),
-          SizedBox(width: 12),
+        children: [
+          const Icon(Icons.check_circle, color: Color(0xFF008DDA)),
+          const SizedBox(width: 12),
           Text(
-            "Your booking is scheduled",
-            style: TextStyle(
+            "Your booking is $status",
+            style: const TextStyle(
               color: Color(0xFF008DDA),
               fontWeight: FontWeight.bold,
             ),
@@ -204,7 +248,7 @@ class BookingDetailViewScreen extends ConsumerWidget {
       ),
       child: SafeArea(
         child: ElevatedButton(
-          onPressed: () => context.goNamed('home'),
+          onPressed: () => context.goNamed('shell'),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.black,
             minimumSize: const Size(double.infinity, 54),

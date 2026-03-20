@@ -36,18 +36,22 @@ class BookingListState {
 
   /// Get active bookings (pending, accepted, in-progress).
   List<Booking> get activeBookings => bookings
-      .where((b) =>
-          b.status == BookingStatus.pending ||
-          b.status == BookingStatus.accepted ||
-          b.status == BookingStatus.inProgress)
+      .where(
+        (b) =>
+            b.status == BookingStatus.pending ||
+            b.status == BookingStatus.accepted ||
+            b.status == BookingStatus.inProgress,
+      )
       .toList();
 
   /// Get past bookings (completed, cancelled, rejected).
   List<Booking> get pastBookings => bookings
-      .where((b) =>
-          b.status == BookingStatus.completed ||
-          b.status == BookingStatus.cancelled ||
-          b.status == BookingStatus.rejected)
+      .where(
+        (b) =>
+            b.status == BookingStatus.completed ||
+            b.status == BookingStatus.cancelled ||
+            b.status == BookingStatus.rejected,
+      )
       .toList();
 }
 
@@ -86,5 +90,5 @@ class BookingListViewModel extends AsyncNotifier<BookingListState> {
 
 final bookingListViewModelProvider =
     AsyncNotifierProvider<BookingListViewModel, BookingListState>(() {
-  return BookingListViewModel();
-});
+      return BookingListViewModel();
+    });

@@ -4,8 +4,6 @@ import 'package:prm_project/core/models/service.dart';
 import 'package:prm_project/core/models/worker.dart';
 import 'package:prm_project/features/service/widgets/workers_horizontal_list.dart';
 
-
-
 import '../viewmodel/service_detail_viewmodel.dart';
 import 'package:prm_project/features/service/widgets//bottom_bar.dart';
 import 'package:prm_project/features/service/widgets//details_card.dart';
@@ -34,9 +32,9 @@ class ServiceDetailScreen extends ConsumerWidget {
           return Stack(
             children: [
               _buildMainContent(context, service, workers),
-              const Align(
+              Align(
                 alignment: Alignment.bottomCenter,
-                child: BottomBar(),
+                child: BottomBar(serviceId: service.id),
               ),
             ],
           );
@@ -66,7 +64,7 @@ class ServiceDetailScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
                 DetailsCard(service: service),
                 const SizedBox(height: 24),
-                WorkersHorizontalList(workers: demoWorkers),
+                WorkersHorizontalList(workers: workers),
                 const SizedBox(height: 24),
                 const ReviewSection(),
                 const SizedBox(height: 100),

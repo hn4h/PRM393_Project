@@ -100,7 +100,8 @@ class AppRouter {
         path: '/complete-profile',
         name: 'complete-profile',
         builder: (_, state) {
-          final email = state.extra as String? ??
+          final email =
+              state.extra as String? ??
               Supabase.instance.client.auth.currentUser?.email ??
               '';
           return CompleteProfileScreen(email: email);
@@ -168,7 +169,13 @@ class AppRouter {
       GoRoute(
         path: '/booking-flow',
         name: 'booking-flow',
-        builder: (_, __) => const BookingFlowScreen(),
+        builder: (_, state) {
+          final extra = state.extra as Map<String, String?>?;
+          return BookingFlowScreen(
+            serviceId: extra?['serviceId'],
+            workerId: extra?['workerId'],
+          );
+        },
       ),
       GoRoute(
         path: '/booking-confirmed',

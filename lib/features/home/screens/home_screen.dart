@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:prm_project/core/models/worker.dart';
 import 'package:prm_project/features/home/viewmodels/home_viewmodel.dart';
 import 'package:prm_project/features/home/widgets/header.dart';
 import 'package:prm_project/features/home/widgets/popular-service-card.dart';
@@ -19,9 +18,18 @@ class HomeScreen extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final allServicesAsync = ref.watch(activeServicesProvider);
     final filteredAsync = ref.watch(filteredServicesProvider);
+    final topWorkersAsync = ref.watch(topRatedWorkersProvider);
     final selectedCategory = ref.watch(selectedCategoryProvider);
 
-    final filters = ['All', 'Cleaning', 'Plumbing', 'Electrical', 'Painting', 'AC Repair', 'Appliance'];
+    final filters = [
+      'All',
+      'Cleaning',
+      'Plumbing',
+      'Electrical',
+      'Painting',
+      'AC Repair',
+      'Appliance',
+    ];
 
     return Scaffold(
       body: SafeArea(
@@ -52,8 +60,17 @@ class HomeScreen extends ConsumerWidget {
                   children: [
                     _buildCategoryItem(context, Icons.ac_unit, 'AC Repair'),
                     _buildCategoryItem(context, Icons.kitchen, 'Appliance'),
-                    _buildCategoryItem(context, Icons.cleaning_services, 'Cleaning'),
-                    _buildCategoryItem(context, Icons.arrow_forward, 'More', isMore: true),
+                    _buildCategoryItem(
+                      context,
+                      Icons.cleaning_services,
+                      'Cleaning',
+                    ),
+                    _buildCategoryItem(
+                      context,
+                      Icons.arrow_forward,
+                      'More',
+                      isMore: true,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 32),
@@ -90,13 +107,25 @@ class HomeScreen extends ConsumerWidget {
                 // ── Top Rated Workers ───────────────────────────
                 SectionHeader(title: 'Top Rated Workers', onTap: () {}),
                 const SizedBox(height: 16),
-                SizedBox(
-                  height: 290,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: demoWorkers.length,
-                    itemBuilder: (context, index) =>
-                        WorkerCard(worker: demoWorkers[index]),
+                topWorkersAsync.when(
+                  loading: () => const SizedBox(
+                    height: 290,
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (err, _) => SizedBox(
+                    height: 290,
+                    child: Center(child: Text('Error: $err')),
+                  ),
+                  data: (workers) => SizedBox(
+                    height: 290,
+                    child: workers.isEmpty
+                        ? const Center(child: Text('No workers available'))
+                        : ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: workers.length,
+                            itemBuilder: (context, index) =>
+                                WorkerCard(worker: workers[index]),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -119,15 +148,20 @@ class HomeScreen extends ConsumerWidget {
                         child: ChoiceChip(
                           label: Text(filter),
                           selected: isSelected,
-                          onSelected: (_) => ref
-                              .read(selectedCategoryProvider.notifier)
-                              .state = filter,
+                          onSelected: (_) =>
+                              ref
+                                      .read(selectedCategoryProvider.notifier)
+                                      .state =
+                                  filter,
                           backgroundColor: colorScheme.surface,
                           selectedColor: Colors.blue.shade50,
                           labelStyle: TextStyle(
-                            color: isSelected ? Colors.blue : colorScheme.onSurface,
-                            fontWeight:
-                                isSelected ? FontWeight.bold : FontWeight.normal,
+                            color: isSelected
+                                ? Colors.blue
+                                : colorScheme.onSurface,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
@@ -174,19 +208,28 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildCategoryItem(BuildContext context, IconData icon, String label,
-      {bool isMore = false}) {
+  Widget _buildCategoryItem(
+    BuildContext context,
+    IconData icon,
+    String label, {
+    bool isMore = false,
+  }) {
     return Column(
       children: [
-        Icon(icon,
-            color: isMore ? Colors.blue : Colors.blue.shade400, size: 36),
+        Icon(
+          icon,
+          color: isMore ? Colors.blue : Colors.blue.shade400,
+          size: 36,
+        ),
         const SizedBox(height: 8),
-        Text(label,
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 14,
-              color: Theme.of(context).colorScheme.onSurface,
-            )),
+        Text(
+          label,
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 14,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
       ],
     );
   }

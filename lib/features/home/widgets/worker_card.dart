@@ -36,10 +36,17 @@ class WorkerCard extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.broken_image, color: colorScheme.onSurfaceVariant, size: 32),
+                      Icon(
+                        Icons.broken_image,
+                        color: colorScheme.onSurfaceVariant,
+                        size: 32,
+                      ),
                       Text(
                         "Image unavailable",
-                        style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12),
+                        style: TextStyle(
+                          color: colorScheme.onSurfaceVariant,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
@@ -80,7 +87,10 @@ class WorkerCard extends StatelessWidget {
                     worker.description,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
+                    style: TextStyle(
+                      color: colorScheme.onSurfaceVariant,
+                      fontSize: 13,
+                    ),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -95,12 +105,17 @@ class WorkerCard extends StatelessWidget {
                           const SizedBox(width: 4),
                           Text(
                             "(${worker.rating})",
-                            style: TextStyle(color: colorScheme.onSurfaceVariant),
+                            style: TextStyle(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
                           ),
                         ],
                       ),
                       OutlinedButton(
-                        onPressed: () => context.pushNamed('booking-flow'),
+                        onPressed: () => context.pushNamed(
+                          'booking-flow',
+                          extra: {'serviceId': null, 'workerId': worker.id},
+                        ),
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(color: Colors.blue),
                           shape: RoundedRectangleBorder(

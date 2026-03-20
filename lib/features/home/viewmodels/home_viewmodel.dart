@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:prm_project/core/models/service.dart';
+import 'package:prm_project/core/models/worker.dart';
 import 'package:prm_project/features/home/repositories/home_repository.dart';
+import 'package:prm_project/features/worker/repository/worker_repository.dart';
 
 // ─── Provider for HomeRepository ─────────────────────────────────────────────
 final homeRepositoryProvider = Provider<HomeRepository>((ref) {
@@ -12,6 +14,15 @@ final homeRepositoryProvider = Provider<HomeRepository>((ref) {
 final activeServicesProvider = FutureProvider<List<Service>>((ref) async {
   final repo = ref.watch(homeRepositoryProvider);
   return repo.getActiveServices();
+});
+
+// ─── Top rated workers (for home screen) ─────────────────────────────────────
+final topRatedWorkersProvider = FutureProvider<List<Worker>>((ref) async {
+  final repo = ref.watch(workerRepositoryProvider);
+  final workers = await repo.getAll();
+  // Sort by rating descending and take top workers
+  workers.sort((a, b) => b.rating.compareTo(a.rating));
+  return workers;
 });
 
 // ─── Selected category filter on home screen ─────────────────────────────────
