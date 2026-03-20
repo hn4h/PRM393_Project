@@ -68,17 +68,17 @@ class StepPersonalInfo extends ConsumerWidget {
           children: [
             _buildPackageChip(
               "Standard",
-              isSelected: booking.duration == "1 Hour",
+              isSelected: booking.durationMinutes == 60,
               onTap: () => notifier.updateBooking(
-                booking.copyWith(duration: "1 Hour", totalPrice: 100.0),
+                booking.copyWith(durationMinutes: 60, totalPrice: 100.0),
               ),
             ),
             const SizedBox(width: 12),
             _buildPackageChip(
               "Premium",
-              isSelected: booking.duration == "2 Hours",
+              isSelected: booking.durationMinutes == 120,
               onTap: () => notifier.updateBooking(
-                booking.copyWith(duration: "2 Hours", totalPrice: 180.0),
+                booking.copyWith(durationMinutes: 120, totalPrice: 180.0),
               ),
             ),
           ],

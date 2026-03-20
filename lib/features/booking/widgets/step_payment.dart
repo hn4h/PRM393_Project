@@ -11,8 +11,7 @@ class StepPayment extends ConsumerWidget {
     final booking = flowState.booking;
     final notifier = ref.read(bookingFlowViewModelProvider.notifier);
 
-    // dung bien tam sau them 'paymentMethod' vao Booking
-    final selectedMethod = booking.duration;
+    final selectedMethod = booking.paymentMethod;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,7 +33,7 @@ class StepPayment extends ConsumerWidget {
           icon: Icons.credit_card,
           isSelected: selectedMethod == "Credit Card",
           onTap: () =>
-              notifier.updateBooking(booking.copyWith(duration: "Credit Card")),
+              notifier.setPaymentMethod("Credit Card"),
         ),
 
         _buildPaymentOption(
@@ -44,7 +43,7 @@ class StepPayment extends ConsumerWidget {
           icon: Icons.account_balance_wallet_outlined,
           isSelected: selectedMethod == "PayPal",
           onTap: () =>
-              notifier.updateBooking(booking.copyWith(duration: "PayPal")),
+              notifier.setPaymentMethod("PayPal"),
         ),
 
         _buildPaymentOption(
@@ -54,7 +53,7 @@ class StepPayment extends ConsumerWidget {
           icon: Icons.apple,
           isSelected: selectedMethod == "Apple Pay",
           onTap: () =>
-              notifier.updateBooking(booking.copyWith(duration: "Apple Pay")),
+              notifier.setPaymentMethod("Apple Pay"),
         ),
 
         _buildPaymentOption(
@@ -64,7 +63,7 @@ class StepPayment extends ConsumerWidget {
           icon: Icons.payment,
           isSelected: selectedMethod == "Google Pay",
           onTap: () =>
-              notifier.updateBooking(booking.copyWith(duration: "Google Pay")),
+              notifier.setPaymentMethod("Google Pay"),
         ),
       ],
     );
