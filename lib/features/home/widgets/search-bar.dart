@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 
 class CustomSearchBar extends StatelessWidget {
-  const CustomSearchBar({Key? key}) : super(key: key);
+  const CustomSearchBar({
+    Key? key,
+    this.onChanged,
+  }) : super(key: key);
+
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return TextField(
+      onChanged: onChanged,
       decoration: InputDecoration(
-        hintText: "Search for services",
+        hintText: "Search services or workers",
         hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
         prefixIcon: Icon(Icons.search, color: colorScheme.onSurface, size: 28),
         border: OutlineInputBorder(

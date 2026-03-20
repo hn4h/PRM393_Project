@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:prm_project/core/models/service.dart';
+import 'package:prm_project/core/utils/image_helper.dart';
+
+import 'image_fallback.dart';
 
 class PopularServiceCard extends StatelessWidget {
   final Service service;
@@ -10,129 +13,165 @@ class PopularServiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      width: 280,
-      margin: const EdgeInsets.only(right: 16),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).dividerColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(16),
-                ),
-                child: Image.network(
-                  service.image,
-                  height: 150,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              Positioned(
-                top: 12,
-                right: 12,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
-                    shape: BoxShape.circle,
+    final durationText = _formatDuration(service.durationMinutes);
+
+    return GestureDetector(
+      onTap: () => context.push('/service-detail/${service.id}'),
+      child: Container(
+        width: 280,
+        margin: const EdgeInsets.only(right: 16),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Theme.of(context).dividerColor),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
                   ),
-                  child: Icon(Icons.favorite_border, size: 20, color: colorScheme.onSurface),
+                  child: ImageHelper.loadNetworkImage(
+                    imageUrl: service.image,
+                    height: 150,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorWidget: const ImageFallback(
+                      height: 150,
+                      width: double.infinity,
+                    ),
+                  ),
                 ),
-              ),
-              Positioned(
-                bottom: 12,
-                left: 12,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.favorite_border,
+                      size: 20,
+                      color: colorScheme.onSurface,
+                    ),
                   ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
-                    borderRadius: BorderRadius.circular(20),
+                ),
+                Positioned(
+                  bottom: 12,
+                  left: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.star, color: Colors.orange, size: 16),
+                        const SizedBox(width: 4),
+                        Text(
+                          service.rating.toString(),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Row(
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    service.name,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
                     children: [
-                      const Icon(Icons.star, color: Colors.orange, size: 16),
-                      const SizedBox(width: 4),
-                      Text(
-                        service.rating.toString(),
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onSurface,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "\$${service.price.toStringAsFixed(2)}",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.blue,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              durationText,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: colorScheme.onSurfaceVariant,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: OutlinedButton(
+                          onPressed: () =>
+                              context.push('/service-detail/${service.id}'),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.blue),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                            minimumSize: const Size(0, 36),
+                          ),
+                          child: const Text(
+                            "View detail",
+                            style: TextStyle(color: Colors.blue),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  service.name,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "\$${service.price.toStringAsFixed(2)}",
-                            style: const TextStyle(
-                              color: Colors.blue,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          TextSpan(
-                            text: " / hour",
-                            style: TextStyle(
-                              color: colorScheme.onSurfaceVariant,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    OutlinedButton(
-                      onPressed: () => context.pushNamed('booking-flow'),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.blue),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
-                      child: const Text(
-                        "Book Now",
-                        style: TextStyle(color: Colors.blue),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  String _formatDuration(int durationMinutes) {
+    if (durationMinutes <= 0) return '-';
+    final hours = durationMinutes ~/ 60;
+    final minutes = durationMinutes % 60;
+    if (hours > 0 && minutes > 0) return '$hours hr $minutes min';
+    if (hours > 0) return '$hours hr';
+    return '$minutes min';
   }
 }

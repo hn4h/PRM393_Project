@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prm_project/core/models/service.dart';
+import 'package:prm_project/core/utils/image_helper.dart';
 
 class Header extends StatelessWidget {
   final Service service;
@@ -13,12 +14,12 @@ class Header extends StatelessWidget {
 
     return Stack(
       children: [
-        Image.network(
-          cover,
+        ImageHelper.loadNetworkImage(
+          imageUrl: cover,
           height: 320,
           width: double.infinity,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Container(
+          errorWidget: Container(
             height: 320,
             width: double.infinity,
             color: Colors.grey.shade200,
@@ -33,11 +34,6 @@ class Header extends StatelessWidget {
             icon: Icons.arrow_back,
             onTap: () => Navigator.pop(context),
           ),
-        ),
-        Positioned(
-          top: MediaQuery.of(context).padding.top + 10,
-          right: 16,
-          child: _buildCircleButton(icon: Icons.ios_share, onTap: () {}),
         ),
       ],
     );

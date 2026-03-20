@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:prm_project/core/models/worker.dart';
+import 'package:prm_project/core/utils/image_helper.dart';
 
 class WorkersHorizontalList extends StatelessWidget {
   final List<Worker> workers;
@@ -70,29 +71,27 @@ class _WorkerCardItem extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            child: Image.network(
-              worker.image,
+            child: ImageHelper.loadNetworkImage(
+              imageUrl: worker.image,
               height: 140,
               width: double.infinity,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  height: 140,
-                  width: double.infinity,
-                  color: Colors.grey.shade200,
-                  child: const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.broken_image, color: Colors.grey, size: 32),
-                      SizedBox(height: 6),
-                      Text(
-                        "Image unavailable",
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
-                      ),
-                    ],
-                  ),
-                );
-              },
+              errorWidget: Container(
+                height: 140,
+                width: double.infinity,
+                color: Colors.grey.shade200,
+                child: const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.broken_image, color: Colors.grey, size: 32),
+                    SizedBox(height: 6),
+                    Text(
+                      "Image unavailable",
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
 
@@ -127,33 +126,46 @@ class _WorkerCardItem extends StatelessWidget {
                   ),
 
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.star, color: Colors.orange, size: 20),
-                          const SizedBox(width: 4),
-                          Text(
-                            "(${worker.rating})",
-                            style: const TextStyle(color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                      OutlinedButton(
-                        onPressed: () {
-                          // GoRoute path: /worker/:id
-                          context.push('/worker/${worker.id}');
-                        },
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.blue),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.star,
+                              color: Colors.orange,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                "(${worker.rating})",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                            ),
+                          ],
                         ),
-                        child: const Text(
-                          "View detail",
-                          style: TextStyle(color: Colors.blue),
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            context.push('/worker/${worker.id}');
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.blue),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                            minimumSize: const Size(0, 36),
+                          ),
+                          child: const Text(
+                            "View detail",
+                            style: TextStyle(color: Colors.blue),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ),
                     ],

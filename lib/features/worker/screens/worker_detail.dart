@@ -6,7 +6,6 @@ import '../viewmodel/worker_detail_viewmodel.dart';
 import '../widgets/header.dart';
 import '../widgets/stats.dart';
 import '../widgets/about.dart';
-import '../widgets/gallery.dart';
 import '../widgets/schedule_location_card.dart';
 import '../widgets/reviews_preview.dart';
 import '../widgets/bottom_bar.dart';
@@ -66,11 +65,9 @@ class WorkerDetailScreen extends ConsumerWidget {
                         const SizedBox(height: 20),
                         About(worker: worker),
                         const SizedBox(height: 20),
-                        Gallery(images: worker.galleryImages),
-                        const SizedBox(height: 20),
                         ScheduleLocationCard(worker: worker),
                         const SizedBox(height: 20),
-                        ReviewsPreview(),
+                        ReviewsPreview(reviews: state.reviews),
                       ],
                     ),
                   ),

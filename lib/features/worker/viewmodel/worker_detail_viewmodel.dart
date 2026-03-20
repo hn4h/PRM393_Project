@@ -2,19 +2,33 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:prm_project/core/models/worker.dart';
 import 'package:prm_project/features/worker/repository/worker_repository.dart';
 
+import 'worker_review_item.dart';
+
 part 'worker_detail_viewmodel.g.dart';
 
 class WorkerDetailState {
   final bool isLoading;
   final Worker? worker;
+  final List<WorkerReviewItem> reviews;
   final String? error;
 
-  WorkerDetailState({this.isLoading = false, this.worker, this.error});
+  WorkerDetailState({
+    this.isLoading = false,
+    this.worker,
+    this.reviews = const [],
+    this.error,
+  });
 
-  WorkerDetailState copyWith({bool? isLoading, Worker? worker, String? error}) {
+  WorkerDetailState copyWith({
+    bool? isLoading,
+    Worker? worker,
+    List<WorkerReviewItem>? reviews,
+    String? error,
+  }) {
     return WorkerDetailState(
       isLoading: isLoading ?? this.isLoading,
       worker: worker ?? this.worker,
+      reviews: reviews ?? this.reviews,
       error: error,
     );
   }
@@ -36,22 +50,31 @@ class WorkerDetailViewModel extends _$WorkerDetailViewModel {
   Future<void> _load(String workerId) async {
     try {
       final repo = ref.read(workerRepositoryProvider);
-      final w = await repo.getById(workerId);
+      final worker = await repo.getById(workerId);
 
-      if (w == null) {
+      if (worker == null) {
         state = WorkerDetailState(
           isLoading: false,
           worker: null,
+          reviews: const [],
           error: "Worker not found",
         );
         return;
       }
 
-      state = WorkerDetailState(isLoading: false, worker: w, error: null);
+      final reviews = await repo.getReviews(workerId);
+
+      state = WorkerDetailState(
+        isLoading: false,
+        worker: worker,
+        reviews: reviews,
+        error: null,
+      );
     } catch (e) {
       state = WorkerDetailState(
         isLoading: false,
         worker: null,
+        reviews: const [],
         error: e.toString(),
       );
     }

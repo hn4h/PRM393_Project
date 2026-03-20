@@ -30,14 +30,11 @@ class Stats extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final expText = '${worker.experienceYears} yrs';
-    final clientsText = worker.clients.toString();
     final ratingText = worker.rating.toStringAsFixed(1);
 
     return Row(
       children: [
         _item(Icons.timer_outlined, expText, 'Experience'),
-        const SizedBox(width: 10),
-        _item(Icons.people_outline, clientsText, 'Clients'),
         const SizedBox(width: 10),
         _item(Icons.star_border, ratingText, 'Rating'),
       ],

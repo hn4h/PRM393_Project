@@ -82,7 +82,7 @@
         features: const [],
         isFeatured: map['is_featured'] as bool? ?? false,
         isPopular: map['is_popular'] as bool? ?? false,
-        durationMinutes: map['duration_minutes'] as int? ?? 0,
+        durationMinutes: (map['duration_minutes'] as num?)?.toInt() ?? 0,
         serviceTags: (map['service_tags'] as List<dynamic>?)
                 ?.map((e) => e as String)
                 .toList() ??

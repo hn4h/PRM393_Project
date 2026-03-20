@@ -4,9 +4,8 @@ import 'package:prm_project/core/models/service.dart';
 import 'package:prm_project/core/models/worker.dart';
 import 'package:prm_project/features/service/widgets/workers_horizontal_list.dart';
 
-
-
 import '../viewmodel/service_detail_viewmodel.dart';
+import '../viewmodel/service_review_item.dart';
 import 'package:prm_project/features/service/widgets//bottom_bar.dart';
 import 'package:prm_project/features/service/widgets//details_card.dart';
 import 'package:prm_project/features/service/widgets//header.dart';
@@ -30,10 +29,11 @@ class ServiceDetailScreen extends ConsumerWidget {
         data: (data) {
           final Service service = data.service;
           final List<Worker> workers = data.workers;
+          final List<ServiceReviewItem> reviews = data.reviews;
 
           return Stack(
             children: [
-              _buildMainContent(context, service, workers),
+              _buildMainContent(context, service, workers, reviews),
               const Align(
                 alignment: Alignment.bottomCenter,
                 child: BottomBar(),
@@ -49,6 +49,7 @@ class ServiceDetailScreen extends ConsumerWidget {
     BuildContext context,
     Service service,
     List<Worker> workers,
+    List<ServiceReviewItem> reviews,
   ) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -66,9 +67,9 @@ class ServiceDetailScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
                 DetailsCard(service: service),
                 const SizedBox(height: 24),
-                WorkersHorizontalList(workers: demoWorkers),
+                WorkersHorizontalList(workers: workers),
                 const SizedBox(height: 24),
-                const ReviewSection(),
+                ReviewSection(reviews: reviews),
                 const SizedBox(height: 100),
               ],
             ),

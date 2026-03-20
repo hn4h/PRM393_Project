@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:prm_project/core/models/service.dart';
+import 'package:prm_project/core/utils/image_helper.dart';
+
+import 'image_fallback.dart';
 
 class OtherServiceTile extends StatelessWidget {
   final Service service;
@@ -23,19 +26,14 @@ class OtherServiceTile extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              service.image,
+            child: ImageHelper.loadNetworkImage(
+              imageUrl: service.image,
               height: 80,
               width: 80,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
+              errorWidget: const ImageFallback(
                 height: 80,
                 width: 80,
-                color: colorScheme.surfaceContainerHighest,
-                child: Icon(
-                  Icons.image_not_supported,
-                  color: colorScheme.onSurfaceVariant,
-                ),
               ),
             ),
           ),
@@ -92,7 +90,7 @@ class OtherServiceTile extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     OutlinedButton(
-                      onPressed: () => context.pushNamed('booking-flow'),
+                      onPressed: () => context.push('/service-detail/${service.id}'),
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.blue),
                         shape: RoundedRectangleBorder(
@@ -105,7 +103,7 @@ class OtherServiceTile extends StatelessWidget {
                         minimumSize: const Size(0, 32),
                       ),
                       child: const Text(
-                        "Book Now",
+                        "View detail",
                         style: TextStyle(color: Colors.blue, fontSize: 13),
                       ),
                     ),

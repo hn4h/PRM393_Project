@@ -25,7 +25,7 @@ class BottomBar extends StatelessWidget {
             height: 44,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Color(0xFFEAEAEA)),
+              border: Border.all(color: const Color(0xFFEAEAEA)),
             ),
             child: IconButton(
               onPressed: () {},
