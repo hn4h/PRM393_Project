@@ -16,8 +16,7 @@ class DetailsCard extends StatelessWidget {
         ? service.serviceTags.join(', ')
         : service.name;
 
-    final durationText =
-        service.durationMinutes > 0 ? '${service.durationMinutes} minutes' : '-';
+    final durationText = _formatDuration(service.durationMinutes);
 
     return Container(
       decoration: BoxDecoration(
@@ -60,6 +59,21 @@ class DetailsCard extends StatelessWidget {
     );
   }
 
+  String _formatDuration(int durationMinutes) {
+    if (durationMinutes <= 0) return '-';
+
+    final hours = durationMinutes ~/ 60;
+    final minutes = durationMinutes % 60;
+
+    if (hours > 0 && minutes > 0) {
+      return '$hours hr $minutes min';
+    }
+    if (hours > 0) {
+      return '$hours hr';
+    }
+    return '$minutes min';
+  }
+
   Widget _buildHeader() {
     return const Padding(
       padding: EdgeInsets.all(16.0),
@@ -85,14 +99,30 @@ class DetailsCard extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(icon, size: 20, color: Colors.grey[400]),
               const SizedBox(width: 12),
-              Text(label, style: const TextStyle(color: Colors.grey)),
-              const Spacer(),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: Colors.grey),
+                ),
+              ),
+              const SizedBox(width: 12),
               if (isRating)
                 const Icon(Icons.star, color: Colors.orange, size: 16),
-              Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
+              Flexible(
+                child: Text(
+                  value,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
             ],
           ),
         ),

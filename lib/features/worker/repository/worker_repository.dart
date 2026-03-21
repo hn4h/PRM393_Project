@@ -1,6 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:prm_project/core/constants/supabase_tables.dart';
+import 'package:prm_project/core/models/service.dart';
 import 'package:prm_project/core/models/worker.dart';
+import 'package:prm_project/features/service/repository/service_stats_mapper.dart';
 
 part 'worker_repository.g.dart';
 
@@ -9,112 +12,118 @@ WorkerRepository workerRepository(WorkerRepositoryRef ref) =>
     WorkerRepository(Supabase.instance.client);
 
 class WorkerRepository {
+  const WorkerRepository(this._client);
+
   final SupabaseClient _client;
+  static const _workerServicesTable = 'worker_services';
+
+  static const _workerSelect = '''
+    profile_id,
+    bio,
+    service_area,
+    years_experience,
+    skills,
+    is_available,
+    rating,
+    created_at,
+    updated_at,
+    profile:profiles!workers_profile_id_fkey(
+      id,
+      full_name,
+      avatar_url,
+      address
+    )
+  ''';
 
   const WorkerRepository(this._client);
 
   /// Fetch all workers with profile data
   Future<List<Worker>> getAll() async {
-    // First get all available workers
-    final workersResponse = await _client
-        .from('workers')
-        .select()
-        .eq('is_available', true);
-
-    final List<Worker> workers = [];
-    for (final workerMap in workersResponse) {
-      final profileId = workerMap['profile_id'] as String?;
-      if (profileId == null) continue;
-
-      // Fetch profile data separately
-      final profileResponse = await _client
-          .from('profiles')
-          .select()
-          .eq('id', profileId)
-          .maybeSingle();
-
-      workers.add(_mapWorker(workerMap, profileResponse));
-    }
-    return workers;
-  }
-
-  /// Fetch a single worker by profile_id
-  Future<Worker?> getById(String id) async {
-    final workerResponse = await _client
-        .from('workers')
-        .select()
-        .eq('profile_id', id)
-        .maybeSingle();
-
-    if (workerResponse == null) return null;
-
-    // Fetch profile data separately
-    final profileResponse = await _client
-        .from('profiles')
-        .select()
-        .eq('id', id)
-        .maybeSingle();
-
-    return _mapWorker(workerResponse, profileResponse);
-  }
-
-  /// Fetch workers who provide a specific service
-  Future<List<Worker>> getWorkersByServiceId(String serviceId) async {
-    // Get worker IDs from worker_services
-    final wsResponse = await _client
-        .from('worker_services')
-        .select('worker_id')
-        .eq('service_id', serviceId);
-
-    final List<Worker> workers = [];
-    for (final row in wsResponse) {
-      final workerId = row['worker_id'] as String?;
-      if (workerId == null) continue;
-
-      final worker = await getById(workerId);
-      if (worker != null) {
-        workers.add(worker);
-      }
-    }
-    return workers;
-  }
-
-  /// Fetch service IDs for a worker
-  Future<List<String>> getWorkerServiceIds(String workerId) async {
     final response = await _client
-        .from('worker_services')
+        .from(SupabaseTables.workers)
+        .select(_workerSelect)
+        .order('rating', ascending: false);
+
+    return (response as List)
+        .map((item) => _mapWorker(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<Worker>> getPage({int limit = 10, int offset = 0}) async {
+    final response = await _client
+        .from(SupabaseTables.workers)
+        .select(_workerSelect)
+        .order('rating', ascending: false)
+        .range(offset, offset + limit - 1);
+
+    return (response as List)
+        .map((item) => _mapWorker(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<Worker?> getById(String profileId) async {
+    final response = await _client
+        .from(SupabaseTables.workers)
+        .select(_workerSelect)
+        .eq('profile_id', profileId)
+        .maybeSingle();
+
+    if (response == null) return null;
+    return _mapWorker(response);
+  }
+
+  Future<List<String>> getServiceNames(String workerId) async {
+    final services = await getServices(workerId);
+    return services.map((service) => service.name).toList();
+  }
+
+  Future<List<Service>> getServices(String workerId) async {
+    final workerServicesResponse = await _client
+        .from(_workerServicesTable)
         .select('service_id')
         .eq('worker_id', workerId);
 
-    return response.map((row) => row['service_id'] as String).toList();
+    final serviceIds = (workerServicesResponse as List)
+        .map((item) => (item as Map<String, dynamic>)['service_id'] as String?)
+        .whereType<String>()
+        .toSet()
+        .toList();
+
+    if (serviceIds.isEmpty) return const [];
+
+    final servicesResponse = await _client
+        .from(SupabaseTables.services)
+        .select()
+        .inFilter('id', serviceIds)
+        .eq('is_active', true)
+        .order('name', ascending: true);
+
+    final services = await ServiceStatsMapper.mapServicesWithStats(
+      _client,
+      (servicesResponse as List)
+          .map((item) => item as Map<String, dynamic>)
+          .toList(),
+    );
+
+    return services.where((service) => service.name.trim().isNotEmpty).toList();
   }
 
-  Worker _mapWorker(Map<String, dynamic> workerMap, Map<String, dynamic>? profile) {
-    // Get worker name from profile
-    String workerName = profile?['full_name'] as String? ?? 'Worker';
+  Worker _mapWorker(Map<String, dynamic> map) {
+    final profile = map['profile'] as Map<String, dynamic>? ?? const {};
 
-    // Get avatar URL from profile
-    String avatarUrl = profile?['avatar_url'] as String? ?? '';
-
-    // Get location from profile address or worker service_area
-    String location = profile?['address'] as String? ?? 
-                      workerMap['service_area'] as String? ?? '';
-
-    return Worker(
-      id: workerMap['profile_id'] as String? ?? '',
-      name: workerName,
-      jobTitle: workerMap['skills'] as String? ?? '',
-      description: workerMap['bio'] as String? ?? '',
-      rating: (workerMap['rating'] as num?)?.toDouble() ?? 0.0,
-      image: avatarUrl,
-      experienceYears: workerMap['years_experience'] as int? ?? 0,
-      clients: 0,
-      isVerified: true,
-      galleryImages: const [],
-      serviceIds: const [],
-      workingDays: 'Mon - Fri',
-      workingTime: '9:00 AM - 5:00 PM',
-      location: location,
-    );
+    return Worker.fromMap({
+      'id': map['profile_id'],
+      'bio': map['bio'],
+      'specialization': map['service_area'],
+      'rating': map['rating'],
+      'experience_years': map['years_experience'],
+      'total_clients': 0,
+      'is_verified': true,
+      'working_days': map['service_area'] ?? '',
+      'working_time': map['skills'] ?? '',
+      'gallery_images': const <String>[],
+      'service_ids': const <String>[],
+      'profile': profile,
+    });
   }
 }

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:prm_project/core/models/service.dart';
 import 'package:prm_project/core/models/worker.dart';
-import 'package:prm_project/features/service/widgets/workers_horizontal_list.dart';
-
+import 'package:prm_project/features/home/widgets/worker_card.dart';
+import 'package:prm_project/features/review/models/review_display_item.dart';
+import 'package:prm_project/features/review/models/review_list_args.dart';
 import '../viewmodel/service_detail_viewmodel.dart';
 import 'package:prm_project/features/service/widgets//bottom_bar.dart';
 import 'package:prm_project/features/service/widgets//details_card.dart';
@@ -28,11 +30,12 @@ class ServiceDetailScreen extends ConsumerWidget {
         data: (data) {
           final Service service = data.service;
           final List<Worker> workers = data.workers;
+          final List<ReviewDisplayItem> reviews = data.reviews;
 
           return Stack(
             children: [
-              _buildMainContent(context, service, workers),
-              Align(
+              _buildMainContent(context, service, workers, reviews),
+              const Align(
                 alignment: Alignment.bottomCenter,
                 child: BottomBar(serviceId: service.id),
               ),
@@ -47,6 +50,7 @@ class ServiceDetailScreen extends ConsumerWidget {
     BuildContext context,
     Service service,
     List<Worker> workers,
+    List<ReviewDisplayItem> reviews,
   ) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -64,9 +68,35 @@ class ServiceDetailScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
                 DetailsCard(service: service),
                 const SizedBox(height: 24),
-                WorkersHorizontalList(workers: workers),
+                if (workers.isNotEmpty) ...[
+                  const Text(
+                    'Top Workers',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 290,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: workers.length,
+                      itemBuilder: (context, index) =>
+                          WorkerCard(worker: workers[index]),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 24),
-                const ReviewSection(),
+                ReviewSection(
+                  reviews: reviews,
+                  onSeeAll: () {
+                    context.pushNamed(
+                      'reviews',
+                      extra: ReviewListArgs(
+                        title: 'Service Reviews',
+                        reviews: reviews,
+                      ),
+                    );
+                  },
+                ),
                 const SizedBox(height: 100),
               ],
             ),
