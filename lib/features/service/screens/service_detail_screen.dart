@@ -7,9 +7,9 @@ import 'package:prm_project/features/home/widgets/worker_card.dart';
 import 'package:prm_project/features/review/models/review_display_item.dart';
 import 'package:prm_project/features/review/models/review_list_args.dart';
 import '../viewmodel/service_detail_viewmodel.dart';
-import 'package:prm_project/features/service/widgets//bottom_bar.dart';
-import 'package:prm_project/features/service/widgets//details_card.dart';
-import 'package:prm_project/features/service/widgets//header.dart';
+import 'package:prm_project/features/service/widgets/bottom_bar.dart';
+import 'package:prm_project/features/service/widgets/details_card.dart';
+import 'package:prm_project/features/service/widgets/header.dart';
 import 'package:prm_project/features/service/widgets/info_section.dart';
 import 'package:prm_project/features/service/widgets/review_section.dart';
 
@@ -35,7 +35,7 @@ class ServiceDetailScreen extends ConsumerWidget {
           return Stack(
             children: [
               _buildMainContent(context, service, workers, reviews),
-              const Align(
+              Align(
                 alignment: Alignment.bottomCenter,
                 child: BottomBar(serviceId: service.id),
               ),

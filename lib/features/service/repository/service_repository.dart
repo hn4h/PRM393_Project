@@ -89,6 +89,37 @@ class ServiceRepository {
         .toList();
   }
 
+  Future<List<Service>> getServicesByWorkerId(String workerId) async {
+    final workerServicesResponse = await _client
+        .from(_workerServicesTable)
+        .select('service_id')
+        .eq('worker_id', workerId);
+
+    final serviceIds = (workerServicesResponse as List)
+        .map((item) => (item as Map<String, dynamic>)['service_id'] as String?)
+        .whereType<String>()
+        .toSet()
+        .toList();
+
+    if (serviceIds.isEmpty) return const [];
+
+    final servicesResponse = await _client
+        .from(SupabaseTables.services)
+        .select()
+        .inFilter('id', serviceIds)
+        .eq('is_active', true)
+        .order('name', ascending: true);
+
+    final services = await ServiceStatsMapper.mapServicesWithStats(
+      _client,
+      (servicesResponse as List)
+          .map((item) => item as Map<String, dynamic>)
+          .toList(),
+    );
+
+    return services.where((service) => service.name.trim().isNotEmpty).toList();
+  }
+
   Worker _mapWorker(Map<String, dynamic> map) {
     final profile = map['profile'] as Map<String, dynamic>? ?? const {};
 
