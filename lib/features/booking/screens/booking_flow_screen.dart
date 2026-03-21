@@ -10,6 +10,7 @@ import '../widgets/step_personal_info.dart';
 import '../widgets/step_payment.dart';
 import '../widgets/step_notes.dart';
 import '../viewmodel/booking_flow_viewmodel.dart';
+import '../../booking_history/viewmodel/booking_history_viewmodel.dart';
 
 class BookingFlowScreen extends ConsumerStatefulWidget {
   final String? serviceId;
@@ -119,9 +120,9 @@ class _BookingFlowScreenState extends ConsumerState<BookingFlowScreen> {
       case 3:
         return const StepNotes();
       case 4:
-        return const StepPayment();  // Payment first
+        return const StepPayment(); // Payment first
       case 5:
-        return const StepSummary();  // Summary last (after payment selection)
+        return const StepSummary(); // Summary last (after payment selection)
       default:
         return const SizedBox();
     }
@@ -157,9 +158,11 @@ class _BookingFlowScreenState extends ConsumerState<BookingFlowScreen> {
                   if (step < 5) {
                     notifier.nextStep();
                   } else {
-                    await notifier.checkout();
-
-                    if (context.mounted) {
+                    final booking = await notifier.checkout();
+                    if (booking != null && context.mounted) {
+                      await ref
+                          .read(bookingHistoryViewModelProvider.notifier)
+                          .refresh();
                       context.pushReplacementNamed('booking-confirmed');
                     }
                   }
