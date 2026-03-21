@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:prm_project/core/models/booking.dart';
-import 'package:prm_project/features/booking/repository/review_repository.dart'
-    as booking_review;
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:prm_project/features/review/viewmodels/review_viewmodel.dart';
 
 class CreateReviewScreen extends ConsumerStatefulWidget {
   const CreateReviewScreen({super.key, required this.booking});
@@ -28,6 +26,8 @@ class _CreateReviewScreenState extends ConsumerState<CreateReviewScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final submitState = ref.watch(createReviewControllerProvider);
+    final isSubmitting = _isSubmitting || submitState.isLoading;
 
     return Scaffold(
       appBar: AppBar(
@@ -86,7 +86,7 @@ class _CreateReviewScreenState extends ConsumerState<CreateReviewScreen> {
                   children: List.generate(5, (index) {
                     final starValue = index + 1;
                     return IconButton(
-                      onPressed: _isSubmitting
+                      onPressed: isSubmitting
                           ? null
                           : () {
                               setState(() {
@@ -121,7 +121,7 @@ class _CreateReviewScreenState extends ConsumerState<CreateReviewScreen> {
               const SizedBox(height: 10),
               TextField(
                 controller: _commentController,
-                enabled: !_isSubmitting,
+                enabled: !isSubmitting,
                 maxLines: 5,
                 decoration: InputDecoration(
                   hintText: 'Share your feedback',
@@ -145,7 +145,7 @@ class _CreateReviewScreenState extends ConsumerState<CreateReviewScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _isSubmitting ? null : _submitReview,
+                  onPressed: isSubmitting ? null : _submitReview,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF008DDA),
                     minimumSize: const Size(double.infinity, 54),
@@ -153,7 +153,7 @@ class _CreateReviewScreenState extends ConsumerState<CreateReviewScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: _isSubmitting
+                  child: isSubmitting
                       ? const SizedBox(
                           height: 20,
                           width: 20,
@@ -187,27 +187,15 @@ class _CreateReviewScreenState extends ConsumerState<CreateReviewScreen> {
       return;
     }
 
-    final workerId = widget.booking.workerId;
-    final customerId = Supabase.instance.client.auth.currentUser?.id;
-
-    if (workerId == null || customerId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Unable to submit review right now')),
-      );
-      return;
-    }
-
     setState(() {
       _isSubmitting = true;
     });
 
     try {
-      await ref.read(booking_review.reviewRepositoryProvider).createReview(
-            bookingId: widget.booking.id,
-            workerId: workerId,
-            customerId: customerId,
+      await ref.read(createReviewControllerProvider.notifier).submitReview(
+            booking: widget.booking,
             rating: _rating,
-            comment: _commentController.text.trim(),
+            comment: _commentController.text,
           );
 
       if (!mounted) return;

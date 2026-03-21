@@ -4,6 +4,7 @@ import 'package:prm_project/core/constants/supabase_tables.dart';
 import 'package:prm_project/core/models/service.dart';
 import 'package:prm_project/core/models/worker.dart';
 import 'package:prm_project/features/service/repository/service_stats_mapper.dart';
+import 'worker_stats_mapper.dart';
 
 part 'worker_repository.g.dart';
 
@@ -42,9 +43,10 @@ class WorkerRepository {
         .select(_workerSelect)
         .order('rating', ascending: false);
 
-    return (response as List)
+    final workers = (response as List)
         .map((item) => _mapWorker(item as Map<String, dynamic>))
         .toList();
+    return WorkerStatsMapper.applyRatings(_client, workers);
   }
 
   Future<List<Worker>> getPage({int limit = 10, int offset = 0}) async {
@@ -54,9 +56,10 @@ class WorkerRepository {
         .order('rating', ascending: false)
         .range(offset, offset + limit - 1);
 
-    return (response as List)
+    final workers = (response as List)
         .map((item) => _mapWorker(item as Map<String, dynamic>))
         .toList();
+    return WorkerStatsMapper.applyRatings(_client, workers);
   }
 
   Future<Worker?> getById(String profileId) async {
@@ -67,7 +70,10 @@ class WorkerRepository {
         .maybeSingle();
 
     if (response == null) return null;
-    return _mapWorker(response);
+    final workers = await WorkerStatsMapper.applyRatings(_client, [
+      _mapWorker(response),
+    ]);
+    return workers.isEmpty ? null : workers.first;
   }
 
   Future<List<String>> getServiceNames(String workerId) async {
@@ -127,9 +133,10 @@ class WorkerRepository {
         .inFilter('profile_id', workerIds)
         .order('rating', ascending: false);
 
-    return (response as List)
+    final workers = (response as List)
         .map((item) => _mapWorker(item as Map<String, dynamic>))
         .toList();
+    return WorkerStatsMapper.applyRatings(_client, workers);
   }
 
   Worker _mapWorker(Map<String, dynamic> map) {

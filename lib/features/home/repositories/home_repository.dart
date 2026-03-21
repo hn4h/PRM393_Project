@@ -1,8 +1,16 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:prm_project/core/models/service.dart';
 import 'package:prm_project/core/models/worker.dart';
 import 'package:prm_project/core/constants/supabase_tables.dart';
 import 'package:prm_project/features/service/repository/service_stats_mapper.dart';
+import 'package:prm_project/features/worker/repository/worker_stats_mapper.dart';
+
+part 'home_repository.g.dart';
+
+@riverpod
+HomeRepository homeRepository(HomeRepositoryRef ref) =>
+    HomeRepository(Supabase.instance.client);
 
 class HomeRepository {
   final SupabaseClient _client;
@@ -93,7 +101,7 @@ class HomeRepository {
 
     final serviceNamesByWorkerId = await _getServiceNamesByWorkerId(workerIds);
 
-    return workerRows
+    final workers = workerRows
         .map((item) => _mapWorker(
               item,
               serviceNames: serviceNamesByWorkerId[
@@ -101,6 +109,8 @@ class HomeRepository {
                   const [],
             ))
         .toList();
+
+    return WorkerStatsMapper.applyRatings(_client, workers);
   }
 
   Future<Map<String, List<String>>> _getServiceNamesByWorkerId(

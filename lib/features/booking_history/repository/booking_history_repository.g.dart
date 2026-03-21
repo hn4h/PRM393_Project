@@ -7,7 +7,7 @@ part of 'booking_history_repository.dart';
 // **************************************************************************
 
 String _$bookingHistoryRepositoryHash() =>
-    r'a9b7c5d3e1f2a0b8c6d4e2f0a1b2c3d4e5f6a7b8';
+    r'76e9602e17ad81dc5e2780b1d68591c91d6943f2';
 
 /// See also [bookingHistoryRepository].
 @ProviderFor(bookingHistoryRepository)
@@ -22,6 +22,8 @@ final bookingHistoryRepositoryProvider =
       allTransitiveDependencies: null,
     );
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 typedef BookingHistoryRepositoryRef =
     AutoDisposeProviderRef<BookingHistoryRepository>;
 // ignore_for_file: type=lint

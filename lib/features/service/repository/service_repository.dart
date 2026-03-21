@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:prm_project/core/constants/supabase_tables.dart';
 import 'package:prm_project/core/models/service.dart';
 import 'package:prm_project/core/models/worker.dart';
+import 'package:prm_project/features/worker/repository/worker_stats_mapper.dart';
 
 import 'service_stats_mapper.dart';
 
@@ -84,9 +85,10 @@ class ServiceRepository {
         .inFilter('profile_id', workerIds)
         .order('rating', ascending: false);
 
-    return (response as List)
+    final workers = (response as List)
         .map((item) => _mapWorker(item as Map<String, dynamic>))
         .toList();
+    return WorkerStatsMapper.applyRatings(_client, workers);
   }
 
   Future<List<Service>> getServicesByWorkerId(String workerId) async {

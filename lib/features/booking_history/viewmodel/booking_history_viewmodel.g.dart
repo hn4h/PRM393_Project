@@ -6,8 +6,27 @@ part of 'booking_history_viewmodel.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+String _$filteredBookingsHash() => r'2d0729bac6c7f0b95963720b8fb7ea1e0206c448';
+
+/// Filtered bookings (applies status filter and search)
+///
+/// Copied from [filteredBookings].
+@ProviderFor(filteredBookings)
+final filteredBookingsProvider = AutoDisposeProvider<List<Booking>>.internal(
+  filteredBookings,
+  name: r'filteredBookingsProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$filteredBookingsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef FilteredBookingsRef = AutoDisposeProviderRef<List<Booking>>;
 String _$bookingHistoryViewModelHash() =>
-    r'b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7';
+    r'a203176490cde4dcbeea39a1764163c82d4787a7';
 
 /// See also [BookingHistoryViewModel].
 @ProviderFor(BookingHistoryViewModel)
@@ -27,23 +46,5 @@ final bookingHistoryViewModelProvider =
 
 typedef _$BookingHistoryViewModel =
     AutoDisposeAsyncNotifier<BookingHistoryState>;
-
-String _$filteredBookingsHash() => r'c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8';
-
-/// Filtered bookings (applies status filter and search)
-///
-/// Copied from [filteredBookings].
-@ProviderFor(filteredBookings)
-final filteredBookingsProvider = AutoDisposeProvider<List<Booking>>.internal(
-  filteredBookings,
-  name: r'filteredBookingsProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$filteredBookingsHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef FilteredBookingsRef = AutoDisposeProviderRef<List<Booking>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

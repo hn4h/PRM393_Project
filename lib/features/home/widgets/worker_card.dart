@@ -41,7 +41,6 @@ class WorkerCard extends StatelessWidget {
                 ),
               ),
             ),
-
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -84,24 +83,26 @@ class WorkerCard extends StatelessWidget {
                       ),
                     ),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.star,
-                              color: Colors.orange,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              "(${worker.rating})",
-                              style: TextStyle(
-                                color: colorScheme.onSurfaceVariant,
+                        Expanded(
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.star,
+                                color: Colors.orange,
+                                size: 20,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 4),
+                              Text(
+                                '(${worker.rating.toStringAsFixed(1)})',
+                                style: TextStyle(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
+                        const SizedBox(width: 8),
                         OutlinedButton(
                           onPressed: () => context.push('/worker/${worker.id}'),
                           style: OutlinedButton.styleFrom(
@@ -109,10 +110,12 @@ class WorkerCard extends StatelessWidget {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            minimumSize: const Size(0, 36),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
                           child: const Text(
-                            "View detail",
+                            'View detail',
                             style: TextStyle(color: Colors.blue),
                           ),
                         ),

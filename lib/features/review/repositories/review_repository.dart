@@ -1,8 +1,10 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:prm_project/core/constants/supabase_tables.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/review_display_item.dart';
+
+part 'review_repository.g.dart';
 
 class ReviewStats {
   const ReviewStats({
@@ -14,13 +16,9 @@ class ReviewStats {
   final int reviewCount;
 }
 
-final reviewRepositoryProvider = Provider<ReviewRepository>((ref) {
-  return ReviewRepository(Supabase.instance.client);
-});
-
-final latestReviewsProvider = FutureProvider<List<ReviewDisplayItem>>((ref) {
-  return ref.read(reviewRepositoryProvider).getLatestReviews(limit: 10);
-});
+@riverpod
+ReviewRepository reviewRepository(ReviewRepositoryRef ref) =>
+    ReviewRepository(Supabase.instance.client);
 
 class ReviewRepository {
   const ReviewRepository(this._client);

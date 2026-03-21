@@ -8,7 +8,7 @@ import 'package:prm_project/features/home/widgets/section-header.dart';
 import 'package:prm_project/features/home/widgets/service_card.dart';
 import 'package:prm_project/features/home/widgets/worker_card.dart';
 import 'package:prm_project/features/review/models/review_list_args.dart';
-import 'package:prm_project/features/review/repositories/review_repository.dart';
+import 'package:prm_project/features/review/viewmodels/review_viewmodel.dart';
 import 'package:prm_project/features/review/widgets/review_section.dart'
     as review_feature;
 
@@ -47,7 +47,7 @@ class HomeScreen extends ConsumerWidget {
                 CustomSearchBar(
                   hintText: 'Search services or workers',
                   onChanged: (value) {
-                    ref.read(homeSearchQueryProvider.notifier).state = value;
+                    ref.read(homeSearchQueryProvider.notifier).setQuery(value);
                   },
                 ),
                 const SizedBox(height: 24),

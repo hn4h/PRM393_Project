@@ -1,27 +1,34 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:prm_project/core/models/service.dart';
 import 'package:prm_project/core/models/worker.dart';
 import 'package:prm_project/features/home/repositories/home_repository.dart';
-import 'package:prm_project/features/worker/repository/worker_repository.dart';
 
-final homeRepositoryProvider = Provider<HomeRepository>((ref) {
-  return HomeRepository(Supabase.instance.client);
-});
+part 'home_viewmodel.g.dart';
 
-final activeServicesProvider = FutureProvider<List<Service>>((ref) async {
+@riverpod
+Future<List<Service>> activeServices(ActiveServicesRef ref) async {
   final repo = ref.watch(homeRepositoryProvider);
   return repo.getActiveServices();
-});
+}
 
-final topWorkersProvider = FutureProvider<List<Worker>>((ref) async {
+@riverpod
+Future<List<Worker>> topWorkers(TopWorkersRef ref) async {
   final repo = ref.watch(homeRepositoryProvider);
   return repo.getTopWorkers();
-});
+}
 
-final homeSearchQueryProvider = StateProvider<String>((ref) => '');
+@riverpod
+class HomeSearchQuery extends _$HomeSearchQuery {
+  @override
+  String build() => '';
 
-final searchedServicesProvider = FutureProvider<List<Service>>((ref) async {
+  void setQuery(String value) {
+    state = value;
+  }
+}
+
+@riverpod
+Future<List<Service>> searchedServices(SearchedServicesRef ref) async {
   final query = ref.watch(homeSearchQueryProvider).trim().toLowerCase();
   final services = await ref.watch(activeServicesProvider.future);
 
@@ -30,9 +37,10 @@ final searchedServicesProvider = FutureProvider<List<Service>>((ref) async {
   return services.where((service) {
     return service.name.toLowerCase().contains(query);
   }).toList();
-});
+}
 
-final searchedWorkersProvider = FutureProvider<List<Worker>>((ref) async {
+@riverpod
+Future<List<Worker>> searchedWorkers(SearchedWorkersRef ref) async {
   final query = ref.watch(homeSearchQueryProvider).trim().toLowerCase();
   final workers = await ref.watch(topWorkersProvider.future);
 
@@ -41,4 +49,4 @@ final searchedWorkersProvider = FutureProvider<List<Worker>>((ref) async {
   return workers.where((worker) {
     return worker.name.toLowerCase().contains(query);
   }).toList();
-});
+}
