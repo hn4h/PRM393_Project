@@ -61,6 +61,29 @@ class OtherServiceTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Row(
+                  children: [
+                    const Icon(Icons.star, color: Colors.orange, size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      service.rating.toStringAsFixed(1),
+                      style: TextStyle(
+                        color: colorScheme.onSurface,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '(${service.reviewCount})',
+                      style: TextStyle(
+                        color: colorScheme.onSurfaceVariant,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Flexible(

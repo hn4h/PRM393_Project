@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prm_project/core/models/worker.dart';
+import 'package:prm_project/core/utils/image_helper.dart';
 
 class Header extends StatelessWidget {
   final Worker worker;
@@ -18,12 +19,12 @@ class Header extends StatelessWidget {
             backgroundColor: Colors.grey.shade200,
             child: ClipOval(
               child: hasAvatar
-                  ? Image.network(
-                      worker.image,
+                  ? ImageHelper.loadNetworkImage(
+                      imageUrl: worker.image,
                       width: 88,
                       height: 88,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(
+                      errorWidget: const Icon(
                         Icons.person,
                         color: Colors.grey,
                         size: 36,

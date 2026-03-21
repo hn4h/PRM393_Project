@@ -1,9 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:prm_project/core/constants/supabase_tables.dart';
+import 'package:prm_project/core/models/service.dart';
 import 'package:prm_project/core/models/worker.dart';
-
-import '../viewmodel/worker_review_item.dart';
+import 'package:prm_project/features/service/repository/service_stats_mapper.dart';
 
 part 'worker_repository.g.dart';
 
@@ -15,6 +15,7 @@ class WorkerRepository {
   const WorkerRepository(this._client);
 
   final SupabaseClient _client;
+  static const _workerServicesTable = 'worker_services';
 
   static const _workerSelect = '''
     profile_id,
@@ -34,19 +35,26 @@ class WorkerRepository {
     )
   ''';
 
-  static const _reviewSelect = '''
-    id,
-    customer_id,
-    rating,
-    comment,
-    created_at
-  ''';
-
   Future<List<Worker>> getAll() async {
     final response = await _client
         .from(SupabaseTables.workers)
         .select(_workerSelect)
         .order('rating', ascending: false);
+
+    return (response as List)
+        .map((item) => _mapWorker(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<Worker>> getPage({
+    int limit = 10,
+    int offset = 0,
+  }) async {
+    final response = await _client
+        .from(SupabaseTables.workers)
+        .select(_workerSelect)
+        .order('rating', ascending: false)
+        .range(offset, offset + limit - 1);
 
     return (response as List)
         .map((item) => _mapWorker(item as Map<String, dynamic>))
@@ -64,43 +72,42 @@ class WorkerRepository {
     return _mapWorker(response);
   }
 
-  Future<List<WorkerReviewItem>> getReviews(String workerId) async {
-    final response = await _client
-        .from(SupabaseTables.reviews)
-        .select(_reviewSelect)
-        .eq('worker_id', workerId)
-        .order('created_at', ascending: false)
-        .limit(3);
+  Future<List<String>> getServiceNames(String workerId) async {
+    final services = await getServices(workerId);
+    return services.map((service) => service.name).toList();
+  }
 
-    final rows = (response as List)
-        .map((item) => item as Map<String, dynamic>)
-        .toList();
+  Future<List<Service>> getServices(String workerId) async {
+    final workerServicesResponse = await _client
+        .from(_workerServicesTable)
+        .select('service_id')
+        .eq('worker_id', workerId);
 
-    final customerIds = rows
-        .map((row) => row['customer_id'] as String?)
+    final serviceIds = (workerServicesResponse as List)
+        .map((item) => (item as Map<String, dynamic>)['service_id'] as String?)
         .whereType<String>()
         .toSet()
         .toList();
 
-    Map<String, Map<String, dynamic>> profilesById = {};
-    if (customerIds.isNotEmpty) {
-      final profilesResponse = await _client
-          .from(SupabaseTables.profiles)
-          .select('id, full_name, avatar_url')
-          .inFilter('id', customerIds);
+    if (serviceIds.isEmpty) return const [];
 
-      profilesById = {
-        for (final profile in profilesResponse as List)
-          (profile as Map<String, dynamic>)['id'] as String: profile,
-      };
-    }
+    final servicesResponse = await _client
+        .from(SupabaseTables.services)
+        .select()
+        .inFilter('id', serviceIds)
+        .eq('is_active', true)
+        .order('name', ascending: true);
 
-    return rows.map((row) {
-      final customerId = row['customer_id'] as String?;
-      final customerProfile =
-          customerId != null ? profilesById[customerId] : null;
-      return WorkerReviewItem.fromMap(row, customerProfile: customerProfile);
-    }).toList();
+    final services = await ServiceStatsMapper.mapServicesWithStats(
+      _client,
+      (servicesResponse as List)
+          .map((item) => item as Map<String, dynamic>)
+          .toList(),
+    );
+
+    return services
+        .where((service) => service.name.trim().isNotEmpty)
+        .toList();
   }
 
   Worker _mapWorker(Map<String, dynamic> map) {

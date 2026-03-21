@@ -4,7 +4,7 @@ import 'package:prm_project/core/constants/supabase_tables.dart';
 import 'package:prm_project/core/models/service.dart';
 import 'package:prm_project/core/models/worker.dart';
 
-import '../viewmodel/service_review_item.dart';
+import 'service_stats_mapper.dart';
 
 part 'service_repository.g.dart';
 
@@ -16,6 +16,7 @@ class ServiceRepository {
   const ServiceRepository(this._client);
 
   final SupabaseClient _client;
+  static const _workerServicesTable = 'worker_services';
 
   static const _workerSelect = '''
     profile_id,
@@ -42,9 +43,10 @@ class ServiceRepository {
         .eq('is_active', true)
         .order('created_at', ascending: false);
 
-    return (response as List)
-        .map((item) => Service.fromMap(item as Map<String, dynamic>))
-        .toList();
+    return ServiceStatsMapper.mapServicesWithStats(
+      _client,
+      (response as List).map((item) => item as Map<String, dynamic>).toList(),
+    );
   }
 
   Future<Service?> getById(String id) async {
@@ -55,17 +57,21 @@ class ServiceRepository {
         .maybeSingle();
 
     if (response == null) return null;
-    return Service.fromMap(response);
+    final services = await ServiceStatsMapper.mapServicesWithStats(
+      _client,
+      [response],
+    );
+    return services.first;
   }
 
   Future<List<Worker>> getWorkersForService(String serviceId) async {
-    final bookingsResponse = await _client
-        .from(SupabaseTables.bookings)
+    final workerServicesResponse = await _client
+        .from(_workerServicesTable)
         .select('worker_id')
         .eq('service_id', serviceId)
         .not('worker_id', 'is', null);
 
-    final workerIds = (bookingsResponse as List)
+    final workerIds = (workerServicesResponse as List)
         .map((item) => (item as Map<String, dynamic>)['worker_id'] as String?)
         .whereType<String>()
         .toSet()
@@ -82,58 +88,6 @@ class ServiceRepository {
     return (response as List)
         .map((item) => _mapWorker(item as Map<String, dynamic>))
         .toList();
-  }
-
-  Future<List<ServiceReviewItem>> getReviewsForService(String serviceId) async {
-    final bookingsResponse = await _client
-        .from(SupabaseTables.bookings)
-        .select('id')
-        .eq('service_id', serviceId);
-
-    final bookingIds = (bookingsResponse as List)
-        .map((item) => (item as Map<String, dynamic>)['id'] as String?)
-        .whereType<String>()
-        .toSet()
-        .toList();
-
-    if (bookingIds.isEmpty) return const [];
-
-    final reviewsResponse = await _client
-        .from(SupabaseTables.reviews)
-        .select('id, customer_id, rating, comment, created_at')
-        .inFilter('booking_id', bookingIds)
-        .order('created_at', ascending: false)
-        .limit(5);
-
-    final reviewRows = (reviewsResponse as List)
-        .map((item) => item as Map<String, dynamic>)
-        .toList();
-
-    final customerIds = reviewRows
-        .map((row) => row['customer_id'] as String?)
-        .whereType<String>()
-        .toSet()
-        .toList();
-
-    Map<String, Map<String, dynamic>> profilesById = {};
-    if (customerIds.isNotEmpty) {
-      final profilesResponse = await _client
-          .from(SupabaseTables.profiles)
-          .select('id, full_name, avatar_url')
-          .inFilter('id', customerIds);
-
-      profilesById = {
-        for (final profile in profilesResponse as List)
-          (profile as Map<String, dynamic>)['id'] as String: profile,
-      };
-    }
-
-    return reviewRows.map((row) {
-      final customerId = row['customer_id'] as String?;
-      final customerProfile =
-          customerId != null ? profilesById[customerId] : null;
-      return ServiceReviewItem.fromMap(row, customerProfile: customerProfile);
-    }).toList();
   }
 
   Worker _mapWorker(Map<String, dynamic> map) {

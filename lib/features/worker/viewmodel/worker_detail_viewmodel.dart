@@ -1,34 +1,39 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:prm_project/core/models/service.dart';
 import 'package:prm_project/core/models/worker.dart';
+import 'package:prm_project/features/review/models/review_display_item.dart';
+import 'package:prm_project/features/review/repositories/review_repository.dart';
 import 'package:prm_project/features/worker/repository/worker_repository.dart';
-
-import 'worker_review_item.dart';
 
 part 'worker_detail_viewmodel.g.dart';
 
 class WorkerDetailState {
   final bool isLoading;
   final Worker? worker;
-  final List<WorkerReviewItem> reviews;
+  final List<ReviewDisplayItem> reviews;
+  final List<Service> services;
   final String? error;
 
   WorkerDetailState({
     this.isLoading = false,
     this.worker,
     this.reviews = const [],
+    this.services = const [],
     this.error,
   });
 
   WorkerDetailState copyWith({
     bool? isLoading,
     Worker? worker,
-    List<WorkerReviewItem>? reviews,
+    List<ReviewDisplayItem>? reviews,
+    List<Service>? services,
     String? error,
   }) {
     return WorkerDetailState(
       isLoading: isLoading ?? this.isLoading,
       worker: worker ?? this.worker,
       reviews: reviews ?? this.reviews,
+      services: services ?? this.services,
       error: error,
     );
   }
@@ -57,17 +62,22 @@ class WorkerDetailViewModel extends _$WorkerDetailViewModel {
           isLoading: false,
           worker: null,
           reviews: const [],
+          services: const [],
           error: "Worker not found",
         );
         return;
       }
 
-      final reviews = await repo.getReviews(workerId);
+      final reviews = await ref
+          .read(reviewRepositoryProvider)
+          .getWorkerReviews(workerId, limit: 10);
+      final services = await repo.getServices(workerId);
 
       state = WorkerDetailState(
         isLoading: false,
         worker: worker,
         reviews: reviews,
+        services: services,
         error: null,
       );
     } catch (e) {
@@ -75,6 +85,7 @@ class WorkerDetailViewModel extends _$WorkerDetailViewModel {
         isLoading: false,
         worker: null,
         reviews: const [],
+        services: const [],
         error: e.toString(),
       );
     }

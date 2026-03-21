@@ -14,6 +14,8 @@ import 'package:prm_project/features/discover/screens/service_discover_screen.da
 import 'package:prm_project/features/settings/screens/settings_screen.dart';
 import 'package:prm_project/features/worker/screens/worker_detail.dart';
 import 'package:prm_project/features/service/screens/service_detail_screen.dart';
+import 'package:prm_project/features/review/models/review_list_args.dart';
+import 'package:prm_project/features/review/screens/review_list_screen.dart';
 import 'package:prm_project/features/booking/screens/booking_confirmed_screen.dart';
 import 'package:prm_project/features/booking/screens/booking_flow_screen.dart';
 import 'package:prm_project/features/booking/screens/booking_detail_view_screen.dart';
@@ -152,6 +154,14 @@ class AppRouter {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return ServiceDetailScreen(serviceId: id);
+        },
+      ),
+      GoRoute(
+        path: '/reviews',
+        name: 'reviews',
+        builder: (_, state) {
+          final args = state.extra as ReviewListArgs;
+          return ReviewListScreen(args: args);
         },
       ),
 

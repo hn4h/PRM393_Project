@@ -111,6 +111,44 @@
         'workerIds': workerIds,
       };
     }
+
+    Service copyWith({
+      String? id,
+      String? name,
+      String? description,
+      double? price,
+      String? categoryId,
+      String? image,
+      double? rating,
+      int? reviewCount,
+      int? bookingCount,
+      List<String>? images,
+      List<String>? features,
+      bool? isFeatured,
+      bool? isPopular,
+      int? durationMinutes,
+      List<String>? serviceTags,
+      List<String>? workerIds,
+    }) {
+      return Service(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        description: description ?? this.description,
+        price: price ?? this.price,
+        categoryId: categoryId ?? this.categoryId,
+        image: image ?? this.image,
+        rating: rating ?? this.rating,
+        reviewCount: reviewCount ?? this.reviewCount,
+        bookingCount: bookingCount ?? this.bookingCount,
+        images: images ?? this.images,
+        features: features ?? this.features,
+        isFeatured: isFeatured ?? this.isFeatured,
+        isPopular: isPopular ?? this.isPopular,
+        durationMinutes: durationMinutes ?? this.durationMinutes,
+        serviceTags: serviceTags ?? this.serviceTags,
+        workerIds: workerIds ?? this.workerIds,
+      );
+    }
   }
 
   // Example services for demo

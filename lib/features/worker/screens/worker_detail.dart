@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:prm_project/features/home/widgets/service_card.dart';
 
 import '../viewmodel/worker_detail_viewmodel.dart';
 import '../widgets/header.dart';
@@ -28,12 +29,6 @@ class WorkerDetailScreen extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => context.pop(),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.ios_share, color: Colors.black),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: SafeArea(
         child: Builder(
@@ -65,8 +60,34 @@ class WorkerDetailScreen extends ConsumerWidget {
                         const SizedBox(height: 20),
                         About(worker: worker),
                         const SizedBox(height: 20),
-                        ScheduleLocationCard(worker: worker),
+                        ScheduleLocationCard(
+                          worker: worker,
+                          serviceNames: state.services
+                              .map((service) => service.name)
+                              .toList(),
+                        ),
                         const SizedBox(height: 20),
+                        if (state.services.isNotEmpty) ...[
+                          const Text(
+                            'Services',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            height: 270,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: state.services.length,
+                              itemBuilder: (context, index) => ServiceCard(
+                                service: state.services[index],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
                         ReviewsPreview(reviews: state.reviews),
                       ],
                     ),

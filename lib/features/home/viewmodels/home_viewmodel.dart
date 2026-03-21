@@ -18,31 +18,26 @@ final topWorkersProvider = FutureProvider<List<Worker>>((ref) async {
   return repo.getTopWorkers();
 });
 
-final searchQueryProvider = StateProvider<String>((ref) => '');
+final homeSearchQueryProvider = StateProvider<String>((ref) => '');
 
 final searchedServicesProvider = FutureProvider<List<Service>>((ref) async {
-  final query = ref.watch(searchQueryProvider).trim().toLowerCase();
+  final query = ref.watch(homeSearchQueryProvider).trim().toLowerCase();
   final services = await ref.watch(activeServicesProvider.future);
 
   if (query.isEmpty) return services;
 
   return services.where((service) {
-    return service.name.toLowerCase().contains(query) ||
-        service.description.toLowerCase().contains(query) ||
-        service.categoryId.toLowerCase().contains(query);
+    return service.name.toLowerCase().contains(query);
   }).toList();
 });
 
 final searchedWorkersProvider = FutureProvider<List<Worker>>((ref) async {
-  final query = ref.watch(searchQueryProvider).trim().toLowerCase();
+  final query = ref.watch(homeSearchQueryProvider).trim().toLowerCase();
   final workers = await ref.watch(topWorkersProvider.future);
 
   if (query.isEmpty) return workers;
 
   return workers.where((worker) {
-    return worker.name.toLowerCase().contains(query) ||
-        worker.description.toLowerCase().contains(query) ||
-        worker.jobTitle.toLowerCase().contains(query) ||
-        worker.location.toLowerCase().contains(query);
+    return worker.name.toLowerCase().contains(query);
   }).toList();
 });

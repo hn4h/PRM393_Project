@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:prm_project/features/home/viewmodels/home_viewmodel.dart';
 import 'package:prm_project/features/home/widgets/header.dart';
-import 'package:prm_project/features/home/widgets/popular-service-card.dart';
 import 'package:prm_project/features/home/widgets/search-bar.dart';
 import 'package:prm_project/features/home/widgets/section-header.dart';
+import 'package:prm_project/features/home/widgets/service_card.dart';
 import 'package:prm_project/features/home/widgets/worker_card.dart';
+import 'package:prm_project/features/review/models/review_list_args.dart';
+import 'package:prm_project/features/review/repositories/review_repository.dart';
+import 'package:prm_project/features/review/widgets/review_section.dart'
+    as review_feature;
 
 import 'all_services_screen.dart';
 import 'all_workers_screen.dart';
@@ -18,6 +23,7 @@ class HomeScreen extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final allServicesAsync = ref.watch(searchedServicesProvider);
     final topWorkersAsync = ref.watch(searchedWorkersProvider);
+    final latestReviewsAsync = ref.watch(latestReviewsProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -39,28 +45,37 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 CustomSearchBar(
+                  hintText: 'Search services or workers',
                   onChanged: (value) {
-                    ref.read(searchQueryProvider.notifier).state = value;
+                    ref.read(homeSearchQueryProvider.notifier).state = value;
                   },
                 ),
                 const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildCategoryItem(context, Icons.ac_unit, 'AC Repair'),
-                    _buildCategoryItem(context, Icons.kitchen, 'Appliance'),
-                    _buildCategoryItem(
-                      context,
-                      Icons.cleaning_services,
-                      'Cleaning',
-                    ),
-                    _buildCategoryItem(
-                      context,
-                      Icons.arrow_forward,
-                      'More',
-                      isMore: true,
-                    ),
-                  ],
+                SizedBox(
+                  height: 52,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      _buildHighlightChip(
+                        context,
+                        icon: Icons.home_repair_service_outlined,
+                        label: 'Home Repair',
+                        accentColor: const Color(0xFF2F80ED),
+                      ),
+                      _buildHighlightChip(
+                        context,
+                        icon: Icons.flash_on_outlined,
+                        label: 'Fast Support',
+                        accentColor: const Color(0xFFF2994A),
+                      ),
+                      _buildHighlightChip(
+                        context,
+                        icon: Icons.verified_outlined,
+                        label: 'Trusted Service',
+                        accentColor: const Color(0xFF6C63FF),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 32),
                 SectionHeader(
@@ -89,7 +104,7 @@ class HomeScreen extends ConsumerWidget {
                             scrollDirection: Axis.horizontal,
                             itemCount: services.length,
                             itemBuilder: (context, index) =>
-                                PopularServiceCard(service: services[index]),
+                                ServiceCard(service: services[index]),
                           ),
                   ),
                 ),
@@ -125,6 +140,30 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 32),
+                latestReviewsAsync.when(
+                  loading: () => const SizedBox(
+                    height: 220,
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (err, _) => SizedBox(
+                    height: 220,
+                    child: Center(child: Text('Error: $err')),
+                  ),
+                  data: (reviews) => review_feature.ReviewSection(
+                    title: 'Latest Reviews',
+                    reviews: reviews,
+                    onSeeAll: () {
+                      context.pushNamed(
+                        'reviews',
+                        extra: ReviewListArgs(
+                          title: 'All Reviews',
+                          reviews: reviews,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 32),
               ],
             ),
           ),
@@ -133,29 +172,47 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildCategoryItem(
-    BuildContext context,
-    IconData icon,
-    String label, {
-    bool isMore = false,
+  Widget _buildHighlightChip(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color accentColor,
   }) {
-    return Column(
-      children: [
-        Icon(
-          icon,
-          color: isMore ? Colors.blue : Colors.blue.shade400,
-          size: 36,
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: colorScheme.outlineVariant),
         ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 14,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: accentColor.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: accentColor, size: 16),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+                color: colorScheme.onSurface,
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

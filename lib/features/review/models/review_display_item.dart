@@ -1,11 +1,12 @@
-class WorkerReviewItem {
-  const WorkerReviewItem({
+class ReviewDisplayItem {
+  const ReviewDisplayItem({
     required this.id,
     required this.customerName,
     required this.customerAvatarUrl,
     required this.rating,
     required this.comment,
     required this.createdAt,
+    this.serviceName = '',
   });
 
   final String id;
@@ -14,14 +15,16 @@ class WorkerReviewItem {
   final double rating;
   final String comment;
   final DateTime? createdAt;
+  final String serviceName;
 
-  factory WorkerReviewItem.fromMap(
+  factory ReviewDisplayItem.fromMap(
     Map<String, dynamic> map, {
     Map<String, dynamic>? customerProfile,
+    String serviceName = '',
   }) {
-    final customer = customerProfile ?? const {};
+    final customer = customerProfile ?? const <String, dynamic>{};
 
-    return WorkerReviewItem(
+    return ReviewDisplayItem(
       id: map['id'] as String? ?? '',
       customerName: customer['full_name'] as String? ?? 'Customer',
       customerAvatarUrl: customer['avatar_url'] as String? ?? '',
@@ -30,6 +33,7 @@ class WorkerReviewItem {
       createdAt: map['created_at'] != null
           ? DateTime.tryParse(map['created_at'] as String)
           : null,
+      serviceName: serviceName,
     );
   }
 }

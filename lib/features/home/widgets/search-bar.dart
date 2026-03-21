@@ -4,9 +4,11 @@ class CustomSearchBar extends StatelessWidget {
   const CustomSearchBar({
     Key? key,
     this.onChanged,
+    this.hintText = 'Search',
   }) : super(key: key);
 
   final ValueChanged<String>? onChanged;
+  final String hintText;
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +16,7 @@ class CustomSearchBar extends StatelessWidget {
     return TextField(
       onChanged: onChanged,
       decoration: InputDecoration(
-        hintText: "Search services or workers",
+        hintText: hintText,
         hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
         prefixIcon: Icon(Icons.search, color: colorScheme.onSurface, size: 28),
         border: OutlineInputBorder(

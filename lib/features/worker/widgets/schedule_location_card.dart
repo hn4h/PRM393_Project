@@ -3,10 +3,12 @@ import 'package:prm_project/core/models/worker.dart';
 
 class ScheduleLocationCard extends StatelessWidget {
   final Worker worker;
+  final List<String> serviceNames;
 
   const ScheduleLocationCard({
     super.key,
     required this.worker,
+    this.serviceNames = const [],
   });
 
   Widget _row(IconData icon, String label, String value) {
