@@ -2,9 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
-import 'package:prm_project/core/models/booking.dart';
 import 'package:prm_project/core/enums/booking_status.dart';
+import 'package:prm_project/core/models/booking.dart';
+import 'package:prm_project/features/booking/repository/review_repository.dart'
+    as booking_review;
+import 'package:prm_project/features/review/screens/create_review_screen.dart';
+
 import '../viewmodel/booking_history_viewmodel.dart';
+
+final bookingReviewExistsProvider =
+    FutureProvider.family<bool, String>((ref, bookingId) {
+  return ref.read(booking_review.reviewRepositoryProvider).hasReview(bookingId);
+});
 
 class BookingDetailManagementScreen extends ConsumerWidget {
   final Booking booking;
@@ -24,7 +33,7 @@ class BookingDetailManagementScreen extends ConsumerWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          "Booking Detail",
+          'Booking Detail',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
@@ -39,24 +48,24 @@ class BookingDetailManagementScreen extends ConsumerWidget {
                   _buildWorkerHeader(),
                   const SizedBox(height: 24),
                   const Text(
-                    "Service",
+                    'Service',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
                   _buildServiceItem(
                     booking.serviceName ?? 'Service',
-                    "\$${booking.totalPrice.toStringAsFixed(2)}",
+                    '\$${booking.totalPrice.toStringAsFixed(2)}',
                   ),
                   const Divider(height: 40),
                   const Text(
-                    "Contact Information",
+                    'Contact Information',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
                   _buildContactBox(),
                   const SizedBox(height: 24),
                   const Text(
-                    "Details",
+                    'Details',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
@@ -160,12 +169,12 @@ class BookingDetailManagementScreen extends ConsumerWidget {
       ),
       child: Column(
         children: [
-          _buildRow("Name", booking.contactName ?? 'N/A'),
-          _buildRow("Phone", booking.contactPhone ?? 'N/A'),
+          _buildRow('Name', booking.contactName ?? 'N/A'),
+          _buildRow('Phone', booking.contactPhone ?? 'N/A'),
           if (booking.address != null && booking.address!.isNotEmpty)
-            _buildRow("Address", booking.address!, isMultiLine: true),
+            _buildRow('Address', booking.address!, isMultiLine: true),
           if (booking.notes != null && booking.notes!.isNotEmpty)
-            _buildRow("Notes", booking.notes!, isMultiLine: true),
+            _buildRow('Notes', booking.notes!, isMultiLine: true),
         ],
       ),
     );
@@ -185,25 +194,25 @@ class BookingDetailManagementScreen extends ConsumerWidget {
       child: Column(
         children: [
           _buildRow(
-            "Status",
+            'Status',
             booking.statusText,
             valueColor: booking.statusColor,
           ),
-          _buildRow("Date", DateFormat('EEE, d MMM yyyy').format(scheduled)),
-          _buildRow("Time", DateFormat('hh:mm a').format(scheduled)),
-          _buildRow("Duration", "${booking.durationMinutes} min"),
+          _buildRow('Date', DateFormat('EEE, d MMM yyyy').format(scheduled)),
+          _buildRow('Time', DateFormat('hh:mm a').format(scheduled)),
+          _buildRow('Duration', '${booking.durationMinutes} min'),
           _buildRow(
-            "Payment Method",
+            'Payment Method',
             _formatPaymentMethod(booking.paymentMethod),
           ),
           const Divider(height: 24),
           _buildRow(
-            "Service Price",
-            "\$${booking.totalPrice.toStringAsFixed(2)}",
+            'Service Price',
+            '\$${booking.totalPrice.toStringAsFixed(2)}',
           ),
-          _buildRow("Service Fee (5%)", "\$${serviceFee.toStringAsFixed(2)}"),
+          _buildRow('Service Fee (5%)', '\$${serviceFee.toStringAsFixed(2)}'),
           const Divider(height: 24),
-          _buildRow("Total", "\$${total.toStringAsFixed(2)}", isTotal: true),
+          _buildRow('Total', '\$${total.toStringAsFixed(2)}', isTotal: true),
         ],
       ),
     );
@@ -261,33 +270,78 @@ class BookingDetailManagementScreen extends ConsumerWidget {
   }
 
   Widget _buildActionButton(BuildContext context, WidgetRef ref) {
-    // No action for final states
     if (booking.status == BookingStatus.cancelled ||
         booking.status == BookingStatus.rejected ||
         booking.status == BookingStatus.accepted) {
       return const SizedBox.shrink();
     }
 
-    String buttonText = "";
+    if (booking.status == BookingStatus.completed) {
+      final reviewExistsAsync = ref.watch(bookingReviewExistsProvider(booking.id));
+
+      return reviewExistsAsync.when(
+        loading: () => _buildBottomButton(
+          context,
+          buttonText: 'Checking Review...',
+          buttonColor: const Color(0xFFB0BEC5),
+          onPressed: null,
+        ),
+        error: (_, __) => _buildBottomButton(
+          context,
+          buttonText: 'Add Review',
+          buttonColor: const Color(0xFF008DDA),
+          onPressed: () => _handleCompletedAction(context, ref),
+        ),
+        data: (exists) {
+          if (exists) {
+            return _buildBottomButton(
+              context,
+              buttonText: 'Review Submitted',
+              buttonColor: Colors.green.shade600,
+              onPressed: null,
+            );
+          }
+
+          return _buildBottomButton(
+            context,
+            buttonText: 'Add Review',
+            buttonColor: const Color(0xFF008DDA),
+            onPressed: () => _handleCompletedAction(context, ref),
+          );
+        },
+      );
+    }
+
+    String buttonText = '';
     Color buttonColor = const Color(0xFF008DDA);
 
     switch (booking.status) {
       case BookingStatus.pending:
-        buttonText = "Cancel Booking";
+        buttonText = 'Cancel Booking';
         buttonColor = Colors.red.shade400;
         break;
       case BookingStatus.inProgress:
-        buttonText = "Mark as Completed";
+        buttonText = 'Mark as Completed';
         buttonColor = Colors.green.shade600;
-        break;
-      case BookingStatus.completed:
-        buttonText = "Add Review";
-        buttonColor = const Color(0xFF008DDA);
         break;
       default:
         return const SizedBox.shrink();
     }
 
+    return _buildBottomButton(
+      context,
+      buttonText: buttonText,
+      buttonColor: buttonColor,
+      onPressed: () => _handleAction(context, ref, booking.status),
+    );
+  }
+
+  Widget _buildBottomButton(
+    BuildContext context, {
+    required String buttonText,
+    required Color buttonColor,
+    required VoidCallback? onPressed,
+  }) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
       decoration: const BoxDecoration(
@@ -295,9 +349,10 @@ class BookingDetailManagementScreen extends ConsumerWidget {
         border: Border(top: BorderSide(color: Color(0xFFF1F4F8))),
       ),
       child: ElevatedButton(
-        onPressed: () => _handleAction(context, ref, booking.status),
+        onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: buttonColor,
+          disabledBackgroundColor: buttonColor,
           minimumSize: const Size(double.infinity, 54),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -326,18 +381,18 @@ class BookingDetailManagementScreen extends ConsumerWidget {
         _showConfirmationDialog(
           context,
           ref,
-          "Cancel Booking",
-          "Are you sure you want to cancel this booking?",
+          'Cancel Booking',
+          'Are you sure you want to cancel this booking?',
           onConfirm: () async {
             await ref
                 .read(bookingHistoryViewModelProvider.notifier)
                 .cancelBooking(booking.id);
             if (context.mounted) {
-              Navigator.pop(context); // Close dialog
-              context.pop(); // Go back to booking history
+              Navigator.pop(context);
+              context.pop();
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text("Booking cancelled successfully"),
+                  content: Text('Booking cancelled successfully'),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -349,18 +404,18 @@ class BookingDetailManagementScreen extends ConsumerWidget {
         _showConfirmationDialog(
           context,
           ref,
-          "Complete Service",
-          "Are you sure the service has been completed?",
+          'Complete Service',
+          'Are you sure the service has been completed?',
           onConfirm: () async {
             await ref
                 .read(bookingHistoryViewModelProvider.notifier)
                 .completeBooking(booking.id);
             if (context.mounted) {
-              Navigator.pop(context); // Close dialog
-              context.pop(); // Go back to booking history
+              Navigator.pop(context);
+              context.pop();
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text("Booking marked as completed!"),
+                  content: Text('Booking marked as completed!'),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -368,14 +423,29 @@ class BookingDetailManagementScreen extends ConsumerWidget {
           },
         );
         break;
-      case BookingStatus.completed:
-        // TODO: Navigate to review screen
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Review feature coming soon...")),
-        );
-        break;
       default:
         break;
+    }
+  }
+
+  Future<void> _handleCompletedAction(BuildContext context, WidgetRef ref) async {
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => CreateReviewScreen(booking: booking),
+      ),
+    );
+
+    if (result == true && context.mounted) {
+      ref.invalidate(bookingReviewExistsProvider(booking.id));
+      await ref.read(bookingHistoryViewModelProvider.notifier).refresh();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Review submitted successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     }
   }
 
@@ -395,16 +465,16 @@ class BookingDetailManagementScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
           ),
           TextButton(
             onPressed: () async {
               await onConfirm();
             },
             child: Text(
-              "Confirm",
+              'Confirm',
               style: TextStyle(
-                color: title.contains("Cancel")
+                color: title.contains('Cancel')
                     ? Colors.red
                     : const Color(0xFF008DDA),
                 fontWeight: FontWeight.bold,
