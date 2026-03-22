@@ -12,6 +12,10 @@ import '../models/wk_chat_models.dart';
 import '../repository/wk_chat_repository.dart';
 import 'wk_chat_room_screen.dart';
 
+final wkChatInboxInvalidationProvider = Provider.autoDispose<int>(
+  (ref) => DateTime.now().microsecondsSinceEpoch,
+);
+
 class WkChatInboxScreen extends ConsumerStatefulWidget {
   const WkChatInboxScreen({super.key});
 
@@ -21,9 +25,9 @@ class WkChatInboxScreen extends ConsumerStatefulWidget {
 
 class _WkChatInboxScreenState extends ConsumerState<WkChatInboxScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
-  RealtimeChannel? _inboxChannel;
+  RealtimeChannel? _inboxConversationsChannel;
+  RealtimeChannel? _inboxMessagesChannel;
   Timer? _refreshDebounce;
-  int _refreshSeed = 0;
 
   @override
   void initState() {
@@ -35,7 +39,7 @@ class _WkChatInboxScreenState extends ConsumerState<WkChatInboxScreen> {
     final workerId = Supabase.instance.client.auth.currentUser?.id;
     if (workerId == null) return;
 
-    _inboxChannel = Supabase.instance.client
+    _inboxConversationsChannel = Supabase.instance.client
         .channel('wk-chat-inbox-$workerId')
         .onPostgresChanges(
           event: PostgresChangeEvent.all,
@@ -52,21 +56,39 @@ class _WkChatInboxScreenState extends ConsumerState<WkChatInboxScreen> {
           },
         )
         .subscribe();
+
+    // Listen to message events as well so inbox updates even if conversation
+    // metadata is updated by another client flow.
+    _inboxMessagesChannel = Supabase.instance.client
+        .channel('wk-chat-inbox-msg-$workerId')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: SupabaseTables.chatMessages,
+          callback: (_) {
+            if (!mounted) return;
+            _scheduleRefresh();
+          },
+        )
+        .subscribe();
   }
 
   void _scheduleRefresh() {
     _refreshDebounce?.cancel();
     _refreshDebounce = Timer(const Duration(milliseconds: 300), () {
       if (!mounted) return;
-      setState(() => _refreshSeed++);
+      ref.invalidate(wkChatInboxInvalidationProvider);
     });
   }
 
   @override
   void dispose() {
     _refreshDebounce?.cancel();
-    if (_inboxChannel != null) {
-      Supabase.instance.client.removeChannel(_inboxChannel!);
+    if (_inboxConversationsChannel != null) {
+      Supabase.instance.client.removeChannel(_inboxConversationsChannel!);
+    }
+    if (_inboxMessagesChannel != null) {
+      Supabase.instance.client.removeChannel(_inboxMessagesChannel!);
     }
     _searchCtrl.dispose();
     super.dispose();
@@ -74,6 +96,7 @@ class _WkChatInboxScreenState extends ConsumerState<WkChatInboxScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(wkChatInboxInvalidationProvider);
     final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -85,7 +108,7 @@ class _WkChatInboxScreenState extends ConsumerState<WkChatInboxScreen> {
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
             child: TextField(
               controller: _searchCtrl,
-              onChanged: (_) => setState(() => _refreshSeed++),
+              onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
                 hintText: 'Search customer',
                 prefixIcon: const Icon(Icons.search),
@@ -94,7 +117,8 @@ class _WkChatInboxScreenState extends ConsumerState<WkChatInboxScreen> {
                     : IconButton(
                         onPressed: () {
                           _searchCtrl.clear();
-                          setState(() => _refreshSeed++);
+                          setState(() {});
+                          ref.invalidate(wkChatInboxInvalidationProvider);
                         },
                         icon: const Icon(Icons.close),
                       ),
@@ -104,7 +128,7 @@ class _WkChatInboxScreenState extends ConsumerState<WkChatInboxScreen> {
         ),
       ),
       body: FutureBuilder<List<WkChatConversationItem>>(
-        key: ValueKey('chat-inbox-$_refreshSeed-${_searchCtrl.text.trim()}'),
+        key: ValueKey('chat-inbox-${_searchCtrl.text.trim()}'),
         future: ref
             .read(wkChatRepositoryProvider)
             .fetchInbox(query: _searchCtrl.text),
@@ -118,7 +142,7 @@ class _WkChatInboxScreenState extends ConsumerState<WkChatInboxScreen> {
               icon: Icons.error_outline,
               title: 'Unable to load messages',
               subtitle: snapshot.error.toString(),
-              onTap: () => setState(() => _refreshSeed++),
+              onTap: () => ref.invalidate(wkChatInboxInvalidationProvider),
               actionLabel: 'Retry',
             );
           }
@@ -129,13 +153,15 @@ class _WkChatInboxScreenState extends ConsumerState<WkChatInboxScreen> {
               icon: Icons.forum_outlined,
               title: 'No conversations yet',
               subtitle: 'Accepted or in-progress bookings will appear here.',
-              onTap: () => setState(() => _refreshSeed++),
+              onTap: () => ref.invalidate(wkChatInboxInvalidationProvider),
               actionLabel: 'Refresh',
             );
           }
 
           return RefreshIndicator(
-            onRefresh: () async => setState(() => _refreshSeed++),
+            onRefresh: () async {
+              ref.invalidate(wkChatInboxInvalidationProvider);
+            },
             child: ListView.separated(
               padding: const EdgeInsets.all(16),
               itemCount: items.length,
@@ -155,7 +181,7 @@ class _WkChatInboxScreenState extends ConsumerState<WkChatInboxScreen> {
                     );
 
                     if (!mounted) return;
-                    setState(() => _refreshSeed++);
+                    ref.invalidate(wkChatInboxInvalidationProvider);
                   },
                   child: Container(
                     padding: const EdgeInsets.all(12),

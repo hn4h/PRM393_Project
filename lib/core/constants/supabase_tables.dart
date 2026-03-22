@@ -11,10 +11,10 @@ abstract class SupabaseTables {
   static const String customerNotifications = 'customer_notifications';
   static const String chatConversations = 'chat_conversations';
   static const String chatMessages = 'chat_messages';
-  static const String serviceStatsView = 'service_stats_view';
-  static const String supportKnowledge = 'support_knowledge';
   static const String aiSupportConversations = 'ai_support_conversations';
   static const String aiSupportMessages = 'ai_support_messages';
+  static const String supportKnowledge = 'support_knowledge';
+  static const String serviceStatsView = 'service_stats_view';
 }
 
 /// Supabase Storage bucket names

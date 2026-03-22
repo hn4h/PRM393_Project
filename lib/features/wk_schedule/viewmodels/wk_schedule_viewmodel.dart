@@ -1,4 +1,9 @@
+import 'dart:async';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../../core/constants/supabase_tables.dart';
 
 import '../models/wk_schedule_models.dart';
 import '../repository/wk_schedule_repository.dart';
@@ -8,10 +13,48 @@ part 'wk_schedule_viewmodel.g.dart';
 @riverpod
 class WkScheduleViewModel extends _$WkScheduleViewModel {
   static const Duration _utcPlus7 = Duration(hours: 7);
+  RealtimeChannel? _bookingsChannel;
+  Timer? _reloadDebounce;
 
   @override
   Future<WkScheduleState> build() async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId != null) {
+      _subscribeBookingChanges(userId);
+    }
+
+    ref.onDispose(() async {
+      _reloadDebounce?.cancel();
+      if (_bookingsChannel != null) {
+        await Supabase.instance.client.removeChannel(_bookingsChannel!);
+      }
+    });
+
     return _loadInitial();
+  }
+
+  void _subscribeBookingChanges(String userId) {
+    _bookingsChannel = Supabase.instance.client
+        .channel('wk-schedule-bookings-$userId')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: SupabaseTables.bookings,
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'worker_id',
+            value: userId,
+          ),
+          callback: (_) => _scheduleInvalidate(),
+        )
+        .subscribe();
+  }
+
+  void _scheduleInvalidate() {
+    _reloadDebounce?.cancel();
+    _reloadDebounce = Timer(const Duration(milliseconds: 300), () {
+      ref.invalidate(wkScheduleViewModelProvider);
+    });
   }
 
   Future<void> refresh() async {

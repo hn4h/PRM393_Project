@@ -142,13 +142,15 @@ class WkChatRepository {
     final raw = await _client
         .from(SupabaseTables.chatConversations)
         .select(
-          'booking:bookings!chat_conversations_booking_id_fkey(id, status, scheduled_at, address, contact_name, service:services(name))',
+          'booking:bookings!chat_conversations_booking_id_fkey(id, status, scheduled_at, address, contact_name, service:services(name)), '
+          'customer:profiles!chat_conversations_customer_id_fkey(full_name, avatar_url)',
         )
         .eq('id', conversationId)
         .eq('worker_id', workerId)
         .maybeSingle();
 
     final booking = raw?['booking'] as Map<String, dynamic>?;
+    final customer = raw?['customer'] as Map<String, dynamic>?;
     if (booking == null) {
       throw Exception('Booking context not found.');
     }
@@ -164,9 +166,12 @@ class WkChatRepository {
       bookingId: booking['id'] as String,
       serviceName: (service?['name'] as String?) ?? 'Service',
       customerName:
-          (booking['contact_name'] as String?)?.trim().isNotEmpty == true
-          ? booking['contact_name'] as String
-          : 'Customer',
+          (customer?['full_name'] as String?)?.trim().isNotEmpty == true
+          ? customer!['full_name'] as String
+          : ((booking['contact_name'] as String?)?.trim().isNotEmpty == true
+                ? booking['contact_name'] as String
+                : 'Customer'),
+      customerAvatarUrl: customer?['avatar_url'] as String?,
       address: (booking['address'] as String?)?.trim() ?? 'No address provided',
       scheduledAtUtc7: scheduledAt,
       status: (booking['status'] as String?) ?? 'unknown',
