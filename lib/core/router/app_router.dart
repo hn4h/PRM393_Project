@@ -78,7 +78,7 @@ class AppRouter {
         // Confirmed + on public route → go to shell (but not /change-password if forced)
         if (isOnPublicRoute && loc != '/change-password') return '/shell';
       }
-      final isOnPublicRoute = _publicRoutes.contains(state.matchedLocation);
+      // final isOnPublicRoute = _publicRoutes.contains(state.matchedLocation);
 
       // Unauthenticated user on a protected page → go to login
       if (!isLoggedIn && !isOnPublicRoute) return '/login';

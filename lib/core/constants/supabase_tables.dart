@@ -9,6 +9,8 @@ abstract class SupabaseTables {
   static const String workerNotifications = 'worker_notifications';
   static const String chatConversations = 'chat_conversations';
   static const String chatMessages = 'chat_messages';
+  static const String customerNotifications = 'customer_notifications';
+  static const String serviceStatsView = 'service_stats_view';
 }
 
 /// Supabase Storage bucket names
