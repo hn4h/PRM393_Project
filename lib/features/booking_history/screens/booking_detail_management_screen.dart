@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:prm_project/core/enums/booking_status.dart';
@@ -7,11 +8,15 @@ import 'package:prm_project/core/models/booking.dart';
 import 'package:prm_project/features/booking/repository/review_repository.dart'
     as booking_review;
 import 'package:prm_project/features/review/screens/create_review_screen.dart';
+import 'package:prm_project/features/cs_chat/repository/cs_chat_repository.dart';
+import 'package:prm_project/features/cs_chat/screens/cs_chat_room_screen.dart';
 
 import '../viewmodel/booking_history_viewmodel.dart';
 
-final bookingReviewExistsProvider =
-    FutureProvider.family<bool, String>((ref, bookingId) {
+final bookingReviewExistsProvider = FutureProvider.family<bool, String>((
+  ref,
+  bookingId,
+) {
   return ref.read(booking_review.reviewRepositoryProvider).hasReview(bookingId);
 });
 
@@ -45,7 +50,7 @@ class BookingDetailManagementScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildWorkerHeader(),
+                  _buildWorkerHeader(context),
                   const SizedBox(height: 24),
                   const Text(
                     'Service',
@@ -80,7 +85,7 @@ class BookingDetailManagementScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildWorkerHeader() {
+  Widget _buildWorkerHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -121,10 +126,18 @@ class BookingDetailManagementScreen extends ConsumerWidget {
             ),
           ),
           IconButton(
-            onPressed: () {},
-            icon: const Icon(
+            onPressed:
+                (booking.status == BookingStatus.accepted ||
+                    booking.status == BookingStatus.inProgress)
+                ? () => _openChatRoom(context)
+                : null,
+            icon: Icon(
               Icons.chat_bubble_outline,
-              color: Color(0xFF008DDA),
+              color:
+                  (booking.status == BookingStatus.accepted ||
+                      booking.status == BookingStatus.inProgress)
+                  ? const Color(0xFF008DDA)
+                  : Colors.grey.shade400,
             ),
           ),
         ],
@@ -269,6 +282,36 @@ class BookingDetailManagementScreen extends ConsumerWidget {
     );
   }
 
+  Future<void> _openChatRoom(BuildContext context) async {
+    try {
+      final repo = CsChatRepository(Supabase.instance.client);
+      final conversationId = await repo.getConversationIdForBooking(booking.id);
+      if (conversationId == null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Chat is not available for this booking yet.'),
+            ),
+          );
+        }
+        return;
+      }
+      if (context.mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => CsChatRoomScreen(conversationId: conversationId),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Unable to open chat: $e')));
+      }
+    }
+  }
+
   Widget _buildActionButton(BuildContext context, WidgetRef ref) {
     if (booking.status == BookingStatus.cancelled ||
         booking.status == BookingStatus.rejected ||
@@ -277,7 +320,9 @@ class BookingDetailManagementScreen extends ConsumerWidget {
     }
 
     if (booking.status == BookingStatus.completed) {
-      final reviewExistsAsync = ref.watch(bookingReviewExistsProvider(booking.id));
+      final reviewExistsAsync = ref.watch(
+        bookingReviewExistsProvider(booking.id),
+      );
 
       return reviewExistsAsync.when(
         loading: () => _buildBottomButton(
@@ -428,11 +473,12 @@ class BookingDetailManagementScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _handleCompletedAction(BuildContext context, WidgetRef ref) async {
+  Future<void> _handleCompletedAction(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     final result = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => CreateReviewScreen(booking: booking),
-      ),
+      MaterialPageRoute(builder: (_) => CreateReviewScreen(booking: booking)),
     );
 
     if (result == true && context.mounted) {

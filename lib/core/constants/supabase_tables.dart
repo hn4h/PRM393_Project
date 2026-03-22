@@ -6,10 +6,11 @@ abstract class SupabaseTables {
   static const String bookings = 'bookings';
   static const String reviews = 'reviews';
   static const String workers = 'workers';
+  static const String workerServices = 'worker_services';
   static const String workerNotifications = 'worker_notifications';
+  static const String customerNotifications = 'customer_notifications';
   static const String chatConversations = 'chat_conversations';
   static const String chatMessages = 'chat_messages';
-  static const String customerNotifications = 'customer_notifications';
   static const String serviceStatsView = 'service_stats_view';
 }
 

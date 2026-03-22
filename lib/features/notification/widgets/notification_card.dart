@@ -6,11 +6,7 @@ class NotificationCard extends StatelessWidget {
   final NotificationModel notification;
   final VoidCallback? onTap;
 
-  const NotificationCard({
-    super.key,
-    required this.notification,
-    this.onTap,
-  });
+  const NotificationCard({super.key, required this.notification, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -25,10 +21,10 @@ class NotificationCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: isRead
               ? colorScheme.surface
-              : colorScheme.primaryContainer.withOpacity(0.15),
+              : colorScheme.primaryContainer.withValues(alpha: 0.15),
           border: Border(
             bottom: BorderSide(
-              color: colorScheme.outlineVariant.withOpacity(0.4),
+              color: colorScheme.outlineVariant.withValues(alpha: 0.4),
               width: 0.5,
             ),
           ),
@@ -44,11 +40,7 @@ class NotificationCard extends StatelessWidget {
                 color: _iconBgColor(colorScheme),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(
-                _typeIcon,
-                color: _iconColor(colorScheme),
-                size: 20,
-              ),
+              child: Icon(_typeIcon, color: _iconColor(colorScheme), size: 20),
             ),
             const SizedBox(width: 12),
 
@@ -64,8 +56,9 @@ class NotificationCard extends StatelessWidget {
                           notification.title,
                           style: TextStyle(
                             fontSize: 14,
-                            fontWeight:
-                                isRead ? FontWeight.w500 : FontWeight.w700,
+                            fontWeight: isRead
+                                ? FontWeight.w500
+                                : FontWeight.w700,
                             color: colorScheme.onSurface,
                           ),
                           maxLines: 1,
@@ -99,7 +92,9 @@ class NotificationCard extends StatelessWidget {
                     _formatTime(notification.createdAt),
                     style: TextStyle(
                       fontSize: 11,
-                      color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                      color: colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.7,
+                      ),
                     ),
                   ),
                 ],
@@ -113,7 +108,17 @@ class NotificationCard extends StatelessWidget {
 
   IconData get _typeIcon {
     switch (notification.type) {
-      case NotificationType.booking:
+      case NotificationType.bookingAccepted:
+        return Icons.check_circle_outline_rounded;
+      case NotificationType.bookingRejected:
+        return Icons.cancel_outlined;
+      case NotificationType.bookingInProgress:
+        return Icons.play_circle_outline_rounded;
+      case NotificationType.bookingCompleted:
+        return Icons.done_all_rounded;
+      case NotificationType.bookingCancelled:
+        return Icons.block_rounded;
+      case NotificationType.newBooking:
         return Icons.calendar_today_rounded;
       case NotificationType.promotion:
         return Icons.local_offer_rounded;
@@ -123,23 +128,21 @@ class NotificationCard extends StatelessWidget {
   }
 
   Color _iconBgColor(ColorScheme cs) {
+    if (notification.type.isBookingRelated) return cs.primaryContainer;
     switch (notification.type) {
-      case NotificationType.booking:
-        return cs.primaryContainer;
       case NotificationType.promotion:
         return cs.tertiaryContainer;
-      case NotificationType.system:
+      default:
         return cs.secondaryContainer;
     }
   }
 
   Color _iconColor(ColorScheme cs) {
+    if (notification.type.isBookingRelated) return cs.primary;
     switch (notification.type) {
-      case NotificationType.booking:
-        return cs.primary;
       case NotificationType.promotion:
         return cs.tertiary;
-      case NotificationType.system:
+      default:
         return cs.secondary;
     }
   }

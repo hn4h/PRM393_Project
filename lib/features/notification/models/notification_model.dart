@@ -1,17 +1,41 @@
 import 'package:flutter/foundation.dart';
 
 /// Notification type enum matching DB 'type' column values.
+/// DB stores: booking_accepted, booking_rejected, booking_in_progress,
+///            booking_completed, booking_cancelled, new_booking, system, etc.
 enum NotificationType {
+  bookingAccepted,
+  bookingRejected,
+  bookingInProgress,
+  bookingCompleted,
+  bookingCancelled,
+  newBooking,
   system,
-  booking,
   promotion;
 
   static NotificationType fromString(String value) {
-    return NotificationType.values.firstWhere(
-      (e) => e.name == value,
-      orElse: () => NotificationType.system,
-    );
+    return switch (value) {
+      'booking_accepted' => NotificationType.bookingAccepted,
+      'booking_rejected' => NotificationType.bookingRejected,
+      'booking_in_progress' => NotificationType.bookingInProgress,
+      'booking_completed' => NotificationType.bookingCompleted,
+      'booking_cancelled' => NotificationType.bookingCancelled,
+      'new_booking' => NotificationType.newBooking,
+      'promotion' => NotificationType.promotion,
+      _ => NotificationType.system,
+    };
   }
+
+  /// Whether this type is booking-related.
+  bool get isBookingRelated => switch (this) {
+    bookingAccepted ||
+    bookingRejected ||
+    bookingInProgress ||
+    bookingCompleted ||
+    bookingCancelled ||
+    newBooking => true,
+    _ => false,
+  };
 }
 
 @immutable
@@ -69,8 +93,7 @@ class NotificationModel {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is NotificationModel && other.id == id);
+      identical(this, other) || (other is NotificationModel && other.id == id);
 
   @override
   int get hashCode => id.hashCode;

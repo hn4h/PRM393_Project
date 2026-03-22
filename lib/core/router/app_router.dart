@@ -24,6 +24,7 @@ import 'package:prm_project/features/booking/screens/booking_detail_view_screen.
 import 'package:prm_project/features/booking_history/screens/booking_detail_management_screen.dart';
 import 'package:prm_project/features/profile/screens/edit_profile_screen.dart';
 import 'package:prm_project/features/settings/screens/change_password_screen.dart';
+import 'package:prm_project/features/cs_chat/screens/cs_chat_room_screen.dart';
 import 'package:prm_project/features/wk_notifications/screens/wk_notifications_screen.dart';
 import 'package:prm_project/features/wk_profile/screens/wk_profile_reviews_screen.dart';
 import 'package:prm_project/features/wk_profile/screens/wk_profile_services_screen.dart';
@@ -109,6 +110,23 @@ class AppRouter {
 
           final isWorker = await _isCurrentUserWorker();
           return isWorker ? '/wk-shell' : '/shell';
+        },
+      ),
+
+      // ── Notifications ─────────────────────────────────────────────────────
+      GoRoute(
+        path: '/notifications',
+        name: 'notifications',
+        builder: (_, __) => const NotificationScreen(),
+      ),
+
+      // ── Customer Chat Room (push on top of shell) ─────────────────────────
+      GoRoute(
+        path: '/cs-chat-room/:conversationId',
+        name: 'cs-chat-room',
+        builder: (context, state) {
+          final id = state.pathParameters['conversationId']!;
+          return CsChatRoomScreen(conversationId: id);
         },
       ),
 

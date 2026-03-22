@@ -90,7 +90,7 @@ class NotificationScreen extends ConsumerWidget {
             Icon(
               Icons.notifications_off_outlined,
               size: 64,
-              color: colorScheme.onSurfaceVariant.withOpacity(0.4),
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
             ),
             const SizedBox(height: 16),
             Text(
@@ -106,7 +106,7 @@ class NotificationScreen extends ConsumerWidget {
               'You will see updates about your bookings here.',
               style: TextStyle(
                 fontSize: 13,
-                color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
               ),
             ),
           ],

@@ -46,10 +46,10 @@ class NotificationViewModel extends StateNotifier<NotificationState> {
     required NotificationRepository repository,
     required String userId,
     required String role,
-  })  : _repository = repository,
-        _userId = userId,
-        _role = role,
-        super(const NotificationState(isLoading: true)) {
+  }) : _repository = repository,
+       _userId = userId,
+       _role = role,
+       super(const NotificationState(isLoading: true)) {
     _init();
   }
 
@@ -74,10 +74,7 @@ class NotificationViewModel extends StateNotifier<NotificationState> {
         unread = await _repository.getCustomerUnreadCount(_userId);
       }
 
-      state = NotificationState(
-        items: items,
-        unreadCount: unread,
-      );
+      state = NotificationState(items: items, unreadCount: unread);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
@@ -152,27 +149,27 @@ class NotificationViewModel extends StateNotifier<NotificationState> {
 
 final notificationViewModelProvider =
     StateNotifierProvider<NotificationViewModel, NotificationState>((ref) {
-  final client = Supabase.instance.client;
-  final user = client.auth.currentUser;
+      final client = Supabase.instance.client;
+      final user = client.auth.currentUser;
 
-  if (user == null) {
-    return NotificationViewModel(
-      repository: NotificationRepository(client),
-      userId: '',
-      role: 'customer',
-    );
-  }
+      if (user == null) {
+        return NotificationViewModel(
+          repository: NotificationRepository(client),
+          userId: '',
+          role: 'customer',
+        );
+      }
 
-  // Attempt to get role from profile provider (sync access).
-  final profileAsync = ref.watch(userProfileProvider);
-  final role = profileAsync.valueOrNull?.role ?? 'customer';
+      // Attempt to get role from profile provider (sync access).
+      final profileAsync = ref.watch(userProfileProvider);
+      final role = profileAsync.valueOrNull?.role ?? 'customer';
 
-  return NotificationViewModel(
-    repository: NotificationRepository(client),
-    userId: user.id,
-    role: role,
-  );
-});
+      return NotificationViewModel(
+        repository: NotificationRepository(client),
+        userId: user.id,
+        role: role,
+      );
+    });
 
 /// Convenience provider: unread count for the notification badge.
 final unreadNotificationCountProvider = Provider<int>((ref) {

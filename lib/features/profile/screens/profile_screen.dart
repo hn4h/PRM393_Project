@@ -49,19 +49,9 @@ class ProfileScreen extends ConsumerWidget {
             onTap: () {},
           ),
           _buildMenuItem(
-            icon: Icons.payment_outlined,
-            title: 'Payment Methods',
-            onTap: () {},
-          ),
-          _buildMenuItem(
             icon: Icons.support_agent_outlined,
             title: 'Support',
             onTap: () => context.push('/settings'),
-          ),
-          _buildMenuItem(
-            icon: Icons.info_outline,
-            title: 'About Us',
-            onTap: () {},
           ),
 
           const SizedBox(height: 16),

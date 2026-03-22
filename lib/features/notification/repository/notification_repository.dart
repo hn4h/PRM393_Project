@@ -25,8 +25,7 @@ class NotificationRepository {
         .order('created_at', ascending: false);
 
     return response
-        .map((m) =>
-            NotificationModel.fromMap(m, userIdColumn: 'customer_id'))
+        .map((m) => NotificationModel.fromMap(m, userIdColumn: 'customer_id'))
         .toList();
   }
 
@@ -71,8 +70,7 @@ class NotificationRepository {
         .order('created_at', ascending: false);
 
     return response
-        .map(
-            (m) => NotificationModel.fromMap(m, userIdColumn: 'worker_id'))
+        .map((m) => NotificationModel.fromMap(m, userIdColumn: 'worker_id'))
         .toList();
   }
 
