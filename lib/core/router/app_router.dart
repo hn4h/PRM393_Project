@@ -20,6 +20,7 @@ import 'package:prm_project/features/booking/screens/booking_detail_view_screen.
 import 'package:prm_project/features/booking_history/screens/booking_detail_management_screen.dart';
 import 'package:prm_project/features/profile/screens/edit_profile_screen.dart';
 import 'package:prm_project/features/settings/screens/change_password_screen.dart';
+import 'package:prm_project/features/cs_chat/screens/cs_chat_room_screen.dart';
 
 // ── Routes that don't require authentication ──────────────────────────────────
 const _publicRoutes = [
@@ -79,6 +80,23 @@ class AppRouter {
       // Root redirect → shell (sau khi đăng nhập)
       GoRoute(path: '/', redirect: (_, __) => '/shell'),
 
+      // ── Notifications ─────────────────────────────────────────────────────
+      GoRoute(
+        path: '/notifications',
+        name: 'notifications',
+        builder: (_, __) => const NotificationScreen(),
+      ),
+
+      // ── Customer Chat Room (push on top of shell) ─────────────────────────
+      GoRoute(
+        path: '/cs-chat-room/:conversationId',
+        name: 'cs-chat-room',
+        builder: (context, state) {
+          final id = state.pathParameters['conversationId']!;
+          return CsChatRoomScreen(conversationId: id);
+        },
+      ),
+
       // ── Auth routes ─────────────────────────────────────────────────────
       GoRoute(
         path: '/login',
@@ -101,7 +119,8 @@ class AppRouter {
         path: '/complete-profile',
         name: 'complete-profile',
         builder: (_, state) {
-          final email = state.extra as String? ??
+          final email =
+              state.extra as String? ??
               Supabase.instance.client.auth.currentUser?.email ??
               '';
           return CompleteProfileScreen(email: email);

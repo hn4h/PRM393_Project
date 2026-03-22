@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:prm_project/core/enums/booking_status.dart';
 import 'package:prm_project/core/models/booking.dart';
+import 'package:prm_project/features/cs_chat/repository/cs_chat_repository.dart';
+import 'package:prm_project/features/cs_chat/screens/cs_chat_room_screen.dart';
 import '../widgets/booking_action_button.dart';
 
 class BookingDetailManagementScreen extends StatelessWidget {
@@ -33,7 +37,7 @@ class BookingDetailManagementScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildWorkerHeader(),
+                  _buildWorkerHeader(context),
                   const SizedBox(height: 24),
                   const Text(
                     "Service",
@@ -61,7 +65,7 @@ class BookingDetailManagementScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildWorkerHeader() {
+  Widget _buildWorkerHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -72,7 +76,8 @@ class BookingDetailManagementScreen extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 30,
-            backgroundImage: booking.workerAvatar != null && booking.workerAvatar!.isNotEmpty
+            backgroundImage:
+                booking.workerAvatar != null && booking.workerAvatar!.isNotEmpty
                 ? NetworkImage(booking.workerAvatar!)
                 : null,
             child: booking.workerAvatar == null || booking.workerAvatar!.isEmpty
@@ -101,10 +106,18 @@ class BookingDetailManagementScreen extends StatelessWidget {
             ),
           ),
           IconButton(
-            onPressed: () {},
-            icon: const Icon(
+            onPressed:
+                (booking.status == BookingStatus.accepted ||
+                    booking.status == BookingStatus.inProgress)
+                ? () => _openChatRoom(context)
+                : null,
+            icon: Icon(
               Icons.chat_bubble_outline,
-              color: Color(0xFF008DDA),
+              color:
+                  (booking.status == BookingStatus.accepted ||
+                      booking.status == BookingStatus.inProgress)
+                  ? const Color(0xFF008DDA)
+                  : Colors.grey.shade400,
             ),
           ),
         ],
@@ -151,10 +164,7 @@ class BookingDetailManagementScreen extends StatelessWidget {
             booking.statusText,
             valueColor: booking.statusColor,
           ),
-          _buildRow(
-            "Date",
-            DateFormat('EEE, d MMM yyyy').format(scheduled),
-          ),
+          _buildRow("Date", DateFormat('EEE, d MMM yyyy').format(scheduled)),
           _buildRow("Time", DateFormat('hh:mm a').format(scheduled)),
           _buildRow("Duration", "${booking.durationMinutes} min"),
           if (booking.address != null)
@@ -180,8 +190,9 @@ class BookingDetailManagementScreen extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
-        crossAxisAlignment:
-            isMultiLine ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        crossAxisAlignment: isMultiLine
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.center,
         children: [
           Text(label, style: const TextStyle(color: Colors.grey)),
           const SizedBox(width: 16),
@@ -192,7 +203,8 @@ class BookingDetailManagementScreen extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: isTotal ? 16 : 14,
-                color: valueColor ??
+                color:
+                    valueColor ??
                     (isTotal ? const Color(0xFF008DDA) : Colors.black),
               ),
             ),
@@ -200,5 +212,35 @@ class BookingDetailManagementScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _openChatRoom(BuildContext context) async {
+    try {
+      final repo = CsChatRepository(Supabase.instance.client);
+      final conversationId = await repo.getConversationIdForBooking(booking.id);
+      if (conversationId == null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Chat is not available for this booking yet.'),
+            ),
+          );
+        }
+        return;
+      }
+      if (context.mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => CsChatRoomScreen(conversationId: conversationId),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Unable to open chat: $e')));
+      }
+    }
   }
 }
