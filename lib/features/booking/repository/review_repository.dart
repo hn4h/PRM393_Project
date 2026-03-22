@@ -92,7 +92,7 @@ class ReviewRepository {
         .eq('booking_id', bookingId)
         .limit(1);
     if (response.isEmpty) return null;
-    return _hydrateReview(response.first as Map<String, dynamic>);
+    return _hydrateReview(response.first);
   }
 
   Future<List<Review>> _hydrateReviews(

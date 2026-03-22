@@ -31,17 +31,22 @@ class _StepNotesState extends ConsumerState<StepNotes> {
     final flowState = ref.watch(bookingFlowViewModelProvider);
     final booking = flowState.booking;
     final notifier = ref.read(bookingFlowViewModelProvider.notifier);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Note for professional",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        Text(
+          "Note for professional (Optional)",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: colorScheme.onSurface,
+          ),
         ),
-        const Text(
+        Text(
           "You can add a note to the professional here",
-          style: TextStyle(color: Colors.grey, fontSize: 13),
+          style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
         ),
         const SizedBox(height: 16),
 
@@ -53,14 +58,25 @@ class _StepNotesState extends ConsumerState<StepNotes> {
           },
           decoration: InputDecoration(
             hintText: "Enter your notes...",
-            hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+            hintStyle: TextStyle(
+              color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+              fontSize: 14,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderSide: BorderSide(
+                color: colorScheme.outline.withOpacity(0.2),
+              ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade200),
+              borderSide: BorderSide(
+                color: colorScheme.outline.withOpacity(0.2),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: const Color(0xFF008DDA), width: 2),
             ),
           ),
         ),
@@ -80,10 +96,10 @@ class _StepNotesState extends ConsumerState<StepNotes> {
                 });
               },
             ),
-            const Expanded(
+            Expanded(
               child: Text(
                 "I agree to the Terms of Service, Community Guidelines and Privacy Policy.",
-                style: TextStyle(fontSize: 12, color: Colors.black87),
+                style: TextStyle(fontSize: 12, color: colorScheme.onSurface),
               ),
             ),
           ],

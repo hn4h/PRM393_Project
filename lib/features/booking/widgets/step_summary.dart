@@ -12,6 +12,7 @@ class StepSummary extends ConsumerWidget {
     final booking = flowState.booking;
     final selectedService = flowState.selectedService;
     final selectedWorker = flowState.selectedWorker;
+    final colorScheme = Theme.of(context).colorScheme;
 
     final scheduled = booking.scheduledAt ?? DateTime.now();
     final dateStr = DateFormat('EEE, d MMM yyyy').format(scheduled);
@@ -25,22 +26,26 @@ class StepSummary extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           "Details",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: colorScheme.onSurface,
+          ),
         ),
-        const Text(
+        Text(
           "Please check your details before proceeding to payment.",
-          style: TextStyle(color: Colors.grey, fontSize: 13),
+          style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
         ),
         const SizedBox(height: 16),
 
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.grey[50],
+            color: colorScheme.surfaceContainerLow,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade200),
+            border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
           ),
           child: Column(
             children: [
@@ -50,6 +55,7 @@ class StepSummary extends ConsumerWidget {
                   Icons.cleaning_services_outlined,
                   "Service",
                   selectedService.name,
+                  colorScheme: colorScheme,
                 ),
               // Worker info
               if (selectedWorker != null)
@@ -57,57 +63,84 @@ class StepSummary extends ConsumerWidget {
                   Icons.person_outline,
                   "Worker",
                   selectedWorker.name,
+                  colorScheme: colorScheme,
                 ),
-              _buildSummaryRow(Icons.calendar_today, "Date", dateStr),
-              _buildSummaryRow(Icons.access_time, "Time", timeStr),
+              _buildSummaryRow(
+                Icons.calendar_today,
+                "Date",
+                dateStr,
+                colorScheme: colorScheme,
+              ),
+              _buildSummaryRow(
+                Icons.access_time,
+                "Time",
+                timeStr,
+                colorScheme: colorScheme,
+              ),
               _buildSummaryRow(
                 Icons.handyman_outlined,
                 "Duration",
                 "${booking.durationMinutes} min",
+                colorScheme: colorScheme,
               ),
               if (booking.address != null && booking.address!.isNotEmpty)
                 _buildSummaryRow(
                   Icons.location_on_outlined,
                   "Address",
                   booking.address!,
+                  colorScheme: colorScheme,
                 ),
               _buildSummaryRow(
                 Icons.payment,
                 "Method",
                 _formatPaymentMethod(booking.paymentMethod),
+                colorScheme: colorScheme,
               ),
-              const Divider(height: 32),
+              Divider(height: 32, color: colorScheme.outline.withOpacity(0.2)),
               _buildSummaryRow(
                 null,
                 "Service Price",
                 "\$${servicePrice.toStringAsFixed(2)}",
+                colorScheme: colorScheme,
               ),
               _buildSummaryRow(
                 null,
                 "Service Fee (5%)",
                 "\$${serviceFee.toStringAsFixed(2)}",
+                colorScheme: colorScheme,
               ),
-              const Divider(height: 32),
+              Divider(height: 32, color: colorScheme.outline.withOpacity(0.2)),
               _buildSummaryRow(
                 null,
                 "Total price",
                 "\$${totalPrice.toStringAsFixed(2)}",
                 isTotal: true,
+                colorScheme: colorScheme,
               ),
             ],
           ),
         ),
 
         const SizedBox(height: 24),
-        const Text("Promo", style: TextStyle(fontWeight: FontWeight.bold)),
+        Text(
+          "Promo",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: colorScheme.onSurface,
+          ),
+        ),
         const SizedBox(height: 8),
         TextField(
           decoration: InputDecoration(
             hintText: "Enter promo code...",
-            hintStyle: TextStyle(fontSize: 14, color: Colors.grey.shade400),
-            prefixIcon: const Icon(
+            hintStyle: TextStyle(
+              fontSize: 14,
+              color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+            ),
+            prefixIcon: Icon(
               Icons.confirmation_number_outlined,
               size: 20,
+              color: colorScheme.onSurfaceVariant,
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -115,11 +148,19 @@ class StepSummary extends ConsumerWidget {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderSide: BorderSide(
+                color: colorScheme.outline.withOpacity(0.2),
+              ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade200),
+              borderSide: BorderSide(
+                color: colorScheme.outline.withOpacity(0.2),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: const Color(0xFF008DDA), width: 2),
             ),
           ),
         ),
@@ -145,6 +186,7 @@ class StepSummary extends ConsumerWidget {
     String label,
     String value, {
     bool isTotal = false,
+    required ColorScheme colorScheme,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -152,13 +194,15 @@ class StepSummary extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 18, color: Colors.grey),
+            Icon(icon, size: 18, color: colorScheme.onSurfaceVariant),
             const SizedBox(width: 8),
           ],
           Text(
             label,
             style: TextStyle(
-              color: isTotal ? Colors.black : Colors.grey,
+              color: isTotal
+                  ? colorScheme.onSurface
+                  : colorScheme.onSurfaceVariant,
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
             ),
           ),
@@ -170,7 +214,9 @@ class StepSummary extends ConsumerWidget {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: isTotal ? 18 : 14,
-                color: isTotal ? const Color(0xFF008DDA) : Colors.black,
+                color: isTotal
+                    ? const Color(0xFF008DDA)
+                    : colorScheme.onSurface,
               ),
             ),
           ),

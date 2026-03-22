@@ -6,6 +6,7 @@ import '../../../core/enums/booking_status.dart';
 import '../repository/booking_repository.dart';
 import '../../service/repository/service_repository.dart';
 import '../../worker/repository/worker_repository.dart';
+import '../utils/booking_validators.dart';
 
 part 'booking_flow_viewmodel.g.dart';
 
@@ -123,18 +124,16 @@ class BookingFlowViewModel extends _$BookingFlowViewModel {
       // Coming from service selection - need to pick worker
       entryMode = BookingEntryMode.fromService;
       preselectedService = await serviceRepo.getById(serviceId);
-      
+
       // Get workers who offer this service using worker_services table
       availableWorkers = await workerRepo.getWorkersByServiceId(serviceId);
-      
     } else if (workerId != null && serviceId == null) {
       // Coming from worker selection - need to pick service
       entryMode = BookingEntryMode.fromWorker;
       preselectedWorker = await workerRepo.getById(workerId);
-      
+
       // Get services this worker offers using worker_services table
       availableServices = await serviceRepo.getServicesByWorkerId(workerId);
-      
     } else {
       // Manual mode - get all workers and services
       entryMode = BookingEntryMode.manual;
@@ -155,7 +154,9 @@ class BookingFlowViewModel extends _$BookingFlowViewModel {
         serviceId: preselectedService?.id,
         workerId: preselectedWorker?.id,
         totalPrice: preselectedService?.price ?? state.booking.totalPrice,
-        durationMinutes: preselectedService?.durationMinutes ?? state.booking.durationMinutes,
+        durationMinutes:
+            preselectedService?.durationMinutes ??
+            state.booking.durationMinutes,
         serviceName: preselectedService?.name,
         workerName: preselectedWorker?.name,
       ),
@@ -214,6 +215,57 @@ class BookingFlowViewModel extends _$BookingFlowViewModel {
   /// Check if step 1 (worker/service selection) is valid
   bool canProceedFromStep1() {
     return state.selectedWorker != null && state.selectedService != null;
+  }
+
+  /// Validate Step 1: Worker/Service Selection
+  String? validateStep1() {
+    if (state.selectedWorker == null) {
+      return "Please select a worker";
+    }
+    if (state.selectedService == null) {
+      return "Please select a service";
+    }
+    return null;
+  }
+
+  /// Validate Step 2: Schedule (Date/Time)
+  String? validateStep2() {
+    return BookingValidators.validateScheduledTime(state.booking.scheduledAt);
+  }
+
+  /// Validate Step 3: Personal Info (Name, Phone, Address when booking for others)
+  String? validateStep3() {
+    final booking = state.booking;
+
+    // If booking for myself, personal info is auto-filled from user profile
+    // No validation needed since data comes from the system
+    if (!state.isBookingForOther) {
+      return null;
+    }
+
+    // Booking for others - validate all fields
+    String? nameError = BookingValidators.validateName(booking.contactName);
+    if (nameError != null) return nameError;
+
+    String? phoneError = BookingValidators.validatePhone(booking.contactPhone);
+    if (phoneError != null) return phoneError;
+
+    String? addressError = BookingValidators.validateAddress(booking.address);
+    if (addressError != null) return addressError;
+
+    return null;
+  }
+
+  /// Validate Step 4: Notes (Optional - no validation needed)
+  /// Returns null always since notes are optional
+  String? validateStep4() {
+    return null; // Notes are optional
+  }
+
+  /// Validate Step 5: Payment Method
+  String? validateStep5() {
+    final paymentMethod = state.booking.paymentMethod;
+    return BookingValidators.validatePaymentMethod(paymentMethod);
   }
 
   /// Submit booking to Supabase.

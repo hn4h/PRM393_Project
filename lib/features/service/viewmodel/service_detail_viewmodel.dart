@@ -4,7 +4,6 @@ import '../../../core/models/worker.dart';
 import '../../review/models/review_display_item.dart';
 import '../../review/repositories/review_repository.dart';
 import '../repository/service_repository.dart';
-import '../../worker/repository/worker_repository.dart';
 
 part 'service_detail_viewmodel.g.dart';
 

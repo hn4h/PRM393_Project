@@ -49,6 +49,26 @@ class _BookingFlowScreenState extends ConsumerState<BookingFlowScreen> {
         );
   }
 
+  /// Validate current step and return error message if any
+  String? _validateCurrentStep(int step, BookingFlowViewModel notifier) {
+    switch (step) {
+      case 0:
+        return notifier.validateStep1();
+      case 1:
+        return notifier.validateStep2();
+      case 2:
+        return notifier.validateStep3();
+      case 3:
+        return notifier.validateStep4(); // Notes - optional, always valid
+      case 4:
+        return notifier.validateStep5();
+      case 5:
+        return null; // Summary - read-only
+      default:
+        return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -136,8 +156,9 @@ class _BookingFlowScreenState extends ConsumerState<BookingFlowScreen> {
   ) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    // Disable button on step 0 if worker/service not selected
-    final bool canProceed = step == 0 ? notifier.canProceedFromStep1() : true;
+    // Validate current step
+    final validationError = _validateCurrentStep(step, notifier);
+    final canProceed = validationError == null;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -152,40 +173,78 @@ class _BookingFlowScreenState extends ConsumerState<BookingFlowScreen> {
         ],
       ),
       child: SafeArea(
-        child: ElevatedButton(
-          onPressed: canProceed
-              ? () async {
-                  if (step < 5) {
-                    notifier.nextStep();
-                  } else {
-                    final booking = await notifier.checkout();
-                    if (booking != null && context.mounted) {
-                      await ref
-                          .read(bookingHistoryViewModelProvider.notifier)
-                          .refresh();
-                      context.pushReplacementNamed('booking-confirmed');
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (validationError != null) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: colorScheme.errorContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      color: colorScheme.error,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        validationError,
+                        style: TextStyle(
+                          color: colorScheme.error,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+            ElevatedButton(
+              onPressed: canProceed
+                  ? () async {
+                      if (step < 5) {
+                        notifier.nextStep();
+                      } else {
+                        // Final validation before checkout
+                        final booking = await notifier.checkout();
+                        if (booking != null && context.mounted) {
+                          await ref
+                              .read(bookingHistoryViewModelProvider.notifier)
+                              .refresh();
+                          context.pushReplacementNamed('booking-confirmed');
+                        }
+                      }
                     }
-                  }
-                }
-              : null,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: canProceed
-                ? const Color(0xFF008DDA)
-                : colorScheme.surfaceContainerHighest,
-            minimumSize: const Size(double.infinity, 54),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+                  : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: canProceed
+                    ? const Color(0xFF008DDA)
+                    : colorScheme.surfaceContainerHighest,
+                minimumSize: const Size(double.infinity, 54),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                step == 5 ? "Confirm Booking" : "Continue",
+                style: TextStyle(
+                  color: canProceed
+                      ? Colors.white
+                      : colorScheme.onSurfaceVariant,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
-            elevation: 0,
-          ),
-          child: Text(
-            step == 5 ? "Confirm Booking" : "Continue",
-            style: TextStyle(
-              color: canProceed ? Colors.white : colorScheme.onSurfaceVariant,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          ],
         ),
       ),
     );
