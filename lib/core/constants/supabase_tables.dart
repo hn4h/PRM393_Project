@@ -6,13 +6,14 @@ abstract class SupabaseTables {
   static const String bookings = 'bookings';
   static const String reviews = 'reviews';
   static const String workers = 'workers';
-  static const String serviceStatsView = 'service_stats_view';
-  static const String customerNotifications = 'customer_notifications';
   static const String workerNotifications = 'worker_notifications';
+  static const String chatConversations = 'chat_conversations';
+  static const String chatMessages = 'chat_messages';
 }
 
 /// Supabase Storage bucket names
 abstract class SupabaseBuckets {
   static const String avatars = 'avatars';
   static const String serviceImages = 'service-images';
+  static const String chatImages = 'chat-images';
 }
