@@ -7,7 +7,7 @@ part of 'wk_notifications_viewmodel.dart';
 // **************************************************************************
 
 String _$wkNotificationsViewmodelHash() =>
-    r'39ad57f0ea5f8e63f56ecba02e2cf0c1dcd2616e';
+    r'a83263af7950a3a7d1670b3d0328a9bb99b50ed0';
 
 /// See also [WkNotificationsViewmodel].
 @ProviderFor(WkNotificationsViewmodel)

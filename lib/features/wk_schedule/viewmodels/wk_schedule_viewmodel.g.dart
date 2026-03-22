@@ -7,7 +7,7 @@ part of 'wk_schedule_viewmodel.dart';
 // **************************************************************************
 
 String _$wkScheduleViewModelHash() =>
-    r'1b413c06f63f12584ce58fae21c2cbe93d364416';
+    r'35220c03cc4c02b5520adf46eee841766ac5f668';
 
 /// See also [WkScheduleViewModel].
 @ProviderFor(WkScheduleViewModel)

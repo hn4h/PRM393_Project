@@ -18,6 +18,7 @@ class WkChatBookingContext {
   final String bookingId;
   final String serviceName;
   final String customerName;
+  final String? customerAvatarUrl;
   final String address;
   final DateTime scheduledAtUtc7;
   final String status;
@@ -26,6 +27,7 @@ class WkChatBookingContext {
     required this.bookingId,
     required this.serviceName,
     required this.customerName,
+    required this.customerAvatarUrl,
     required this.address,
     required this.scheduledAtUtc7,
     required this.status,

@@ -7,7 +7,7 @@ part of 'wk_profile_repository.dart';
 // **************************************************************************
 
 String _$wkProfileRepositoryHash() =>
-    r'5d66f47ccf6ec6b7bcce5b39f3c9a9e2e7af04f9';
+    r'18d8f46288cd120032f3aa36236ea9fbfc4fb1c2';
 
 /// See also [wkProfileRepository].
 @ProviderFor(wkProfileRepository)

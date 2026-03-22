@@ -6,7 +6,7 @@ part of 'wk_home_viewmodel.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$wkHomeViewModelHash() => r'57c7a59fa6c88b001880a2dbc2bfaa1f7682ce68';
+String _$wkHomeViewModelHash() => r'826955797ee51ce8b1692455838d1cd0d3a6d50c';
 
 /// See also [WkHomeViewModel].
 @ProviderFor(WkHomeViewModel)

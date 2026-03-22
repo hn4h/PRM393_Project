@@ -4,9 +4,12 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/constants/supabase_tables.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/utils/image_helper.dart';
 import '../models/wk_chat_models.dart';
 import '../repository/wk_chat_repository.dart';
 
@@ -25,9 +28,10 @@ class _WkChatRoomScreenState extends ConsumerState<WkChatRoomScreen> {
   final ImagePicker _picker = ImagePicker();
 
   Timer? _pollTimer;
+  RealtimeChannel? _messagesChannel;
+  Timer? _loadDebounce;
   bool _loading = true;
   bool _sending = false;
-  int _refreshSeed = 0;
 
   WkChatBookingContext? _context;
   List<WkChatMessage> _messages = const [];
@@ -38,15 +42,48 @@ class _WkChatRoomScreenState extends ConsumerState<WkChatRoomScreen> {
   void initState() {
     super.initState();
     _load();
+    _subscribeToMessages();
     _pollTimer = Timer.periodic(
       const Duration(seconds: 4),
       (_) => _load(silent: true),
     );
   }
 
+  void _subscribeToMessages() {
+    _messagesChannel = Supabase.instance.client
+        .channel('wk-chat-messages-${widget.conversationId}')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: SupabaseTables.chatMessages,
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'conversation_id',
+            value: widget.conversationId,
+          ),
+          callback: (_) {
+            if (!mounted) return;
+            _scheduleLoadRefresh();
+          },
+        )
+        .subscribe();
+  }
+
+  void _scheduleLoadRefresh() {
+    _loadDebounce?.cancel();
+    _loadDebounce = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      _load(silent: true);
+    });
+  }
+
   @override
   void dispose() {
     _pollTimer?.cancel();
+    _loadDebounce?.cancel();
+    if (_messagesChannel != null) {
+      Supabase.instance.client.removeChannel(_messagesChannel!);
+    }
     _messageCtrl.dispose();
     _scrollCtrl.dispose();
     super.dispose();
@@ -76,9 +113,15 @@ class _WkChatRoomScreenState extends ConsumerState<WkChatRoomScreen> {
         if (!_scrollCtrl.hasClients) return;
         _scrollCtrl.jumpTo(_scrollCtrl.position.maxScrollExtent);
       });
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
+      if (!silent) {
+        debugPrint('Error loading chat messages: $e');
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading messages: $e')));
+      }
     }
   }
 
@@ -110,10 +153,24 @@ class _WkChatRoomScreenState extends ConsumerState<WkChatRoomScreen> {
             CircleAvatar(
               radius: 16,
               backgroundColor: scheme.surface,
-              child: Icon(
-                Icons.person,
-                size: 18,
-                color: scheme.onSurfaceVariant,
+              child: ClipOval(
+                child: (contextData.customerAvatarUrl ?? '').isNotEmpty
+                    ? ImageHelper.loadNetworkImage(
+                        imageUrl: contextData.customerAvatarUrl!,
+                        width: 32,
+                        height: 32,
+                        fit: BoxFit.cover,
+                        errorWidget: Icon(
+                          Icons.person,
+                          size: 18,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      )
+                    : Icon(
+                        Icons.person,
+                        size: 18,
+                        color: scheme.onSurfaceVariant,
+                      ),
               ),
             ),
             const SizedBox(width: 8),
@@ -204,7 +261,7 @@ class _WkChatRoomScreenState extends ConsumerState<WkChatRoomScreen> {
                 _pendingImageBytes = null;
                 _pendingImageExt = null;
               }),
-              onChanged: () => setState(() => _refreshSeed++),
+              onChanged: () => setState(() {}),
               onAttach: _pickAttachment,
               onSend: _send,
             ),

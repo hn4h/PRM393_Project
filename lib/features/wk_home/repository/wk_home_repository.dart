@@ -109,7 +109,77 @@ class WkHomeRepository {
   }
 
   Future<void> acceptBooking(String bookingId) {
-    return _updateBookingStatus(bookingId, 'accepted');
+    return _acceptBookingWithValidation(bookingId);
+  }
+
+  Future<void> _acceptBookingWithValidation(String bookingId) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) {
+      throw Exception('You are not signed in.');
+    }
+
+    final target = await _client
+        .from(SupabaseTables.bookings)
+        .select(
+          'id, status, scheduled_at, duration_minutes, service:services(duration_minutes)',
+        )
+        .eq('id', bookingId)
+        .eq('worker_id', userId)
+        .maybeSingle();
+
+    if (target == null) {
+      throw Exception('Booking not found.');
+    }
+
+    final targetStatus = (target['status'] as String?) ?? 'unknown';
+    if (targetStatus != 'pending') {
+      throw Exception('This booking can no longer be accepted.');
+    }
+
+    final targetStartUtc = DateTime.tryParse(
+      target['scheduled_at']?.toString() ?? '',
+    )?.toUtc();
+    if (targetStartUtc == null) {
+      throw Exception('Invalid booking schedule.');
+    }
+
+    final targetDurationMinutes = _durationMinutesFromRow(target);
+    final targetEndUtc = targetStartUtc.add(
+      Duration(minutes: targetDurationMinutes),
+    );
+
+    final acceptedRows = await _client
+        .from(SupabaseTables.bookings)
+        .select(
+          'id, scheduled_at, duration_minutes, service:services(duration_minutes)',
+        )
+        .eq('worker_id', userId)
+        .eq('status', 'accepted')
+        .neq('id', bookingId);
+
+    for (final row in acceptedRows) {
+      final existingStartUtc = DateTime.tryParse(
+        row['scheduled_at']?.toString() ?? '',
+      )?.toUtc();
+      if (existingStartUtc == null) continue;
+
+      final existingDurationMinutes = _durationMinutesFromRow(row);
+      final existingEndUtc = existingStartUtc.add(
+        Duration(minutes: existingDurationMinutes),
+      );
+
+      final hasOverlap =
+          targetStartUtc.isBefore(existingEndUtc) &&
+          existingStartUtc.isBefore(targetEndUtc);
+
+      if (hasOverlap) {
+        throw Exception(
+          'You already have an accepted booking in this time slot.',
+        );
+      }
+    }
+
+    await _updateBookingStatus(bookingId, 'accepted');
   }
 
   Future<void> declineBooking(String bookingId) {
@@ -149,10 +219,7 @@ class WkHomeRepository {
       id: map['id'] as String,
       serviceName: (serviceMap?['name'] as String?) ?? 'Home Service',
       scheduledAt: scheduledAtUtc7,
-      durationMinutes:
-          (map['duration_minutes'] as int?) ??
-          (serviceMap?['duration_minutes'] as int?) ??
-          60,
+      durationMinutes: _durationMinutesFromRow(map),
       customerName: (map['contact_name'] as String?)?.trim().isNotEmpty == true
           ? (map['contact_name'] as String)
           : 'Customer',
@@ -164,6 +231,13 @@ class WkHomeRepository {
       contactPhone: map['contact_phone'] as String?,
       status: wkJobStatusFromDb(map['status'] as String?),
     );
+  }
+
+  int _durationMinutesFromRow(Map<String, dynamic> row) {
+    final serviceMap = row['service'] as Map<String, dynamic>?;
+    return (row['duration_minutes'] as int?) ??
+        (serviceMap?['duration_minutes'] as int?) ??
+        60;
   }
 
   Future<void> _autoRejectOverduePending(String userId) async {
