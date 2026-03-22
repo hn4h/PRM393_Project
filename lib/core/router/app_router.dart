@@ -319,13 +319,6 @@ class AppRouter {
         name: 'wk-profile-services',
         builder: (_, __) => const WkProfileServicesScreen(),
       ),
-
-      // ── Notifications ─────────────────────────────────────────────────────
-      // GoRoute(
-      //   path: '/notifications',
-      //   name: 'notifications',
-      //   builder: (_, __) => const NotificationScreen(),
-      // ),
     ],
   );
 

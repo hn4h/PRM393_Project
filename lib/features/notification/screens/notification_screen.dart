@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:prm_project/core/models/booking.dart';
 import 'package:prm_project/features/notification/viewmodels/notification_viewmodel.dart';
 import 'package:prm_project/features/notification/widgets/notification_card.dart';
 
@@ -124,14 +126,37 @@ class NotificationScreen extends ConsumerWidget {
           final notification = state.items[index];
           return NotificationCard(
             notification: notification,
-            onTap: () {
+            onTap: () async {
               // Mark as read on tap
               if (!notification.isRead) {
                 vm.markAsRead(notification.id);
               }
               // Navigate to booking detail if linked
               if (notification.bookingId != null) {
-                context.push('/booking-detail-view');
+                try {
+                  final response = await Supabase.instance.client
+                      .from('bookings')
+                      .select('''
+                        *,
+                        worker_profile:profiles!bookings_worker_id_fkey(full_name, avatar_url),
+                        service:services!bookings_service_id_fkey(name, image_url)
+                      ''')
+                      .eq('id', notification.bookingId!)
+                      .single();
+
+                  final booking = Booking.fromMap(response);
+                  if (context.mounted) {
+                    context.push('/booking-history-detail', extra: booking);
+                  }
+                } catch (_) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Could not load booking details'),
+                      ),
+                    );
+                  }
+                }
               }
             },
           );
