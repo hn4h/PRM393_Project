@@ -28,6 +28,10 @@ const _publicRoutes = [
   '/forgot-password',
   '/complete-profile',
   '/otp-verify',
+<<<<<<< HEAD
+=======
+  '/change-password',
+>>>>>>> anhnlh
 ];
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
@@ -64,8 +68,8 @@ class AppRouter {
           return '/complete-profile';
         }
 
-        // Confirmed + on public route → go to shell
-        if (isOnPublicRoute) return '/shell';
+        // Confirmed + on public route → go to shell (but not /change-password if forced)
+        if (isOnPublicRoute && loc != '/change-password') return '/shell';
       }
 
       // Unauthenticated user on a protected page → go to login
@@ -109,6 +113,17 @@ class AppRouter {
       GoRoute(
         path: '/otp-verify',
         name: 'otp-verify',
+<<<<<<< HEAD
+=======
+        redirect: (context, state) {
+          // If extra data is missing (e.g. deep link, browser refresh),
+          // redirect back to complete-profile to re-collect data.
+          if (state.extra == null || state.extra is! Map<String, String>) {
+            return '/complete-profile';
+          }
+          return null;
+        },
+>>>>>>> anhnlh
         builder: (_, state) {
           final data = state.extra as Map<String, String>;
           return OtpVerifyScreen(
@@ -137,7 +152,10 @@ class AppRouter {
       GoRoute(
         path: '/change-password',
         name: 'change-password',
-        builder: (_, __) => const ChangePasswordScreen(),
+        builder: (_, state) {
+          final forceMode = state.extra as bool? ?? true;
+          return ChangePasswordScreen(forceMode: forceMode);
+        },
       ),
 
       // ── Service ─────────────────────────────────────────────────────────

@@ -106,7 +106,7 @@ class _ForgotPasswordScreenState
           ),
           const SizedBox(height: 8),
           Text(
-            'Enter your registered email and we\'ll send you a link to reset your password.',
+            'Enter your registered email and we\'ll send you a temporary password.',
             style: AppTextStyles.body1.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -136,7 +136,7 @@ class _ForgotPasswordScreenState
           const SizedBox(height: 28),
 
           AppButton(
-            text: 'Send Reset Link',
+            text: 'Send Temporary Password',
             onPressed: _sendReset,
             isLoading: _isLoading,
           ),
@@ -182,7 +182,7 @@ class _ForgotPasswordScreenState
         ),
         const SizedBox(height: 12),
         Text(
-          'A password reset link has been sent to\n${_emailController.text.trim()}.\n\nPlease check your inbox.',
+          'A temporary password has been sent to\n${_emailController.text.trim()}.\n\nPlease login with the temporary password and change it immediately.',
           style: AppTextStyles.body1.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
           textAlign: TextAlign.center,
         ),

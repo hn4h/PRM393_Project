@@ -36,6 +36,20 @@ class ChangePasswordViewModel extends Notifier<ChangePasswordStatus> {
     // 2️⃣ Update to new password
     try {
       await repo.updatePassword(newPassword);
+
+      // 3️⃣ Clear must_change_password flag if it was set (from reset flow)
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId != null) {
+        await repo.clearMustChangePassword(userId);
+      }
+
+      // 4️⃣ Update auth state to clear mustChangePassword
+      final authState =
+          ref.read(authViewModelProvider).valueOrNull;
+      if (authState != null && authState.mustChangePassword) {
+        ref.read(authViewModelProvider.notifier).clearMustChangePasswordFlag();
+      }
+
       state = ChangePasswordStatus.success;
       return null; // success
     } on AuthException catch (e) {

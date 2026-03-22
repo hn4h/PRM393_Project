@@ -69,7 +69,7 @@ class AuthViewModel extends AsyncNotifier<AuthStateModel> {
         ),
       );
       return e.message;
-    } catch (e) {
+    } catch (_) {
       state = AsyncData(
         const AuthStateModel(
           status: AuthStatus.unauthenticated,
@@ -112,12 +112,14 @@ class AuthViewModel extends AsyncNotifier<AuthStateModel> {
       }
 
       final role = await _repo.getUserRole(user.id);
+      final mustChange = await _repo.checkMustChangePassword(user.id);
       state = AsyncData(
         AuthStateModel(
           status: AuthStatus.authenticated,
           userId: user.id,
           email: user.email,
           role: role,
+          mustChangePassword: mustChange,
         ),
       );
       return null; // success
@@ -149,17 +151,81 @@ class AuthViewModel extends AsyncNotifier<AuthStateModel> {
     );
   }
 
-  // ── Forgot Password ───────────────────────────────────────────────────────
+  // ── Forgot Password (Edge Function) ────────────────────────────────────────
 
+  /// Calls Edge Function to generate random password and send via Gmail SMTP.
   /// Returns null on success, error message on failure.
   Future<String?> sendPasswordReset(String email) async {
+    return _repo.requestPasswordReset(email);
+  }
+
+  /// Clears the mustChangePassword flag in the in-memory auth state.
+  /// Called after the user successfully changes their password.
+  void clearMustChangePasswordFlag() {
+    final current = state.valueOrNull;
+    if (current != null) {
+      state = AsyncData(current.copyWith(mustChangePassword: false));
+    }
+  }
+
+  // ── OTP Registration Flow ──────────────────────────────────────────────────
+
+  /// Gửi lại OTP tới email. Returns null on success, error message on failure.
+  Future<String?> resendOtp(String email) async {
     try {
-      await _repo.resetPassword(email);
+      await _repo.resendOtp(email);
       return null;
     } on AuthException catch (e) {
       return e.message;
     } catch (_) {
-      return 'Failed to send reset email.';
+      return 'Failed to send OTP. Please try again.';
+    }
+  }
+
+  /// Xác nhận OTP + lưu phone/address vào DB.
+  /// Returns null on success, error message on failure.
+  Future<String?> verifyOtpAndSaveProfile({
+    required String email,
+    required String otpCode,
+    required String phone,
+    required String address,
+  }) async {
+    try {
+      // 1. Verify OTP → Supabase confirms email + returns session
+      final res = await _repo.verifyOtp(email, otpCode);
+      final user = res.user;
+      if (user == null) return 'Verification failed.';
+
+      // 2. Save phone + address to profiles table
+      try {
+        await _repo.updateProfileInfo(
+          user.id,
+          phone: phone,
+          address: address,
+        );
+      } catch (e) {
+        // Profile update failed (e.g. RLS, network) — still authenticated
+        // Log but don't block login, user can update profile later
+        // ignore: avoid_print
+        print('Profile update failed: $e');
+      }
+
+      // 3. Update auth state to authenticated
+      final role = await _repo.getUserRole(user.id);
+      state = AsyncData(
+        AuthStateModel(
+          status: AuthStatus.authenticated,
+          userId: user.id,
+          email: user.email,
+          role: role,
+        ),
+      );
+
+      return null; // success
+    } on AuthException catch (e) {
+      return e.message;
+    } catch (e) {
+      return 'An unexpected error occurred: ${e.toString()}';
     }
   }
 

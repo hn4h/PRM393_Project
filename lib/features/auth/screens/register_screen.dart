@@ -58,7 +58,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return;
     }
 
-    // Success → navigate to complete profile
+    // Success → navigate to complete profile with email
+    // GoRouter redirect also handles this, but explicit navigation
+    // ensures the email is passed as extra data.
+    if (!mounted) return;
     context.go('/complete-profile', extra: _emailController.text.trim());
   }
 
@@ -170,7 +173,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   validator: (v) {
                     if (v == null || v.isEmpty) return 'Password is required';
-                    if (v.length < 8) return 'Password must be at least 8 characters';
+                    if (v.length < 5) return 'Password must be at least 5 characters';
                     return null;
                   },
                 ),
