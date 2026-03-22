@@ -30,10 +30,7 @@ const _publicRoutes = [
   '/forgot-password',
   '/complete-profile',
   '/otp-verify',
-<<<<<<< HEAD
-=======
   '/change-password',
->>>>>>> anhnlh
 ];
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
@@ -116,8 +113,6 @@ class AppRouter {
       GoRoute(
         path: '/otp-verify',
         name: 'otp-verify',
-<<<<<<< HEAD
-=======
         redirect: (context, state) {
           // If extra data is missing (e.g. deep link, browser refresh),
           // redirect back to complete-profile to re-collect data.
@@ -126,7 +121,6 @@ class AppRouter {
           }
           return null;
         },
->>>>>>> anhnlh
         builder: (_, state) {
           final data = state.extra as Map<String, String>;
           return OtpVerifyScreen(
