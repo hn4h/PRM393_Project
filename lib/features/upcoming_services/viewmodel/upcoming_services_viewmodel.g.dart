@@ -7,7 +7,7 @@ part of 'upcoming_services_viewmodel.dart';
 // **************************************************************************
 
 String _$upcomingServicesViewModelHash() =>
-    r'765d4a16851472549a4bc3890d4e4e8d04a4a8ee';
+    r'37d66b4f8b66c7675f26538aa06dfe15531c97f9';
 
 /// See also [UpcomingServicesViewModel].
 @ProviderFor(UpcomingServicesViewModel)

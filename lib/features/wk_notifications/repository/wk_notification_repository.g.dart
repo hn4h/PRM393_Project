@@ -7,7 +7,7 @@ part of 'wk_notification_repository.dart';
 // **************************************************************************
 
 String _$wkNotificationRepositoryHash() =>
-    r'b572f8a548a479d8a6d2bc5b18fc7d2d2feaf71f';
+    r'72fdb659fd6f0e836817b16e080ee11abad965bc';
 
 /// See also [wkNotificationRepository].
 @ProviderFor(wkNotificationRepository)

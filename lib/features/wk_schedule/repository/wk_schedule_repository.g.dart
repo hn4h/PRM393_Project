@@ -7,7 +7,7 @@ part of 'wk_schedule_repository.dart';
 // **************************************************************************
 
 String _$wkScheduleRepositoryHash() =>
-    r'8c2f68e9fd6dd12de4f4707d9f13c2ec9f764f7f';
+    r'32296b0f1652ffb51354ac6948f71231f0a99e98';
 
 /// See also [wkScheduleRepository].
 @ProviderFor(wkScheduleRepository)

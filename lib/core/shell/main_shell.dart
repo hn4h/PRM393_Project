@@ -13,36 +13,6 @@ import 'package:prm_project/features/cs_chat/screens/cs_chat_inbox_screen.dart';
 import 'package:prm_project/features/home/screens/home_screen.dart';
 import 'package:prm_project/features/profile/screens/profile_screen.dart';
 
-/// Placeholder cho tab Calendar (chưa implement)
-class _CalendarTab extends StatelessWidget {
-  const _CalendarTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Calendar')),
-      body: const Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.calendar_today_outlined, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text(
-              'Your Bookings Calendar',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Schedule view coming soon',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 /// Shell chính của app — giữ BottomNavigationBar và quản lý tabs bằng IndexedStack.
 /// IndexedStack giữ nguyên state của mỗi tab khi switch, tránh rebuild không cần thiết.
 class MainShell extends ConsumerStatefulWidget {
@@ -61,7 +31,6 @@ class _MainShellState extends ConsumerState<MainShell> {
   List<Widget> get _screens => [
     const HomeScreen(),
     const BookingHistoryScreen(),
-    const _CalendarTab(),
     const CsChatInboxScreen(),
     const ProfileScreen(),
   ];
@@ -146,11 +115,6 @@ class _MainShellState extends ConsumerState<MainShell> {
             icon: Icon(Icons.receipt_long_outlined),
             activeIcon: Icon(Icons.receipt_long),
             label: 'Bookings',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today_outlined),
-            activeIcon: Icon(Icons.calendar_today),
-            label: 'Calendar',
           ),
           BottomNavigationBarItem(
             icon: _chatUnreadCount > 0

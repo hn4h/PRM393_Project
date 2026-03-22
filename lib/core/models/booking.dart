@@ -61,20 +61,23 @@ class Booking {
       workerId: map['worker_id'] as String?,
       serviceId: map['service_id'] as String?,
       status: BookingStatus.fromString(map['status'] as String? ?? 'pending'),
+      // Database time is already in GMT+7 - load as-is
       scheduledAt: map['scheduled_at'] != null
           ? DateTime.parse(map['scheduled_at'] as String)
           : null,
       address: map['address'] as String?,
       notes: map['notes'] as String?,
       totalPrice: (map['total_price'] as num?)?.toDouble() ?? 0.0,
-      paymentMethod: map['payment_method'] as String? ?? 'cash',
+      paymentMethod: map['payment_method'] as String? ?? '',
       contactName: map['contact_name'] as String?,
       contactPhone: map['contact_phone'] as String?,
       durationMinutes: map['duration_minutes'] as int? ?? 60,
       createdAt: DateTime.parse(
-          map['created_at'] as String? ?? DateTime.now().toIso8601String()),
+        map['created_at'] as String? ?? DateTime.now().toIso8601String(),
+      ),
       updatedAt: DateTime.parse(
-          map['updated_at'] as String? ?? DateTime.now().toIso8601String()),
+        map['updated_at'] as String? ?? DateTime.now().toIso8601String(),
+      ),
       // joined
       workerName: workerProfile?['full_name'] as String?,
       workerAvatar: workerProfile?['avatar_url'] as String?,
@@ -84,20 +87,21 @@ class Booking {
   }
 
   /// Map for INSERT (exclude auto-generated fields).
+  /// Database time is already in GMT+7 - save as-is
   Map<String, dynamic> toInsertMap() => {
-        'customer_id': customerId,
-        if (workerId != null) 'worker_id': workerId,
-        if (serviceId != null) 'service_id': serviceId,
-        'status': status.toDbValue(),
-        if (scheduledAt != null) 'scheduled_at': scheduledAt!.toIso8601String(),
-        if (address != null) 'address': address,
-        if (notes != null) 'notes': notes,
-        'total_price': totalPrice,
-        'payment_method': paymentMethod,
-        if (contactName != null) 'contact_name': contactName,
-        if (contactPhone != null) 'contact_phone': contactPhone,
-        'duration_minutes': durationMinutes,
-      };
+    'customer_id': customerId,
+    if (workerId != null) 'worker_id': workerId,
+    if (serviceId != null) 'service_id': serviceId,
+    'status': status.toDbValue(),
+    if (scheduledAt != null) 'scheduled_at': scheduledAt!.toIso8601String(),
+    if (address != null) 'address': address,
+    if (notes != null) 'notes': notes,
+    'total_price': totalPrice,
+    'payment_method': paymentMethod,
+    if (contactName != null) 'contact_name': contactName,
+    if (contactPhone != null) 'contact_phone': contactPhone,
+    'duration_minutes': durationMinutes,
+  };
 
   Booking copyWith({
     String? id,

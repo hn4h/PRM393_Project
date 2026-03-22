@@ -96,7 +96,7 @@ class BookingFlowViewModel extends _$BookingFlowViewModel {
         customerId: '',
         status: BookingStatus.pending,
         totalPrice: 0.0,
-        paymentMethod: 'cash',
+        paymentMethod: '', // Empty - user MUST select method
         durationMinutes: 60,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),

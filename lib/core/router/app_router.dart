@@ -22,6 +22,7 @@ import 'package:prm_project/features/booking/screens/booking_confirmed_screen.da
 import 'package:prm_project/features/booking/screens/booking_flow_screen.dart';
 import 'package:prm_project/features/booking/screens/booking_detail_view_screen.dart';
 import 'package:prm_project/features/booking_history/screens/booking_detail_management_screen.dart';
+import 'package:prm_project/features/upcoming_services/screens/upcoming_services_screen.dart';
 import 'package:prm_project/features/profile/screens/edit_profile_screen.dart';
 import 'package:prm_project/features/settings/screens/change_password_screen.dart';
 import 'package:prm_project/features/cs_chat/screens/cs_chat_room_screen.dart';
@@ -280,6 +281,13 @@ class AppRouter {
         builder: (_, __) => const BookingDetailViewScreen(),
       ),
 
+      // ── Upcoming Services Calendar (push lên trên shell) ────────────────
+      GoRoute(
+        path: '/upcoming-services',
+        name: 'upcoming-services',
+        builder: (_, __) => const UpcomingServicesScreen(),
+      ),
+
       // ── Booking history detail (push trên shell) ─────────────────────────
       GoRoute(
         path: '/booking-history-detail',
@@ -313,11 +321,11 @@ class AppRouter {
       ),
 
       // ── Notifications ─────────────────────────────────────────────────────
-      GoRoute(
-        path: '/notifications',
-        name: 'notifications',
-        builder: (_, __) => const NotificationScreen(),
-      ),
+      // GoRoute(
+      //   path: '/notifications',
+      //   name: 'notifications',
+      //   builder: (_, __) => const NotificationScreen(),
+      // ),
     ],
   );
 

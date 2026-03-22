@@ -138,7 +138,7 @@ class _UpcomingServicesScreenState extends ConsumerState<UpcomingServicesScreen>
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'You don\'t have any accepted bookings yet',
+                          'You don\'t have any upcoming bookings yet',
                           style: TextStyle(
                             fontSize: 14,
                             color: colorScheme.onSurfaceVariant,

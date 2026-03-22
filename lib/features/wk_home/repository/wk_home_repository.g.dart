@@ -6,7 +6,7 @@ part of 'wk_home_repository.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$wkHomeRepositoryHash() => r'3a59d798ec3b20a8ca92c79b8f7b1bb169f6ef95';
+String _$wkHomeRepositoryHash() => r'cb80dafc4248cbac70a06714911445731addddf0';
 
 /// See also [wkHomeRepository].
 @ProviderFor(wkHomeRepository)
