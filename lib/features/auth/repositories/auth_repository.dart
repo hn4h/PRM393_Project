@@ -1,4 +1,7 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:prm_project/core/config/supabase_config.dart';
 
 /// Repository wrapping Supabase Auth operations.
 /// All methods throw [AuthException] on failure — viewmodel handles errors.
@@ -41,11 +44,57 @@ class AuthRepository {
 
   Future<void> signOut() async => _client.auth.signOut();
 
-  // ── Forgot Password ───────────────────────────────────────────────────────
+  // ── Forgot Password (Edge Function) ───────────────────────────────────────
 
-  /// Sends a password reset email.
-  Future<void> resetPassword(String email) async {
-    await _client.auth.resetPasswordForEmail(email);
+  /// Calls the `reset-password` Edge Function to generate a random password
+  /// and send it to the user's email via Gmail SMTP.
+  /// Returns null on success, error message on failure.
+  Future<String?> requestPasswordReset(String email) async {
+    try {
+      final url = '${SupabaseConfig.url}/functions/v1/reset-password';
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SupabaseConfig.anonKey,
+        },
+        body: jsonEncode({'email': email}),
+      );
+
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+
+      if (response.statusCode == 200) {
+        return null; // success
+      } else {
+        return body['error'] as String? ?? 'Failed to reset password';
+      }
+    } catch (e) {
+      return 'Failed to send reset email. Please try again.';
+    }
+  }
+
+  // ── Must Change Password ──────────────────────────────────────────────────
+
+  /// Checks if the user must change their password.
+  Future<bool> checkMustChangePassword(String userId) async {
+    try {
+      final data = await _client
+          .from('profiles')
+          .select('must_change_password')
+          .eq('id', userId)
+          .maybeSingle();
+      return (data?['must_change_password'] as bool?) ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Clears the must_change_password flag after user changes their password.
+  Future<void> clearMustChangePassword(String userId) async {
+    await _client
+        .from('profiles')
+        .update({'must_change_password': false})
+        .eq('id', userId);
   }
 
   // ── Change Password ─────────────────────────────────────────────────────

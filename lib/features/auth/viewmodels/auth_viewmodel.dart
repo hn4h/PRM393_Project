@@ -69,7 +69,7 @@ class AuthViewModel extends AsyncNotifier<AuthStateModel> {
         ),
       );
       return e.message;
-    } catch (e) {
+    } catch (_) {
       state = AsyncData(
         const AuthStateModel(
           status: AuthStatus.unauthenticated,
@@ -112,12 +112,14 @@ class AuthViewModel extends AsyncNotifier<AuthStateModel> {
       }
 
       final role = await _repo.getUserRole(user.id);
+      final mustChange = await _repo.checkMustChangePassword(user.id);
       state = AsyncData(
         AuthStateModel(
           status: AuthStatus.authenticated,
           userId: user.id,
           email: user.email,
           role: role,
+          mustChangePassword: mustChange,
         ),
       );
       return null; // success
@@ -149,17 +151,20 @@ class AuthViewModel extends AsyncNotifier<AuthStateModel> {
     );
   }
 
-  // ── Forgot Password ───────────────────────────────────────────────────────
+  // ── Forgot Password (Edge Function) ────────────────────────────────────────
 
+  /// Calls Edge Function to generate random password and send via Gmail SMTP.
   /// Returns null on success, error message on failure.
   Future<String?> sendPasswordReset(String email) async {
-    try {
-      await _repo.resetPassword(email);
-      return null;
-    } on AuthException catch (e) {
-      return e.message;
-    } catch (_) {
-      return 'Failed to send reset email.';
+    return _repo.requestPasswordReset(email);
+  }
+
+  /// Clears the mustChangePassword flag in the in-memory auth state.
+  /// Called after the user successfully changes their password.
+  void clearMustChangePasswordFlag() {
+    final current = state.valueOrNull;
+    if (current != null) {
+      state = AsyncData(current.copyWith(mustChangePassword: false));
     }
   }
 
@@ -192,11 +197,18 @@ class AuthViewModel extends AsyncNotifier<AuthStateModel> {
       if (user == null) return 'Verification failed.';
 
       // 2. Save phone + address to profiles table
-      await _repo.updateProfileInfo(
-        user.id,
-        phone: phone,
-        address: address,
-      );
+      try {
+        await _repo.updateProfileInfo(
+          user.id,
+          phone: phone,
+          address: address,
+        );
+      } catch (e) {
+        // Profile update failed (e.g. RLS, network) — still authenticated
+        // Log but don't block login, user can update profile later
+        // ignore: avoid_print
+        print('Profile update failed: $e');
+      }
 
       // 3. Update auth state to authenticated
       final role = await _repo.getUserRole(user.id);
@@ -213,7 +225,7 @@ class AuthViewModel extends AsyncNotifier<AuthStateModel> {
     } on AuthException catch (e) {
       return e.message;
     } catch (e) {
-      return 'An unexpected error occurred.';
+      return 'An unexpected error occurred: ${e.toString()}';
     }
   }
 

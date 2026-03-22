@@ -45,7 +45,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _buildSettingItem(
             icon: Icons.password_outlined,
             title: l10n.changePassword,
-            onTap: () => context.push('/change-password'),
+            onTap: () => context.push('/change-password', extra: false),
           ),
           _buildSettingItem(
             icon: Icons.privacy_tip_outlined,

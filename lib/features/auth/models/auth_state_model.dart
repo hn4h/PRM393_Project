@@ -9,6 +9,7 @@ class AuthStateModel {
     this.role,
     this.email,
     this.errorMessage,
+    this.mustChangePassword = false,
   });
 
   final AuthStatus status;
@@ -16,6 +17,7 @@ class AuthStateModel {
   final String? role; // 'customer' | 'worker' | 'admin'
   final String? email;
   final String? errorMessage;
+  final bool mustChangePassword;
 
   bool get isAuthenticated => status == AuthStatus.authenticated;
 
@@ -25,6 +27,7 @@ class AuthStateModel {
     String? role,
     String? email,
     String? errorMessage,
+    bool? mustChangePassword,
   }) {
     return AuthStateModel(
       status: status ?? this.status,
@@ -32,10 +35,11 @@ class AuthStateModel {
       role: role ?? this.role,
       email: email ?? this.email,
       errorMessage: errorMessage,
+      mustChangePassword: mustChangePassword ?? this.mustChangePassword,
     );
   }
 
   @override
   String toString() =>
-      'AuthStateModel(status: $status, role: $role, email: $email)';
+      'AuthStateModel(status: $status, role: $role, email: $email, mustChangePassword: $mustChangePassword)';
 }

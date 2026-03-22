@@ -8,7 +8,11 @@ import 'package:prm_project/core/widgets/app_text_field.dart';
 import 'package:prm_project/features/settings/viewmodels/change_password_viewmodel.dart';
 
 class ChangePasswordScreen extends ConsumerStatefulWidget {
-  const ChangePasswordScreen({Key? key}) : super(key: key);
+  const ChangePasswordScreen({Key? key, this.forceMode = false}) : super(key: key);
+
+  /// When true, user was redirected here after a password reset.
+  /// Back button is hidden, success navigates to /shell.
+  final bool forceMode;
 
   @override
   ConsumerState<ChangePasswordScreen> createState() =>
@@ -70,10 +74,13 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => context.pop(),
-        ),
+        leading: widget.forceMode
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+                onPressed: () => context.pop(),
+              ),
+        automaticallyImplyLeading: !widget.forceMode,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -120,7 +127,9 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Enter your current password and choose a new one.',
+            widget.forceMode
+                ? 'Your password was reset. Please set a new password to continue.'
+                : 'Enter your current password and choose a new one.',
             style: AppTextStyles.body1.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -132,8 +141,8 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
           // ── Current Password ──────────────────────────────────────────
           AppTextField(
             controller: _currentPwController,
-            label: 'Current Password',
-            hint: 'Enter current password',
+            label: widget.forceMode ? 'Temporary Password' : 'Current Password',
+            hint: widget.forceMode ? 'Enter temporary password' : 'Enter current password',
             obscureText: _obscureCurrent,
             prefixIcon: const Icon(Icons.key_outlined),
             suffixIcon: IconButton(
@@ -179,8 +188,8 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
               if (v == null || v.trim().isEmpty) {
                 return 'New password is required';
               }
-              if (v.trim().length < 6) {
-                return 'Password must be at least 6 characters';
+              if (v.trim().length < 5) {
+                return 'Password must be at least 5 characters';
               }
               if (v.trim() == _currentPwController.text.trim()) {
                 return 'New password must be different from current';
@@ -267,8 +276,14 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
         ),
         const SizedBox(height: 40),
         AppButton(
-          text: 'Back to Settings',
-          onPressed: () => context.pop(),
+          text: widget.forceMode ? 'Continue to App' : 'Back to Settings',
+          onPressed: () {
+            if (widget.forceMode) {
+              context.go('/shell');
+            } else {
+              context.pop();
+            }
+          },
         ),
       ],
     );

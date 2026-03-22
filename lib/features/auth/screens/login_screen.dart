@@ -6,6 +6,7 @@ import 'package:prm_project/core/theme/app_text_styles.dart';
 import 'package:prm_project/core/widgets/app_button.dart';
 import 'package:prm_project/core/widgets/app_text_field.dart';
 import 'package:prm_project/features/auth/viewmodels/auth_viewmodel.dart';
+import 'package:prm_project/features/auth/models/auth_state_model.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -51,7 +52,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return;
     }
 
-    context.go('/shell');
+    // Check if user's email is confirmed — route accordingly
+    final authState = ref.read(authViewModelProvider).valueOrNull;
+    if (authState != null &&
+        authState.status == AuthStatus.emailNotConfirmed) {
+      context.go('/complete-profile', extra: authState.email);
+    } else if (authState != null && authState.mustChangePassword) {
+      context.go('/change-password');
+    } else {
+      context.go('/shell');
+    }
   }
 
   @override
