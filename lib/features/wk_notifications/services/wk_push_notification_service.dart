@@ -71,7 +71,7 @@ class WkPushNotificationService {
     );
 
     await _local.initialize(
-      const InitializationSettings(
+      settings: const InitializationSettings(
         android: android,
         iOS: darwin,
         macOS: darwin,
@@ -94,15 +94,17 @@ class WkPushNotificationService {
 
     const iosDetails = DarwinNotificationDetails();
 
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+      macOS: iosDetails,
+    );
+
     await _local.show(
-      id,
-      title,
-      body,
-      const NotificationDetails(
-        android: androidDetails,
-        iOS: iosDetails,
-        macOS: iosDetails,
-      ),
+      id: id,
+      title: title,
+      body: body,
+      notificationDetails: details,
     );
   }
 }
