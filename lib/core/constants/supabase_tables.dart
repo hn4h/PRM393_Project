@@ -7,6 +7,8 @@ abstract class SupabaseTables {
   static const String reviews = 'reviews';
   static const String workers = 'workers';
   static const String serviceStatsView = 'service_stats_view';
+  static const String customerNotifications = 'customer_notifications';
+  static const String workerNotifications = 'worker_notifications';
 }
 
 /// Supabase Storage bucket names

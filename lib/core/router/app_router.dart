@@ -22,6 +22,7 @@ import 'package:prm_project/features/booking/screens/booking_detail_view_screen.
 import 'package:prm_project/features/booking_history/screens/booking_detail_management_screen.dart';
 import 'package:prm_project/features/profile/screens/edit_profile_screen.dart';
 import 'package:prm_project/features/settings/screens/change_password_screen.dart';
+import 'package:prm_project/features/notification/screens/notification_screen.dart';
 
 // ── Routes that don't require authentication ──────────────────────────────────
 const _publicRoutes = [
@@ -225,6 +226,13 @@ class AppRouter {
         path: '/edit-profile',
         name: 'edit-profile',
         builder: (_, __) => const EditProfileScreen(),
+      ),
+
+      // ── Notifications ─────────────────────────────────────────────────────
+      GoRoute(
+        path: '/notifications',
+        name: 'notifications',
+        builder: (_, __) => const NotificationScreen(),
       ),
     ],
   );
