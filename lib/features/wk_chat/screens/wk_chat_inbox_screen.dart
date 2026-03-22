@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/constants/supabase_tables.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/image_helper.dart';
@@ -19,13 +21,42 @@ class WkChatInboxScreen extends ConsumerStatefulWidget {
 
 class _WkChatInboxScreenState extends ConsumerState<WkChatInboxScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
-  Timer? _pollTimer;
+  RealtimeChannel? _inboxChannel;
+  Timer? _refreshDebounce;
   int _refreshSeed = 0;
 
   @override
   void initState() {
     super.initState();
-    _pollTimer = Timer.periodic(const Duration(seconds: 8), (_) {
+    _subscribeRealtime();
+  }
+
+  void _subscribeRealtime() {
+    final workerId = Supabase.instance.client.auth.currentUser?.id;
+    if (workerId == null) return;
+
+    _inboxChannel = Supabase.instance.client
+        .channel('wk-chat-inbox-$workerId')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: SupabaseTables.chatConversations,
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'worker_id',
+            value: workerId,
+          ),
+          callback: (_) {
+            if (!mounted) return;
+            _scheduleRefresh();
+          },
+        )
+        .subscribe();
+  }
+
+  void _scheduleRefresh() {
+    _refreshDebounce?.cancel();
+    _refreshDebounce = Timer(const Duration(milliseconds: 300), () {
       if (!mounted) return;
       setState(() => _refreshSeed++);
     });
@@ -33,7 +64,10 @@ class _WkChatInboxScreenState extends ConsumerState<WkChatInboxScreen> {
 
   @override
   void dispose() {
-    _pollTimer?.cancel();
+    _refreshDebounce?.cancel();
+    if (_inboxChannel != null) {
+      Supabase.instance.client.removeChannel(_inboxChannel!);
+    }
     _searchCtrl.dispose();
     super.dispose();
   }

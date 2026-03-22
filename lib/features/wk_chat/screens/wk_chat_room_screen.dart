@@ -4,7 +4,9 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/constants/supabase_tables.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../models/wk_chat_models.dart';
@@ -24,10 +26,10 @@ class _WkChatRoomScreenState extends ConsumerState<WkChatRoomScreen> {
   final ScrollController _scrollCtrl = ScrollController();
   final ImagePicker _picker = ImagePicker();
 
-  Timer? _pollTimer;
+  RealtimeChannel? _messagesChannel;
+  Timer? _reloadDebounce;
   bool _loading = true;
   bool _sending = false;
-  int _refreshSeed = 0;
 
   WkChatBookingContext? _context;
   List<WkChatMessage> _messages = const [];
@@ -38,15 +40,43 @@ class _WkChatRoomScreenState extends ConsumerState<WkChatRoomScreen> {
   void initState() {
     super.initState();
     _load();
-    _pollTimer = Timer.periodic(
-      const Duration(seconds: 4),
-      (_) => _load(silent: true),
-    );
+    _subscribeRealtime();
+  }
+
+  void _subscribeRealtime() {
+    _messagesChannel = Supabase.instance.client
+        .channel('wk-chat-room-${widget.conversationId}')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: SupabaseTables.chatMessages,
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'conversation_id',
+            value: widget.conversationId,
+          ),
+          callback: (_) {
+            if (!mounted) return;
+            _scheduleSilentReload();
+          },
+        )
+        .subscribe();
+  }
+
+  void _scheduleSilentReload() {
+    _reloadDebounce?.cancel();
+    _reloadDebounce = Timer(const Duration(milliseconds: 250), () {
+      if (!mounted) return;
+      _load(silent: true);
+    });
   }
 
   @override
   void dispose() {
-    _pollTimer?.cancel();
+    _reloadDebounce?.cancel();
+    if (_messagesChannel != null) {
+      Supabase.instance.client.removeChannel(_messagesChannel!);
+    }
     _messageCtrl.dispose();
     _scrollCtrl.dispose();
     super.dispose();
@@ -204,7 +234,7 @@ class _WkChatRoomScreenState extends ConsumerState<WkChatRoomScreen> {
                 _pendingImageBytes = null;
                 _pendingImageExt = null;
               }),
-              onChanged: () => setState(() => _refreshSeed++),
+              onChanged: () => setState(() {}),
               onAttach: _pickAttachment,
               onSend: _send,
             ),
