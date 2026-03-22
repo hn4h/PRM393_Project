@@ -7,7 +7,7 @@ part of 'booking_flow_viewmodel.dart';
 // **************************************************************************
 
 String _$bookingFlowViewModelHash() =>
-    r'343e37375b0dcc726bfa81ad34b55b4d938a12ba';
+    r'49156ca324dff76218ca5d19b71d95b33181f91e';
 
 /// See also [BookingFlowViewModel].
 @ProviderFor(BookingFlowViewModel)

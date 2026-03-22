@@ -14,9 +14,7 @@ class BookingConfirmedScreen extends ConsumerWidget {
     final booking = flowState.booking;
 
     final scheduled = booking.scheduledAt ?? DateTime.now();
-    final formattedDateTime = DateFormat(
-      'EEEE, hh:mm a',
-    ).format(scheduled);
+    final formattedDateTime = DateFormat('EEEE, hh:mm a').format(scheduled);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -91,6 +89,10 @@ class BookingConfirmedScreen extends ConsumerWidget {
   }
 
   Widget _buildInfoCard(Booking booking, String dateTime) {
+    final servicePrice = booking.totalPrice;
+    final serviceFee = servicePrice * 0.05;
+    final totalPaid = servicePrice + serviceFee;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -112,13 +114,13 @@ class BookingConfirmedScreen extends ConsumerWidget {
           _buildRow(
             Icons.cleaning_services,
             "Services",
-            booking.serviceName ?? "General Cleaning",
+            booking.serviceName ?? "Service",
           ),
           const Divider(),
           _buildRow(
             Icons.monetization_on,
             "Total Paid",
-            "\$${(booking.totalPrice + 3.5).toStringAsFixed(2)}",
+            "\$${totalPaid.toStringAsFixed(2)}",
           ),
         ],
       ),

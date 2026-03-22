@@ -7,7 +7,7 @@ part of 'worker_detail_viewmodel.dart';
 // **************************************************************************
 
 String _$workerDetailViewModelHash() =>
-    r'faa1115ff6452aa8d6df7941f1494325d83a71bd';
+    r'65b2887558b7b04531e89d17e2af2d2bc71ad521';
 
 /// Copied from Dart SDK
 class _SystemHash {

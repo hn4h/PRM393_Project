@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:prm_project/core/constants/supabase_tables.dart';
 import 'package:prm_project/core/models/booking.dart';
 import 'package:prm_project/core/shell/main_shell.dart';
+import 'package:prm_project/core/shell/wk_main_shell.dart';
 import 'package:prm_project/features/auth/screens/login_screen.dart';
 import 'package:prm_project/features/auth/screens/register_screen.dart';
 import 'package:prm_project/features/auth/screens/forgot_password_screen.dart';
@@ -14,6 +16,8 @@ import 'package:prm_project/features/discover/screens/service_discover_screen.da
 import 'package:prm_project/features/settings/screens/settings_screen.dart';
 import 'package:prm_project/features/worker/screens/worker_detail.dart';
 import 'package:prm_project/features/service/screens/service_detail_screen.dart';
+import 'package:prm_project/features/review/models/review_list_args.dart';
+import 'package:prm_project/features/review/screens/review_list_screen.dart';
 import 'package:prm_project/features/booking/screens/booking_confirmed_screen.dart';
 import 'package:prm_project/features/booking/screens/booking_flow_screen.dart';
 import 'package:prm_project/features/booking/screens/booking_detail_view_screen.dart';
@@ -21,6 +25,11 @@ import 'package:prm_project/features/booking_history/screens/booking_detail_mana
 import 'package:prm_project/features/profile/screens/edit_profile_screen.dart';
 import 'package:prm_project/features/settings/screens/change_password_screen.dart';
 import 'package:prm_project/features/cs_chat/screens/cs_chat_room_screen.dart';
+import 'package:prm_project/features/wk_notifications/screens/wk_notifications_screen.dart';
+import 'package:prm_project/features/wk_profile/screens/wk_profile_reviews_screen.dart';
+import 'package:prm_project/features/wk_profile/screens/wk_profile_services_screen.dart';
+import 'package:prm_project/features/wk_schedule/models/wk_schedule_models.dart';
+import 'package:prm_project/features/wk_schedule/screens/wk_schedule_screen.dart';
 import 'package:prm_project/features/notification/screens/notification_screen.dart';
 
 // ── Routes that don't require authentication ──────────────────────────────────
@@ -47,7 +56,7 @@ class AppRouter {
     initialLocation: '/login',
     navigatorKey: _rootNavigatorKey,
     refreshListenable: _authRefresh,
-    redirect: (context, state) {
+    redirect: (context, state) async {
       final session = Supabase.instance.client.auth.currentSession;
       final user = Supabase.instance.client.auth.currentUser;
       final isLoggedIn = session != null;
@@ -70,16 +79,39 @@ class AppRouter {
         // Confirmed + on public route → go to shell (but not /change-password if forced)
         if (isOnPublicRoute && loc != '/change-password') return '/shell';
       }
+      // final isOnPublicRoute = _publicRoutes.contains(state.matchedLocation);
 
       // Unauthenticated user on a protected page → go to login
       if (!isLoggedIn && !isOnPublicRoute) return '/login';
+
+      if (!isLoggedIn) return null;
+
+      final isWorker = await _isCurrentUserWorker();
+      final isOnDefaultShell = state.matchedLocation == '/shell';
+      final isOnWorkerShell = state.matchedLocation == '/wk-shell';
+
+      // Authenticated user on a public page → go to role-based shell
+      if (isOnPublicRoute) return isWorker ? '/wk-shell' : '/shell';
+
+      // Prevent opening wrong shell for current role
+      if (isWorker && isOnDefaultShell) return '/wk-shell';
+      if (!isWorker && isOnWorkerShell) return '/shell';
 
       // No redirect needed
       return null;
     },
     routes: [
-      // Root redirect → shell (sau khi đăng nhập)
-      GoRoute(path: '/', redirect: (_, __) => '/shell'),
+      // Root redirect → role-based shell (sau khi đăng nhập)
+      GoRoute(
+        path: '/',
+        redirect: (_, __) async {
+          final session = Supabase.instance.client.auth.currentSession;
+          if (session == null) return '/login';
+
+          final isWorker = await _isCurrentUserWorker();
+          return isWorker ? '/wk-shell' : '/shell';
+        },
+      ),
 
       // ── Notifications ─────────────────────────────────────────────────────
       GoRoute(
@@ -154,6 +186,27 @@ class AppRouter {
         name: 'shell',
         builder: (_, __) => const MainShell(),
       ),
+      GoRoute(
+        path: '/wk-shell',
+        name: 'wk-shell',
+        builder: (_, __) => const WkMainShell(),
+      ),
+      GoRoute(
+        path: '/wk-schedule',
+        name: 'wk-schedule',
+        builder: (_, state) {
+          final tab = state.uri.queryParameters['tab'];
+          final status = state.uri.queryParameters['status'];
+
+          final initialTab = tab == 'bookings' ? 1 : 0;
+          final initialFilter = _bookingsFilterFromQuery(status);
+
+          return WkScheduleScreen(
+            initialTabIndex: initialTab,
+            initialFilter: initialFilter,
+          );
+        },
+      ),
 
       // ── Settings (push lên trên shell) ──────────────────────────────────
       GoRoute(
@@ -186,6 +239,14 @@ class AppRouter {
           return ServiceDetailScreen(serviceId: id);
         },
       ),
+      GoRoute(
+        path: '/reviews',
+        name: 'reviews',
+        builder: (_, state) {
+          final args = state.extra as ReviewListArgs;
+          return ReviewListScreen(args: args);
+        },
+      ),
 
       // ── Worker ───────────────────────────────────────────────────────────
       GoRoute(
@@ -200,7 +261,13 @@ class AppRouter {
       GoRoute(
         path: '/booking-flow',
         name: 'booking-flow',
-        builder: (_, __) => const BookingFlowScreen(),
+        builder: (_, state) {
+          final extra = state.extra as Map<String, String?>?;
+          return BookingFlowScreen(
+            serviceId: extra?['serviceId'],
+            workerId: extra?['workerId'],
+          );
+        },
       ),
       GoRoute(
         path: '/booking-confirmed',
@@ -229,8 +296,67 @@ class AppRouter {
         name: 'edit-profile',
         builder: (_, __) => const EditProfileScreen(),
       ),
+      GoRoute(
+        path: '/wk-notifications',
+        name: 'wk-notifications',
+        builder: (_, __) => const WkNotificationsScreen(),
+      ),
+      GoRoute(
+        path: '/wk-profile-reviews',
+        name: 'wk-profile-reviews',
+        builder: (_, __) => const WkProfileReviewsScreen(),
+      ),
+      GoRoute(
+        path: '/wk-profile-services',
+        name: 'wk-profile-services',
+        builder: (_, __) => const WkProfileServicesScreen(),
+      ),
+
+      // ── Notifications ─────────────────────────────────────────────────────
+      GoRoute(
+        path: '/notifications',
+        name: 'notifications',
+        builder: (_, __) => const NotificationScreen(),
+      ),
     ],
   );
+
+  static Future<bool> _isCurrentUserWorker() async {
+    final client = Supabase.instance.client;
+    final user = client.auth.currentUser;
+    if (user == null) return false;
+
+    try {
+      final profile = await client
+          .from(SupabaseTables.profiles)
+          .select('role')
+          .eq('id', user.id)
+          .maybeSingle();
+
+      return profile?['role'] == 'worker';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static WkBookingsFilter? _bookingsFilterFromQuery(String? value) {
+    switch (value) {
+      case 'pending':
+        return WkBookingsFilter.pending;
+      case 'accepted':
+        return WkBookingsFilter.accepted;
+      case 'in_progress':
+        return WkBookingsFilter.inProgress;
+      case 'completed':
+        return WkBookingsFilter.completed;
+      case 'rejected':
+        return WkBookingsFilter.rejected;
+      case 'cancelled':
+        return WkBookingsFilter.cancelled;
+      default:
+        return null;
+    }
+  }
 }
 
 // ── GoRouterRefreshStream ─────────────────────────────────────────────────────

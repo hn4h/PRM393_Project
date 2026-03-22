@@ -7,7 +7,7 @@ part of 'service_detail_viewmodel.dart';
 // **************************************************************************
 
 String _$serviceDetailViewmodelHash() =>
-    r'4f873d64db07f199b6088c254edcaa8f8144368c';
+    r'5d83811ed1b2f0f352387172790a7e7884fc4eec';
 
 /// Copied from Dart SDK
 class _SystemHash {

@@ -1,24 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:prm_project/core/models/service.dart';
+import 'package:prm_project/core/utils/image_helper.dart';
+import 'package:prm_project/features/service/viewmodel/service_favorites_provider.dart';
 
-class Header extends StatelessWidget {
+class Header extends ConsumerWidget {
   final Service service;
 
   const Header({super.key, required this.service});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cover =
         service.images.isNotEmpty ? service.images.first : service.image;
+    final isFavorite = ref.watch(
+      serviceFavoritesProvider.select((favorites) => favorites.contains(service.id)),
+    );
 
     return Stack(
       children: [
-        Image.network(
-          cover,
+        ImageHelper.loadNetworkImage(
+          imageUrl: cover,
           height: 320,
           width: double.infinity,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Container(
+          errorWidget: Container(
             height: 320,
             width: double.infinity,
             color: Colors.grey.shade200,
@@ -37,7 +43,12 @@ class Header extends StatelessWidget {
         Positioned(
           top: MediaQuery.of(context).padding.top + 10,
           right: 16,
-          child: _buildCircleButton(icon: Icons.ios_share, onTap: () {}),
+          child: _buildCircleButton(
+            icon: isFavorite ? Icons.favorite : Icons.favorite_border,
+            iconColor: isFavorite ? Colors.red : Colors.black,
+            onTap: () =>
+                ref.read(serviceFavoritesProvider.notifier).toggle(service.id),
+          ),
         ),
       ],
     );
@@ -46,6 +57,7 @@ class Header extends StatelessWidget {
   Widget _buildCircleButton({
     required IconData icon,
     required VoidCallback onTap,
+    Color iconColor = Colors.black,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -55,7 +67,7 @@ class Header extends StatelessWidget {
           color: Colors.white,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: Colors.black, size: 20),
+        child: Icon(icon, color: iconColor, size: 20),
       ),
     );
   }

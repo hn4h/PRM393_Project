@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodel/booking_flow_viewmodel.dart';
+import '../utils/booking_validators.dart';
 
 class StepPayment extends ConsumerWidget {
   const StepPayment({super.key});
@@ -10,19 +11,27 @@ class StepPayment extends ConsumerWidget {
     final flowState = ref.watch(bookingFlowViewModelProvider);
     final booking = flowState.booking;
     final notifier = ref.read(bookingFlowViewModelProvider.notifier);
+    final colorScheme = Theme.of(context).colorScheme;
 
     final selectedMethod = booking.paymentMethod;
+    final validationError = BookingValidators.validatePaymentMethod(
+      selectedMethod,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Payment Method",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        Text(
+          "Payment Method *",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: colorScheme.onSurface,
+          ),
         ),
-        const Text(
+        Text(
           "Choose a payment method",
-          style: TextStyle(color: Colors.grey, fontSize: 13),
+          style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
         ),
         const SizedBox(height: 16),
 
@@ -32,8 +41,8 @@ class StepPayment extends ConsumerWidget {
           subtitle: "Secure and fast payment",
           icon: Icons.credit_card,
           isSelected: selectedMethod == "Credit Card",
-          onTap: () =>
-              notifier.setPaymentMethod("Credit Card"),
+          onTap: () => notifier.setPaymentMethod("Credit Card"),
+          colorScheme: colorScheme,
         ),
 
         _buildPaymentOption(
@@ -42,8 +51,8 @@ class StepPayment extends ConsumerWidget {
           subtitle: "Secure and fast payment",
           icon: Icons.account_balance_wallet_outlined,
           isSelected: selectedMethod == "PayPal",
-          onTap: () =>
-              notifier.setPaymentMethod("PayPal"),
+          onTap: () => notifier.setPaymentMethod("PayPal"),
+          colorScheme: colorScheme,
         ),
 
         _buildPaymentOption(
@@ -52,8 +61,8 @@ class StepPayment extends ConsumerWidget {
           subtitle: "Secure and fast payment",
           icon: Icons.apple,
           isSelected: selectedMethod == "Apple Pay",
-          onTap: () =>
-              notifier.setPaymentMethod("Apple Pay"),
+          onTap: () => notifier.setPaymentMethod("Apple Pay"),
+          colorScheme: colorScheme,
         ),
 
         _buildPaymentOption(
@@ -62,9 +71,32 @@ class StepPayment extends ConsumerWidget {
           subtitle: "Secure and fast payment",
           icon: Icons.payment,
           isSelected: selectedMethod == "Google Pay",
-          onTap: () =>
-              notifier.setPaymentMethod("Google Pay"),
+          onTap: () => notifier.setPaymentMethod("Google Pay"),
+          colorScheme: colorScheme,
         ),
+
+        if (validationError != null) ...[
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: colorScheme.errorContainer,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.error_outline, color: colorScheme.error, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    validationError,
+                    style: TextStyle(color: colorScheme.error, fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -76,6 +108,7 @@ class StepPayment extends ConsumerWidget {
     required IconData icon,
     required bool isSelected,
     required VoidCallback onTap,
+    required ColorScheme colorScheme,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -84,7 +117,9 @@ class StepPayment extends ConsumerWidget {
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
           border: Border.all(
-            color: isSelected ? const Color(0xFF008DDA) : Colors.grey.shade200,
+            color: isSelected
+                ? const Color(0xFF008DDA)
+                : colorScheme.outline.withOpacity(0.2),
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(16),
@@ -96,22 +131,26 @@ class StepPayment extends ConsumerWidget {
           leading: CircleAvatar(
             backgroundColor: isSelected
                 ? const Color(0xFF008DDA).withOpacity(0.1)
-                : Colors.grey[100],
+                : colorScheme.surfaceContainerLow,
             child: Icon(
               icon,
-              color: isSelected ? const Color(0xFF008DDA) : Colors.black,
+              color: isSelected
+                  ? const Color(0xFF008DDA)
+                  : colorScheme.onSurfaceVariant,
             ),
           ),
           title: Text(
             title,
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: isSelected ? const Color(0xFF008DDA) : Colors.black,
+              color: isSelected
+                  ? const Color(0xFF008DDA)
+                  : colorScheme.onSurface,
             ),
           ),
           subtitle: Text(
             subtitle,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
+            style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
           ),
           trailing: Radio<String>(
             value: title,

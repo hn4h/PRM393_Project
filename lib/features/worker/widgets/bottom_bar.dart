@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class BottomBar extends StatelessWidget {
-  const BottomBar({super.key});
+  final String? workerId;
+
+  const BottomBar({super.key, this.workerId});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +27,7 @@ class BottomBar extends StatelessWidget {
             height: 44,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Color(0xFFEAEAEA)),
+              border: Border.all(color: const Color(0xFFEAEAEA)),
             ),
             child: IconButton(
               onPressed: () {},
@@ -38,7 +40,10 @@ class BottomBar extends StatelessWidget {
               height: 48,
               child: ElevatedButton(
                 onPressed: () {
-                  context.pushNamed('booking-flow');
+                  context.pushNamed(
+                    'booking-flow',
+                    extra: {'serviceId': null, 'workerId': workerId},
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2F80ED),

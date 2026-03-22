@@ -11,41 +11,72 @@ class StepNotes extends ConsumerStatefulWidget {
 
 class _StepNotesState extends ConsumerState<StepNotes> {
   bool _isAgreed = false;
+  final _notesController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final booking = ref.read(bookingFlowViewModelProvider).booking;
+    _notesController.text = booking.notes ?? '';
+  }
+
+  @override
+  void dispose() {
+    _notesController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Watch bookingFlowViewModelProvider for future use when notes field is added
-    ref.watch(bookingFlowViewModelProvider);
+    final flowState = ref.watch(bookingFlowViewModelProvider);
+    final booking = flowState.booking;
+    final notifier = ref.read(bookingFlowViewModelProvider.notifier);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Note for professional",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        Text(
+          "Note for professional (Optional)",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: colorScheme.onSurface,
+          ),
         ),
-        const Text(
+        Text(
           "You can add a note to the professional here",
-          style: TextStyle(color: Colors.grey, fontSize: 13),
+          style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
         ),
         const SizedBox(height: 16),
 
         TextFormField(
+          controller: _notesController,
           maxLines: 6,
-          // initialValue: booking.notes, //sau them truong notes vao Booking
           onChanged: (val) {
-            // notifier.updateBooking(booking.copyWith(notes: val));
+            notifier.updateBooking(booking.copyWith(notes: val));
           },
           decoration: InputDecoration(
-            hintText: "Write your note here",
-            hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+            hintText: "Enter your notes...",
+            hintStyle: TextStyle(
+              color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+              fontSize: 14,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderSide: BorderSide(
+                color: colorScheme.outline.withOpacity(0.2),
+              ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade200),
+              borderSide: BorderSide(
+                color: colorScheme.outline.withOpacity(0.2),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: const Color(0xFF008DDA), width: 2),
             ),
           ),
         ),
@@ -65,10 +96,10 @@ class _StepNotesState extends ConsumerState<StepNotes> {
                 });
               },
             ),
-            const Expanded(
+            Expanded(
               child: Text(
                 "I agree to the Terms of Service, Community Guidelines and Privacy Policy.",
-                style: TextStyle(fontSize: 12, color: Colors.black87),
+                style: TextStyle(fontSize: 12, color: colorScheme.onSurface),
               ),
             ),
           ],

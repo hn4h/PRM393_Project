@@ -21,10 +21,10 @@ class NotificationCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: isRead
               ? colorScheme.surface
-              : colorScheme.primaryContainer.withOpacity(0.15),
+              : colorScheme.primaryContainer.withValues(alpha: 0.15),
           border: Border(
             bottom: BorderSide(
-              color: colorScheme.outlineVariant.withOpacity(0.4),
+              color: colorScheme.outlineVariant.withValues(alpha: 0.4),
               width: 0.5,
             ),
           ),
@@ -92,7 +92,9 @@ class NotificationCard extends StatelessWidget {
                     _formatTime(notification.createdAt),
                     style: TextStyle(
                       fontSize: 11,
-                      color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                      color: colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.7,
+                      ),
                     ),
                   ),
                 ],

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:prm_project/core/providers/user_profile_provider.dart';
 import 'package:prm_project/core/utils/image_helper.dart';
+import 'package:prm_project/features/notification/viewmodels/notification_viewmodel.dart';
 
 class HomeHeader extends ConsumerWidget {
   const HomeHeader({Key? key}) : super(key: key);
@@ -10,6 +12,7 @@ class HomeHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(userProfileProvider);
     final colorScheme = Theme.of(context).colorScheme;
+    final unreadCount = ref.watch(unreadNotificationCountProvider);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -19,13 +22,26 @@ class HomeHeader extends ConsumerWidget {
           error: (_, __) => _buildFallback(context),
           data: (profile) => _buildUserInfo(context, profile),
         ),
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest,
-            shape: BoxShape.circle,
+        GestureDetector(
+          onTap: () => context.push('/notifications'),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest,
+              shape: BoxShape.circle,
+            ),
+            child: Badge(
+              isLabelVisible: unreadCount > 0,
+              label: Text(
+                unreadCount > 99 ? '99+' : unreadCount.toString(),
+                style: const TextStyle(fontSize: 10, color: Colors.white),
+              ),
+              child: Icon(
+                Icons.notifications_none,
+                color: colorScheme.onSurface,
+              ),
+            ),
           ),
-          child: Icon(Icons.notifications_none, color: colorScheme.onSurface),
         ),
       ],
     );

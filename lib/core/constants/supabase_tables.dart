@@ -1,4 +1,4 @@
-/// Supabase table name constants — do NOT hard-code table names in code.
+/// Supabase table name constants - do NOT hard-code table names in code.
 abstract class SupabaseTables {
   static const String profiles = 'profiles';
   static const String services = 'services';

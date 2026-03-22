@@ -43,7 +43,11 @@ class PopularServiceCard extends StatelessWidget {
                     color: colorScheme.surface,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.favorite_border, size: 20, color: colorScheme.onSurface),
+                  child: Icon(
+                    Icons.favorite_border,
+                    size: 20,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
               ),
               Positioned(
@@ -114,7 +118,10 @@ class PopularServiceCard extends StatelessWidget {
                       ),
                     ),
                     OutlinedButton(
-                      onPressed: () => context.pushNamed('booking-flow'),
+                      onPressed: () => context.pushNamed(
+                        'booking-flow',
+                        extra: {'serviceId': service.id, 'workerId': null},
+                      ),
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.blue),
                         shape: RoundedRectangleBorder(
