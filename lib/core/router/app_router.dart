@@ -31,6 +31,7 @@ import 'package:prm_project/features/wk_profile/screens/wk_profile_services_scre
 import 'package:prm_project/features/wk_schedule/models/wk_schedule_models.dart';
 import 'package:prm_project/features/wk_schedule/screens/wk_schedule_screen.dart';
 import 'package:prm_project/features/notification/screens/notification_screen.dart';
+import 'package:prm_project/features/ai_support/screens/ai_support_screen.dart';
 
 // ── Routes that don't require authentication ──────────────────────────────────
 const _publicRoutes = [
@@ -312,11 +313,11 @@ class AppRouter {
         builder: (_, __) => const WkProfileServicesScreen(),
       ),
 
-      // ── Notifications ─────────────────────────────────────────────────────
+      // ── AI Support ──────────────────────────────────────────────────────────
       GoRoute(
-        path: '/notifications',
-        name: 'notifications',
-        builder: (_, __) => const NotificationScreen(),
+        path: '/ai-support',
+        name: 'ai-support',
+        builder: (_, __) => const AiSupportScreen(),
       ),
     ],
   );

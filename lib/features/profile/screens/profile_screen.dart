@@ -49,9 +49,9 @@ class ProfileScreen extends ConsumerWidget {
             onTap: () {},
           ),
           _buildMenuItem(
-            icon: Icons.support_agent_outlined,
-            title: 'Support',
-            onTap: () => context.push('/settings'),
+            icon: Icons.smart_toy_outlined,
+            title: 'AI Support',
+            onTap: () => context.push('/ai-support'),
           ),
 
           const SizedBox(height: 16),
