@@ -7,7 +7,7 @@ part of 'wk_profile_viewmodel.dart';
 // **************************************************************************
 
 String _$wkProfileViewmodelHash() =>
-    r'4c1d2f329f7e9c2d4ca66a6be3cc7dca578566f2';
+    r'675720dc3dd072454b7e56d920b85e0bf0e40006';
 
 /// See also [WkProfileViewmodel].
 @ProviderFor(WkProfileViewmodel)

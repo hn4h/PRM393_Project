@@ -42,9 +42,15 @@ class UpcomingServicesViewModel extends _$UpcomingServicesViewModel {
     final repo = ref.read(bookingHistoryRepositoryProvider);
     final allBookings = await repo.getCustomerBookings(user.id);
 
-    // Filter only accepted bookings, sorted by scheduled date
+    // Filter accepted and in_progress bookings, sorted by scheduled date
     final upcomingBookings =
-        allBookings.where((b) => b.status == BookingStatus.accepted).toList()
+        allBookings
+            .where(
+              (b) =>
+                  b.status == BookingStatus.accepted ||
+                  b.status == BookingStatus.inProgress,
+            )
+            .toList()
           ..sort((a, b) {
             final aDate = a.scheduledAt ?? DateTime.now();
             final bDate = b.scheduledAt ?? DateTime.now();
@@ -63,7 +69,13 @@ class UpcomingServicesViewModel extends _$UpcomingServicesViewModel {
       final allBookings = await repo.getCustomerBookings(user.id);
 
       final upcomingBookings =
-          allBookings.where((b) => b.status == BookingStatus.accepted).toList()
+          allBookings
+              .where(
+                (b) =>
+                    b.status == BookingStatus.accepted ||
+                    b.status == BookingStatus.inProgress,
+              )
+              .toList()
             ..sort((a, b) {
               final aDate = a.scheduledAt ?? DateTime.now();
               final bDate = b.scheduledAt ?? DateTime.now();

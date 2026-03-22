@@ -26,7 +26,8 @@ class _StepScheduleState extends ConsumerState<StepSchedule> {
     final flowState = ref.watch(bookingFlowViewModelProvider);
     final booking = flowState.booking;
     final notifier = ref.read(bookingFlowViewModelProvider.notifier);
-    final selectedDate = booking.scheduledAt ?? DateTime.now();
+    // Don't fallback to DateTime.now() - keep it null if user hasn't selected
+    final selectedDate = booking.scheduledAt;
     final colorScheme = Theme.of(context).colorScheme;
 
     // Check if there's a validation error
@@ -50,7 +51,10 @@ class _StepScheduleState extends ConsumerState<StepSchedule> {
         const SizedBox(height: 12),
         _buildWeekdayHeader(colorScheme),
         const SizedBox(height: 8),
-        _buildCalendarGrid(selectedDate, notifier, booking, colorScheme),
+        if (selectedDate != null)
+          _buildCalendarGrid(selectedDate, notifier, booking, colorScheme)
+        else
+          _buildCalendarGrid(DateTime.now(), notifier, booking, colorScheme),
         const SizedBox(height: 24),
         Text(
           "Select a Time",
@@ -76,11 +80,16 @@ class _StepScheduleState extends ConsumerState<StepSchedule> {
                 "04:00 PM",
                 "05:00 PM",
               ].map((timeStr) {
-                final isSelected = _isTimeSelected(selectedDate, timeStr);
-                final isPastTime = _isPastTime(selectedDate, timeStr);
+                // Only check if time is selected/past if user has selected a date
+                final isSelected = selectedDate != null
+                    ? _isTimeSelected(selectedDate, timeStr)
+                    : false;
+                final isPastTime = selectedDate != null
+                    ? _isPastTime(selectedDate, timeStr)
+                    : false;
 
                 return GestureDetector(
-                  onTap: isPastTime
+                  onTap: isPastTime || selectedDate == null
                       ? null
                       : () {
                           final newDateTime = _updateTime(
@@ -94,7 +103,7 @@ class _StepScheduleState extends ConsumerState<StepSchedule> {
                   child: _buildTimeChip(
                     timeStr,
                     isSelected: isSelected,
-                    isDisabled: isPastTime,
+                    isDisabled: isPastTime || selectedDate == null,
                     colorScheme: colorScheme,
                   ),
                 );
