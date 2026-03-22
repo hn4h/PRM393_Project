@@ -21,6 +21,7 @@ import 'package:prm_project/features/booking_history/screens/booking_detail_mana
 import 'package:prm_project/features/profile/screens/edit_profile_screen.dart';
 import 'package:prm_project/features/settings/screens/change_password_screen.dart';
 import 'package:prm_project/features/cs_chat/screens/cs_chat_room_screen.dart';
+import 'package:prm_project/features/notification/screens/notification_screen.dart';
 
 // ── Routes that don't require authentication ──────────────────────────────────
 const _publicRoutes = [
