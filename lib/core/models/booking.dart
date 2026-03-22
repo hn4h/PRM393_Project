@@ -48,6 +48,29 @@ class Booking {
     this.serviceImage,
   });
 
+  static DateTime? _parseScheduledAtRaw(dynamic value) {
+    if (value == null) return null;
+    final raw = value.toString().trim();
+    if (raw.isEmpty) return null;
+
+    // Keep wall-clock time exactly as stored in DB and ignore timezone suffix.
+    final normalized = raw.replaceFirst(' ', 'T');
+    final wallClock = normalized.length >= 19
+        ? normalized.substring(0, 19)
+        : normalized;
+
+    try {
+      return DateTime.parse(wallClock);
+    } catch (_) {
+      return DateTime.tryParse(raw);
+    }
+  }
+
+  static String _formatScheduledAtRaw(DateTime value) {
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${value.year}-${two(value.month)}-${two(value.day)}T${two(value.hour)}:${two(value.minute)}:${two(value.second)}';
+  }
+
   /// Parse from Supabase response (snake_case).
   factory Booking.fromMap(Map<String, dynamic> map) {
     // Handle joined worker profile data
@@ -61,10 +84,7 @@ class Booking {
       workerId: map['worker_id'] as String?,
       serviceId: map['service_id'] as String?,
       status: BookingStatus.fromString(map['status'] as String? ?? 'pending'),
-      // Database time is already in GMT+7 - load as-is
-      scheduledAt: map['scheduled_at'] != null
-          ? DateTime.parse(map['scheduled_at'] as String)
-          : null,
+      scheduledAt: _parseScheduledAtRaw(map['scheduled_at']),
       address: map['address'] as String?,
       notes: map['notes'] as String?,
       totalPrice: (map['total_price'] as num?)?.toDouble() ?? 0.0,
@@ -93,7 +113,8 @@ class Booking {
     if (workerId != null) 'worker_id': workerId,
     if (serviceId != null) 'service_id': serviceId,
     'status': status.toDbValue(),
-    if (scheduledAt != null) 'scheduled_at': scheduledAt!.toIso8601String(),
+    if (scheduledAt != null)
+      'scheduled_at': _formatScheduledAtRaw(scheduledAt!),
     if (address != null) 'address': address,
     if (notes != null) 'notes': notes,
     'total_price': totalPrice,

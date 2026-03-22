@@ -63,6 +63,11 @@ class BookingValidators {
       return "Date and time are required";
     }
 
+    const allowedHours = {9, 10, 11, 12, 13, 14, 15, 16, 17};
+    if (!allowedHours.contains(scheduledAt.hour) || scheduledAt.minute != 0) {
+      return "Please select one of the available time slots";
+    }
+
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final selectedDate = DateTime(

@@ -51,10 +51,7 @@ class _StepScheduleState extends ConsumerState<StepSchedule> {
         const SizedBox(height: 12),
         _buildWeekdayHeader(colorScheme),
         const SizedBox(height: 8),
-        if (selectedDate != null)
-          _buildCalendarGrid(selectedDate, notifier, booking, colorScheme)
-        else
-          _buildCalendarGrid(DateTime.now(), notifier, booking, colorScheme),
+        _buildCalendarGrid(selectedDate, notifier, booking, colorScheme),
         const SizedBox(height: 24),
         Text(
           "Select a Time",
@@ -206,7 +203,7 @@ class _StepScheduleState extends ConsumerState<StepSchedule> {
   }
 
   Widget _buildCalendarGrid(
-    DateTime selectedDate,
+    DateTime? selectedDate,
     BookingFlowViewModel notifier,
     dynamic booking,
     ColorScheme colorScheme,
@@ -248,6 +245,7 @@ class _StepScheduleState extends ConsumerState<StepSchedule> {
               dayNumber,
             );
             final isSelected =
+                selectedDate != null &&
                 selectedDate.year == cellDate.year &&
                 selectedDate.month == cellDate.month &&
                 selectedDate.day == cellDate.day;
@@ -265,8 +263,8 @@ class _StepScheduleState extends ConsumerState<StepSchedule> {
                         cellDate.year,
                         cellDate.month,
                         cellDate.day,
-                        selectedDate.hour,
-                        selectedDate.minute,
+                        selectedDate?.hour ?? 0,
+                        selectedDate?.minute ?? 0,
                       );
                       notifier.updateBooking(
                         booking.copyWith(scheduledAt: newDate),
