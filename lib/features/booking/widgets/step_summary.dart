@@ -10,10 +10,17 @@ class StepSummary extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final flowState = ref.watch(bookingFlowViewModelProvider);
     final booking = flowState.booking;
+    final selectedService = flowState.selectedService;
+    final selectedWorker = flowState.selectedWorker;
 
     final scheduled = booking.scheduledAt ?? DateTime.now();
     final dateStr = DateFormat('EEE, d MMM yyyy').format(scheduled);
     final timeStr = DateFormat('hh:mm a').format(scheduled);
+
+    // Calculate prices
+    final servicePrice = booking.totalPrice;
+    final serviceFee = servicePrice * 0.05; // 5% service fee
+    final totalPrice = servicePrice + serviceFee;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,30 +44,54 @@ class StepSummary extends ConsumerWidget {
           ),
           child: Column(
             children: [
+              // Service info
+              if (selectedService != null)
+                _buildSummaryRow(
+                  Icons.cleaning_services_outlined,
+                  "Service",
+                  selectedService.name,
+                ),
+              // Worker info
+              if (selectedWorker != null)
+                _buildSummaryRow(
+                  Icons.person_outline,
+                  "Worker",
+                  selectedWorker.name,
+                ),
               _buildSummaryRow(Icons.calendar_today, "Date", dateStr),
               _buildSummaryRow(Icons.access_time, "Time", timeStr),
               _buildSummaryRow(
                 Icons.handyman_outlined,
-                "Package",
+                "Duration",
                 "${booking.durationMinutes} min",
               ),
+              if (booking.address != null && booking.address!.isNotEmpty)
+                _buildSummaryRow(
+                  Icons.location_on_outlined,
+                  "Address",
+                  booking.address!,
+                ),
               _buildSummaryRow(
                 Icons.payment,
                 "Method",
-                booking.paymentMethod,
+                _formatPaymentMethod(booking.paymentMethod),
               ),
               const Divider(height: 32),
               _buildSummaryRow(
                 null,
-                "Price",
-                "\$${booking.totalPrice.toStringAsFixed(2)}",
+                "Service Price",
+                "\$${servicePrice.toStringAsFixed(2)}",
               ),
-              _buildSummaryRow(null, "Service Fee", "\$3.50"),
+              _buildSummaryRow(
+                null,
+                "Service Fee (5%)",
+                "\$${serviceFee.toStringAsFixed(2)}",
+              ),
               const Divider(height: 32),
               _buildSummaryRow(
                 null,
                 "Total price",
-                "\$${(booking.totalPrice + 3.50).toStringAsFixed(2)}",
+                "\$${totalPrice.toStringAsFixed(2)}",
                 isTotal: true,
               ),
             ],
@@ -72,8 +103,8 @@ class StepSummary extends ConsumerWidget {
         const SizedBox(height: 8),
         TextField(
           decoration: InputDecoration(
-            hintText: "Enter promo code",
-            hintStyle: const TextStyle(fontSize: 14, color: Colors.grey),
+            hintText: "Enter promo code...",
+            hintStyle: TextStyle(fontSize: 14, color: Colors.grey.shade400),
             prefixIcon: const Icon(
               Icons.confirmation_number_outlined,
               size: 20,
@@ -96,6 +127,19 @@ class StepSummary extends ConsumerWidget {
     );
   }
 
+  String _formatPaymentMethod(String method) {
+    switch (method.toLowerCase()) {
+      case 'cash':
+        return 'Cash';
+      case 'card':
+        return 'Credit/Debit Card';
+      case 'wallet':
+        return 'Digital Wallet';
+      default:
+        return method;
+    }
+  }
+
   Widget _buildSummaryRow(
     IconData? icon,
     String label,
@@ -105,6 +149,7 @@ class StepSummary extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (icon != null) ...[
             Icon(icon, size: 18, color: Colors.grey),
@@ -117,13 +162,16 @@ class StepSummary extends ConsumerWidget {
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
             ),
           ),
-          const Spacer(),
-          Text(
-            value,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: isTotal ? 18 : 14,
-              color: isTotal ? const Color(0xFF008DDA) : Colors.black,
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: isTotal ? 18 : 14,
+                color: isTotal ? const Color(0xFF008DDA) : Colors.black,
+              ),
             ),
           ),
         ],

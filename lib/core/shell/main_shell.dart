@@ -2,36 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:prm_project/features/booking_history/screens/booking_history_screen.dart';
 import 'package:prm_project/features/home/screens/home_screen.dart';
 import 'package:prm_project/features/profile/screens/profile_screen.dart';
-
-/// Placeholder cho tab Calendar
-class _CalendarTab extends StatelessWidget {
-  const _CalendarTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Calendar')),
-      body: const Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.calendar_today_outlined, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text(
-              'Your Bookings Calendar',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Schedule view coming soon',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+import 'package:prm_project/features/upcoming_services/screens/upcoming_services_screen.dart';
 
 /// Placeholder cho tab Chat
 class _ChatTab extends StatelessWidget {
@@ -52,10 +23,7 @@ class _ChatTab extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 8),
-            Text(
-              'No messages yet',
-              style: TextStyle(color: Colors.grey),
-            ),
+            Text('No messages yet', style: TextStyle(color: Colors.grey)),
           ],
         ),
       ),
@@ -76,12 +44,12 @@ class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
   /// Các tab screens — giữ thứ tự khớp với BottomNavigationBar items
-  static const List<Widget> _screens = [
-    HomeScreen(),
-    BookingHistoryScreen(),
-    _CalendarTab(),
-    _ChatTab(),
-    ProfileScreen(),
+  List<Widget> get _screens => [
+    const HomeScreen(),
+    const BookingHistoryScreen(),
+    const UpcomingServicesScreen(),
+    const _ChatTab(),
+    const ProfileScreen(),
   ];
 
   void _onTabTapped(int index) {
@@ -91,10 +59,7 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: _onTabTapped,

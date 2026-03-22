@@ -1,40 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:prm_project/core/enums/booking_status.dart';
+import '../viewmodel/booking_history_viewmodel.dart';
 
-class BookingFilterBar extends StatefulWidget {
+class BookingFilterBar extends ConsumerWidget {
   const BookingFilterBar({super.key});
 
   @override
-  State<BookingFilterBar> createState() => _BookingFilterBarState();
-}
-
-class _BookingFilterBarState extends State<BookingFilterBar> {
-  int selectedIndex = 0;
-  final List<String> categories = [
-    "All",
-    "Plumbing",
-    "Electrical",
-    "Cleaning",
-    "Repair",
-  ];
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final selectedStatus = ref.watch(selectedStatusFilterProvider);
+    final searchQuery = ref.watch(searchQueryProvider);
+
+    // Status filter options: null means "All"
+    final statusFilters = <BookingStatus?>[
+      null, // All
+      BookingStatus.pending,
+      BookingStatus.accepted,
+      BookingStatus.inProgress,
+      BookingStatus.completed,
+      BookingStatus.cancelled,
+      BookingStatus.rejected,
+    ];
+
+    String getStatusLabel(BookingStatus? status) {
+      if (status == null) return 'All';
+      return status.label;
+    }
 
     return Column(
       children: [
+        // Search bar
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: TextField(
+            onChanged: (value) {
+              ref.read(searchQueryProvider.notifier).state = value;
+            },
             decoration: InputDecoration(
-              hintText: "Search in services, workers, etc.",
-              hintStyle: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
+              hintText: "Search by service, worker, address...",
+              hintStyle: TextStyle(
+                color: colorScheme.onSurfaceVariant,
+                fontSize: 14,
+              ),
               prefixIcon: Icon(
                 Icons.search,
                 color: colorScheme.onSurfaceVariant,
                 size: 20,
               ),
+              suffixIcon: searchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: Icon(
+                        Icons.clear,
+                        color: colorScheme.onSurfaceVariant,
+                        size: 20,
+                      ),
+                      onPressed: () {
+                        ref.read(searchQueryProvider.notifier).state = '';
+                      },
+                    )
+                  : null,
               filled: true,
               fillColor: isDark
                   ? colorScheme.surfaceContainerHighest
@@ -47,21 +73,26 @@ class _BookingFilterBarState extends State<BookingFilterBar> {
             ),
           ),
         ),
+        // Status filter chips
         SizedBox(
           height: 40,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: categories.length,
+            itemCount: statusFilters.length,
             itemBuilder: (context, index) {
-              bool isSelected = selectedIndex == index;
+              final status = statusFilters[index];
+              final isSelected = selectedStatus == status;
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: GestureDetector(
-                  onTap: () => setState(() => selectedIndex = index),
+                  onTap: () {
+                    ref.read(selectedStatusFilterProvider.notifier).state =
+                        status;
+                  },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
+                      horizontal: 16,
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
@@ -76,9 +107,11 @@ class _BookingFilterBarState extends State<BookingFilterBar> {
                       ),
                     ),
                     child: Text(
-                      categories[index],
+                      getStatusLabel(status),
                       style: TextStyle(
-                        color: isSelected ? Colors.white : colorScheme.onSurface,
+                        color: isSelected
+                            ? Colors.white
+                            : colorScheme.onSurface,
                         fontWeight: isSelected
                             ? FontWeight.bold
                             : FontWeight.normal,

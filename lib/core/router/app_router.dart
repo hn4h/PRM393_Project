@@ -14,6 +14,8 @@ import 'package:prm_project/features/discover/screens/service_discover_screen.da
 import 'package:prm_project/features/settings/screens/settings_screen.dart';
 import 'package:prm_project/features/worker/screens/worker_detail.dart';
 import 'package:prm_project/features/service/screens/service_detail_screen.dart';
+import 'package:prm_project/features/review/models/review_list_args.dart';
+import 'package:prm_project/features/review/screens/review_list_screen.dart';
 import 'package:prm_project/features/booking/screens/booking_confirmed_screen.dart';
 import 'package:prm_project/features/booking/screens/booking_flow_screen.dart';
 import 'package:prm_project/features/booking/screens/booking_detail_view_screen.dart';
@@ -104,7 +106,8 @@ class AppRouter {
         path: '/complete-profile',
         name: 'complete-profile',
         builder: (_, state) {
-          final email = state.extra as String? ??
+          final email =
+              state.extra as String? ??
               Supabase.instance.client.auth.currentUser?.email ??
               '';
           return CompleteProfileScreen(email: email);
@@ -172,6 +175,14 @@ class AppRouter {
           return ServiceDetailScreen(serviceId: id);
         },
       ),
+      GoRoute(
+        path: '/reviews',
+        name: 'reviews',
+        builder: (_, state) {
+          final args = state.extra as ReviewListArgs;
+          return ReviewListScreen(args: args);
+        },
+      ),
 
       // ── Worker ───────────────────────────────────────────────────────────
       GoRoute(
@@ -186,7 +197,13 @@ class AppRouter {
       GoRoute(
         path: '/booking-flow',
         name: 'booking-flow',
-        builder: (_, __) => const BookingFlowScreen(),
+        builder: (_, state) {
+          final extra = state.extra as Map<String, String?>?;
+          return BookingFlowScreen(
+            serviceId: extra?['serviceId'],
+            workerId: extra?['workerId'],
+          );
+        },
       ),
       GoRoute(
         path: '/booking-confirmed',

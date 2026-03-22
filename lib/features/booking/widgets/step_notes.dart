@@ -11,11 +11,26 @@ class StepNotes extends ConsumerStatefulWidget {
 
 class _StepNotesState extends ConsumerState<StepNotes> {
   bool _isAgreed = false;
+  final _notesController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final booking = ref.read(bookingFlowViewModelProvider).booking;
+    _notesController.text = booking.notes ?? '';
+  }
+
+  @override
+  void dispose() {
+    _notesController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Watch bookingFlowViewModelProvider for future use when notes field is added
-    ref.watch(bookingFlowViewModelProvider);
+    final flowState = ref.watch(bookingFlowViewModelProvider);
+    final booking = flowState.booking;
+    final notifier = ref.read(bookingFlowViewModelProvider.notifier);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -31,14 +46,14 @@ class _StepNotesState extends ConsumerState<StepNotes> {
         const SizedBox(height: 16),
 
         TextFormField(
+          controller: _notesController,
           maxLines: 6,
-          // initialValue: booking.notes, //sau them truong notes vao Booking
           onChanged: (val) {
-            // notifier.updateBooking(booking.copyWith(notes: val));
+            notifier.updateBooking(booking.copyWith(notes: val));
           },
           decoration: InputDecoration(
-            hintText: "Write your note here",
-            hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+            hintText: "Enter your notes...",
+            hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: Colors.grey.shade300),

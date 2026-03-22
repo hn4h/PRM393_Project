@@ -33,7 +33,7 @@ class Review {
       serviceId: map['service_id'] as String? ?? '',
       workerId: map['worker_id'] as String? ?? '',
       bookingId: map['booking_id'] as String? ?? '',
-      userId: map['user_id'] as String? ?? '',
+      userId: map['customer_id'] as String? ?? map['user_id'] as String? ?? '',
       userName: profile?['full_name'] as String? ??
           map['user_name'] as String? ??
           'User',
@@ -54,7 +54,10 @@ class Review {
       serviceId: json['serviceId'] as String? ?? json['service_id'] as String? ?? '',
       workerId: json['workerId'] as String? ?? json['worker_id'] as String? ?? '',
       bookingId: json['bookingId'] as String? ?? json['booking_id'] as String? ?? '',
-      userId: json['userId'] as String? ?? json['user_id'] as String? ?? '',
+      userId: json['userId'] as String? ??
+          json['customer_id'] as String? ??
+          json['user_id'] as String? ??
+          '',
       userName: json['userName'] as String? ?? json['user_name'] as String? ?? '',
       userImage: json['userImage'] as String? ?? json['user_image'] as String? ?? '',
       rating: (json['rating'] as num).toDouble(),
@@ -66,10 +69,9 @@ class Review {
 
   /// Map for INSERT into reviews table.
   Map<String, dynamic> toInsertMap() => {
-        'service_id': serviceId,
         'worker_id': workerId,
         'booking_id': bookingId,
-        'user_id': userId,
+        'customer_id': userId,
         'rating': rating,
         'comment': comment,
       };
@@ -80,7 +82,7 @@ class Review {
       'service_id': serviceId,
       'worker_id': workerId,
       'booking_id': bookingId,
-      'user_id': userId,
+      'customer_id': userId,
       'user_name': userName,
       'user_image': userImage,
       'rating': rating,

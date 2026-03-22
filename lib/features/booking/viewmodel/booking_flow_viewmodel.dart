@@ -1,9 +1,20 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/models/booking.dart';
+import '../../../core/models/service.dart';
+import '../../../core/models/worker.dart';
 import '../../../core/enums/booking_status.dart';
 import '../repository/booking_repository.dart';
+import '../../service/repository/service_repository.dart';
+import '../../worker/repository/worker_repository.dart';
 
 part 'booking_flow_viewmodel.g.dart';
+
+/// Entry mode for booking flow
+enum BookingEntryMode {
+  fromService, // User selected a service first → pick worker
+  fromWorker, // User selected a worker first → pick service
+  manual, // User navigated directly → pick both
+}
 
 /// State for the multi-step booking flow.
 class BookingFlowState {
@@ -14,6 +25,15 @@ class BookingFlowState {
   final bool isBookingForOther;
   final String? selectedPaymentMethod;
 
+  // New fields for step 1 (worker/service selection)
+  final BookingEntryMode entryMode;
+  final Service? preselectedService;
+  final Worker? preselectedWorker;
+  final List<Worker> availableWorkers;
+  final List<Service> availableServices;
+  final Worker? selectedWorker;
+  final Service? selectedService;
+
   BookingFlowState({
     required this.currentStep,
     required this.booking,
@@ -21,6 +41,13 @@ class BookingFlowState {
     this.error,
     this.isBookingForOther = false,
     this.selectedPaymentMethod,
+    this.entryMode = BookingEntryMode.manual,
+    this.preselectedService,
+    this.preselectedWorker,
+    this.availableWorkers = const [],
+    this.availableServices = const [],
+    this.selectedWorker,
+    this.selectedService,
   });
 
   BookingFlowState copyWith({
@@ -30,6 +57,13 @@ class BookingFlowState {
     String? error,
     bool? isBookingForOther,
     String? selectedPaymentMethod,
+    BookingEntryMode? entryMode,
+    Service? preselectedService,
+    Worker? preselectedWorker,
+    List<Worker>? availableWorkers,
+    List<Service>? availableServices,
+    Worker? selectedWorker,
+    Service? selectedService,
   }) {
     return BookingFlowState(
       currentStep: currentStep ?? this.currentStep,
@@ -39,6 +73,13 @@ class BookingFlowState {
       isBookingForOther: isBookingForOther ?? this.isBookingForOther,
       selectedPaymentMethod:
           selectedPaymentMethod ?? this.selectedPaymentMethod,
+      entryMode: entryMode ?? this.entryMode,
+      preselectedService: preselectedService ?? this.preselectedService,
+      preselectedWorker: preselectedWorker ?? this.preselectedWorker,
+      availableWorkers: availableWorkers ?? this.availableWorkers,
+      availableServices: availableServices ?? this.availableServices,
+      selectedWorker: selectedWorker ?? this.selectedWorker,
+      selectedService: selectedService ?? this.selectedService,
     );
   }
 }
@@ -63,22 +104,84 @@ class BookingFlowViewModel extends _$BookingFlowViewModel {
   }
 
   /// Initialize the flow with context from the selected worker/service.
-  void init({
+  Future<void> init({
     required String customerId,
     String? serviceId,
     String? workerId,
-    double? servicePrice,
-    String? serviceName,
-    String? workerName,
-  }) {
+  }) async {
+    final serviceRepo = ref.read(serviceRepositoryProvider);
+    final workerRepo = ref.read(workerRepositoryProvider);
+
+    Service? preselectedService;
+    Worker? preselectedWorker;
+    List<Worker> availableWorkers = [];
+    List<Service> availableServices = [];
+    BookingEntryMode entryMode = BookingEntryMode.manual;
+
+    // Determine entry mode based on what was pre-selected
+    if (serviceId != null && workerId == null) {
+      // Coming from service selection - need to pick worker
+      entryMode = BookingEntryMode.fromService;
+      preselectedService = await serviceRepo.getById(serviceId);
+      
+      // Get workers who offer this service using worker_services table
+      availableWorkers = await workerRepo.getWorkersByServiceId(serviceId);
+      
+    } else if (workerId != null && serviceId == null) {
+      // Coming from worker selection - need to pick service
+      entryMode = BookingEntryMode.fromWorker;
+      preselectedWorker = await workerRepo.getById(workerId);
+      
+      // Get services this worker offers using worker_services table
+      availableServices = await serviceRepo.getServicesByWorkerId(workerId);
+      
+    } else {
+      // Manual mode - get all workers and services
+      entryMode = BookingEntryMode.manual;
+      availableWorkers = await workerRepo.getAll();
+      availableServices = await serviceRepo.getAll();
+    }
+
     state = state.copyWith(
+      entryMode: entryMode,
+      preselectedService: preselectedService,
+      preselectedWorker: preselectedWorker,
+      availableWorkers: availableWorkers,
+      availableServices: availableServices,
+      selectedService: preselectedService,
+      selectedWorker: preselectedWorker,
       booking: state.booking.copyWith(
         customerId: customerId,
-        serviceId: serviceId,
-        workerId: workerId,
-        totalPrice: servicePrice ?? state.booking.totalPrice,
-        serviceName: serviceName,
-        workerName: workerName,
+        serviceId: preselectedService?.id,
+        workerId: preselectedWorker?.id,
+        totalPrice: preselectedService?.price ?? state.booking.totalPrice,
+        durationMinutes: preselectedService?.durationMinutes ?? state.booking.durationMinutes,
+        serviceName: preselectedService?.name,
+        workerName: preselectedWorker?.name,
+      ),
+    );
+  }
+
+  /// Select a worker (when entry mode is fromService)
+  void selectWorker(Worker worker) {
+    state = state.copyWith(
+      selectedWorker: worker,
+      booking: state.booking.copyWith(
+        workerId: worker.id,
+        workerName: worker.name,
+      ),
+    );
+  }
+
+  /// Select a service (when entry mode is fromWorker)
+  void selectService(Service service) {
+    state = state.copyWith(
+      selectedService: service,
+      booking: state.booking.copyWith(
+        serviceId: service.id,
+        serviceName: service.name,
+        totalPrice: service.price,
+        durationMinutes: service.durationMinutes,
       ),
     );
   }
@@ -98,19 +201,20 @@ class BookingFlowViewModel extends _$BookingFlowViewModel {
     state = state.copyWith(isBookingForOther: value);
     if (!value) {
       state = state.copyWith(
-        booking: state.booking.copyWith(
-          contactName: null,
-          contactPhone: null,
-        ),
+        booking: state.booking.copyWith(contactName: null, contactPhone: null),
       );
     }
   }
 
-  void nextStep() =>
-      state = state.copyWith(currentStep: state.currentStep + 1);
+  void nextStep() => state = state.copyWith(currentStep: state.currentStep + 1);
 
   void previousStep() =>
       state = state.copyWith(currentStep: state.currentStep - 1);
+
+  /// Check if step 1 (worker/service selection) is valid
+  bool canProceedFromStep1() {
+    return state.selectedWorker != null && state.selectedService != null;
+  }
 
   /// Submit booking to Supabase.
   Future<Booking?> checkout() async {
@@ -122,10 +226,7 @@ class BookingFlowViewModel extends _$BookingFlowViewModel {
       state = state.copyWith(isSubmitting: false, booking: created);
       return created;
     } catch (e) {
-      state = state.copyWith(
-        isSubmitting: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isSubmitting: false, error: e.toString());
       return null;
     }
   }
