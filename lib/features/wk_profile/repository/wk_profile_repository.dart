@@ -207,7 +207,7 @@ class WkProfileRepository {
     if (serviceIds.isEmpty) return;
 
     final rows = serviceIds
-        .map((id) => {'worker_id': userId, 'service_id': id})
+      .map((id) => {'worker_id': userId, 'service_id': id})
         .toList(growable: false);
 
     await _client.from('worker_services').insert(rows);
