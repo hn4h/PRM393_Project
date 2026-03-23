@@ -151,6 +151,21 @@ class _WkProfileServicesScreenState
                                     );
                                 if (!context.mounted) return;
                                 Navigator.of(context).pop(true);
+                              } catch (e) {
+                                if (!context.mounted) return;
+                                final raw = e.toString();
+                                final message = raw.startsWith('Exception: ')
+                                    ? raw.substring('Exception: '.length)
+                                    : raw;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      message.trim().isEmpty
+                                          ? 'Unable to save services.'
+                                          : message,
+                                    ),
+                                  ),
+                                );
                               } finally {
                                 if (mounted) setState(() => _saving = false);
                               }
